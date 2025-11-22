@@ -22,6 +22,8 @@ cp .env.example .env
 # Edit .env and add your HEVY_API_KEY
 ```
 
+**⚠️ Important Security Note:** See [SECURITY_SETUP.md](SECURITY_SETUP.md) for detailed instructions on safely configuring your API key.
+
 ### 2. Upload Routines
 
 ```bash
