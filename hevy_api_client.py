@@ -341,6 +341,62 @@ class HevyAPIClient:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(routine_data, f, indent=2, ensure_ascii=False)
         print(f"Routine saved to {file_path}")
+    
+    def get_warmup_weight_for_exercise(
+        self, 
+        exercise_template_id: str,
+        strategy: str = "recent"
+    ) -> Optional[float]:
+        """
+        Get a suggested warmup weight for an exercise based on exercise history.
+        
+        Args:
+            exercise_template_id: The exercise template ID
+            strategy: How to determine warmup weight:
+                - "recent": Use the most recent warmup weight (default)
+                - "average": Use the average of the last 5 warmup weights
+                - "mode": Use the most common warmup weight
+        
+        Returns:
+            Warmup weight in kg, or None if no warmup history exists
+        """
+        try:
+            history = self.get_exercise_history(exercise_template_id)
+            warmup_sets = [
+                set_data for set_data in history.get('exercise_history', [])
+                if set_data.get('set_type') == 'warmup' and set_data.get('weight_kg')
+            ]
+            
+            if not warmup_sets:
+                return None
+            
+            # Sort by most recent first (by workout_start_time)
+            warmup_sets.sort(
+                key=lambda x: x.get('workout_start_time', ''),
+                reverse=True
+            )
+            
+            if strategy == "recent":
+                return warmup_sets[0].get('weight_kg')
+            
+            elif strategy == "average":
+                # Average of last 5 warmup sets
+                recent_warmups = [s.get('weight_kg') for s in warmup_sets[:5]]
+                return sum(recent_warmups) / len(recent_warmups) if recent_warmups else None
+            
+            elif strategy == "mode":
+                # Most common warmup weight
+                from collections import Counter
+                weights = [s.get('weight_kg') for s in warmup_sets[:10]]
+                if weights:
+                    counter = Counter(weights)
+                    return counter.most_common(1)[0][0]
+                return None
+            
+            return None
+        except Exception:
+            # If there's any error fetching history, return None
+            return None
 
 
 def main():

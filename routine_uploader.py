@@ -7,15 +7,26 @@ import json
 import sys
 from pathlib import Path
 from hevy_api_client import HevyAPIClient
+from routine_enhancer import RoutineEnhancer
+from exercise_validator import ExerciseValidator
 
 
-def upload_routine_from_file(file_path: str, dry_run: bool = False) -> bool:
+def upload_routine_from_file(
+    file_path: str,
+    dry_run: bool = False,
+    enhance: bool = True,
+    warmup_strategy: str = "recent",
+    validate: bool = True
+) -> bool:
     """
     Upload a routine from a JSON file to Hevy.
     
     Args:
         file_path: Path to the routine JSON file
         dry_run: If True, only show what would be done without uploading
+        enhance: If True, auto-populate warmup weights from history
+        warmup_strategy: Strategy for warmup weight ("recent", "average", "mode")
+        validate: If True, validate exercise IDs against instructions.md
         
     Returns:
         True if successful, False otherwise
@@ -31,6 +42,35 @@ def upload_routine_from_file(file_path: str, dry_run: bool = False) -> bool:
         # Count exercises
         exercises = routine_data.get('routine', {}).get('exercises', [])
         print(f"   Exercises: {len(exercises)}")
+        
+        # Validate exercise IDs against instructions.md
+        if validate:
+            print("   Validating exercise IDs...")
+            validator = ExerciseValidator()
+            is_valid, errors = validator.validate_routine(routine_data, verbose=False)
+            if not is_valid:
+                print(f"   ❌ Validation failed: {len(errors)} exercise(s) not found in instructions.md")
+                for error in errors:
+                    print(f"      {error}")
+                print("   Use: python exercise_validator.py --list  to see available exercises")
+                return False
+            print("   ✓ All exercise IDs valid")
+        
+        # Enhance routine with warmup data from history
+        if enhance:
+            print("   Enhancing with historical warmup data...")
+            try:
+                client = HevyAPIClient()
+                enhancer = RoutineEnhancer(api_client=client)
+                routine_data = enhancer.enhance_routine(
+                    routine_data,
+                    warmup_strategy=warmup_strategy,
+                    verbose=False
+                )
+                print("   ✓ Enhancement complete")
+            except Exception as e:
+                print(f"   ⚠ Enhancement skipped: {e}")
+                # Continue with original data if enhancement fails
         
         if dry_run:
             print("   [DRY RUN] Would upload this routine")
@@ -90,6 +130,22 @@ def main():
         action="store_true",
         help="Show what would be done without uploading"
     )
+    parser.add_argument(
+        "--no-enhance",
+        action="store_true",
+        help="Skip automatic warmup weight population"
+    )
+    parser.add_argument(
+        "--warmup-strategy",
+        choices=["recent", "average", "mode"],
+        default="recent",
+        help="Strategy for choosing warmup weight (default: recent)"
+    )
+    parser.add_argument(
+        "--no-validate",
+        action="store_true",
+        help="Skip exercise ID validation against instructions.md"
+    )
     
     args = parser.parse_args()
     
@@ -116,7 +172,13 @@ def main():
     failed = 0
     
     for file_path in files_to_upload:
-        if upload_routine_from_file(str(file_path), dry_run=args.dry_run):
+        if upload_routine_from_file(
+            str(file_path),
+            dry_run=args.dry_run,
+            enhance=not args.no_enhance,
+            warmup_strategy=args.warmup_strategy,
+            validate=not args.no_validate
+        ):
             successful += 1
         else:
             failed += 1

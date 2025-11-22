@@ -1,0 +1,122 @@
+# Exercise Validation Quick Reference
+
+## What Is Exercise Validation?
+
+Exercise validation ensures all exercise IDs in your routine templates match the authoritative source in `instructions.md`. This prevents upload failures and data integrity issues.
+
+## Quick Start
+
+### See All Valid Exercises
+
+```bash
+python exercise_validator.py --list
+```
+
+### Validate Your Routine File
+
+```bash
+python exercise_validator.py input/my_routine.json
+```
+
+### Upload a Routine (Validation Automatic)
+
+```bash
+python routine_uploader.py input/my_routine.json
+```
+
+## What Happens During Upload?
+
+1. ✅ **Validation** - All exercise IDs checked against instructions.md
+2. ✅ **Enhancement** - Warmup weights auto-populated from history
+3. ✅ **Upload** - Routine sent to Hevy API
+
+If validation fails, upload stops with helpful error message.
+
+## Fix Invalid Exercise IDs
+
+### You See This Error
+
+```text
+❌ Validation failed: 1 exercise(s) not found in instructions.md
+   1. BADID123 - NOT FOUND IN instructions.md!
+```
+
+### Follow These Steps
+
+1. **Find the correct exercise ID**:
+
+   ```bash
+   python exercise_validator.py --list | grep -i "exercise_name"
+   ```
+
+2. **Copy the correct ID** from the output
+
+3. **Update your routine JSON** with the correct ID
+
+4. **Validate again**:
+
+   ```bash
+   python exercise_validator.py input/my_routine.json
+   ```
+
+## Advanced: Skip Validation
+
+⚠️ **Only for testing or special cases!**
+
+```bash
+python routine_uploader.py input/my_routine.json --no-validate
+```
+
+## Useful Commands
+
+| Command | Purpose |
+|---------|---------|
+| `python exercise_validator.py --list` | Show all available exercises |
+| `python exercise_validator.py file.json -v` | Validate with detailed output |
+| `python exercise_validator.py --list \| grep -i "biceps"` | Find specific exercise IDs |
+| `python routine_uploader.py input/` | Upload all routines in directory |
+| `python routine_uploader.py file.json --dry-run` | Preview upload without sending |
+
+## Categories Available
+
+The validator supports these exercise categories:
+
+- **Biceps** - Biceps curl variations
+- **Core** - Ab exercises and planks
+- **Espalda** (Back) - Back exercises
+- **Hombro** (Shoulders) - Shoulder exercises
+- **Pecho** (Chest) - Chest exercises
+- **Pierna** (Legs) - Leg exercises
+- **Triceps** - Triceps exercises
+
+## Troubleshooting
+
+### I can't find my exercise ID
+
+Run `--list` and search for similar exercises:
+
+```bash
+python exercise_validator.py --list | grep -i "your_exercise"
+```
+
+If still not found, the exercise may not be in instructions.md. Add it first.
+
+### Validation says exercise not found but I know it exists
+
+1. Check for typos in the exercise ID
+2. Make sure instructions.md is up to date
+3. Compare against the authoritative IDs in `--list` output
+
+### I want to bypass validation
+
+Use `--no-validate` flag (advanced users only):
+
+```bash
+python routine_uploader.py input/my_routine.json --no-validate
+```
+
+## See Also
+
+- **ROUTINE_ENHANCEMENT.md** - Complete validation documentation
+- **VALIDATION_SYSTEM_COMPLETE.md** - Technical implementation details
+- **instructions.md** - Authoritative exercise ID source
