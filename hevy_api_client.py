@@ -137,6 +137,49 @@ class HevyAPIClient:
         """
         return self._make_request("GET", "/v1/routines")
     
+    def create_routine_folder(self, folder_title: str) -> Dict[str, Any]:
+        """
+        Create a new routine folder.
+        
+        Args:
+            folder_title: Title for the new folder
+            
+        Returns:
+            Created folder response with folder ID
+        """
+        data = {
+            "routine_folder": {
+                "title": folder_title
+            }
+        }
+        return self._make_request("POST", "/v1/routine_folders", data=data)
+    
+    def list_routine_folders(self, page: int = 1, page_size: int = 10) -> Dict[str, Any]:
+        """
+        List all routine folders.
+        
+        Args:
+            page: Page number (default: 1)
+            page_size: Number of results per page (default: 10)
+            
+        Returns:
+            List of routine folders
+        """
+        params = {"page": page, "pageSize": page_size}
+        return self._make_request("GET", "/v1/routine_folders", params=params)
+    
+    def get_routine_folder(self, folder_id: str) -> Dict[str, Any]:
+        """
+        Get a routine folder by ID.
+        
+        Args:
+            folder_id: The folder ID
+            
+        Returns:
+            Folder data
+        """
+        return self._make_request("GET", f"/v1/routine_folders/{folder_id}")
+    
     def update_routine(self, routine_id: str, routine_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Update an existing routine.
