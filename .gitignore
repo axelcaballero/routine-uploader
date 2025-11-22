@@ -44,3 +44,8 @@ htmlcov/
 
 # Logs
 *.log
+data/next_workout.json
+input/dia_10_biceps_triceps.json
+input/dia_8_pecho.json
+input/dia_9_pierna.json
+data/next_workout.json
