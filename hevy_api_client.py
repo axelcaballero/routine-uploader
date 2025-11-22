@@ -128,14 +128,18 @@ class HevyAPIClient:
         """
         return self._make_request("GET", f"/v1/routines/{routine_id}")
     
-    def list_routines(self) -> Dict[str, Any]:
+    def list_routines(self, page: int = 1, page_size: int = 10) -> Dict[str, Any]:
         """
         List all routines for the authenticated user.
         
+        Args:
+            page: Page number (1-indexed)
+            page_size: Number of routines per page
+        
         Returns:
-            List of routines
+            List of routines with pagination info
         """
-        return self._make_request("GET", "/v1/routines")
+        return self._make_request("GET", "/v1/routines", params={"page": page, "page_size": page_size})
     
     def create_routine_folder(self, folder_title: str) -> Dict[str, Any]:
         """
@@ -225,6 +229,20 @@ class HevyAPIClient:
             Exercise history with all workouts for this exercise
         """
         return self._make_request("GET", f"/v1/exercise_history/{exercise_template_id}")
+    
+    def list_workouts(self, page: int = 1, page_size: int = 10) -> Dict[str, Any]:
+        """
+        Get a paginated list of workouts.
+        
+        Args:
+            page: Page number (default: 1, first page has most recent workouts)
+            page_size: Number of results per page (default: 10)
+            
+        Returns:
+            List of workouts with metadata
+        """
+        params = {"page": page, "pageSize": page_size}
+        return self._make_request("GET", "/v1/workouts", params=params)
     
     def create_routine_from_file(self, file_path: str) -> Dict[str, Any]:
         """
