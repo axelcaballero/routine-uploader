@@ -121,9 +121,7 @@ Creates 5 visualization styles:
 
 Output files saved to `visualizations/` directory.
 
-### Analysis Tools
-
-#### Squat Low-Point Analysis
+### Analyze Squat Low-Point Analysis
 
 Identify sessions significantly below your rolling average:
 
@@ -135,6 +133,34 @@ Identifies:
 - Sessions >5kg below 7-day rolling average
 - Chronological low points with context
 - Summary statistics and trends
+
+## Workout Management
+
+### Update Workout Notes/Description
+
+Add or update workout description/notes (e.g., location, equipment used):
+
+```python
+from hevy_api_client import HevyAPIClient
+
+client = HevyAPIClient()
+
+# Get latest workout and update description
+workouts = client.list_workouts(page=1, page_size=1)
+latest_id = workouts['workouts'][0]['id']
+
+# Simple one-liner - handles all the complexity internally
+result = client.update_workout(latest_id, 'station 24')
+print(f"Updated: {result.get('description')}")
+```
+
+The `update_workout()` method handles all required fields internally:
+- Fetches current workout data
+- Cleans exercise data (removes indices, ensures notes are non-empty)
+- Sends complete workout payload to API
+- Returns the updated workout object
+
+For detailed information, see [WORKOUT_UPDATE_GUIDE.md](WORKOUT_UPDATE_GUIDE.md).
 
 ## 2. Upload Routines (Original Feature)
 

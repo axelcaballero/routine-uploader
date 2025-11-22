@@ -244,6 +244,77 @@ class HevyAPIClient:
         params = {"page": page, "pageSize": page_size}
         return self._make_request("GET", "/v1/workouts", params=params)
     
+    def update_workout(self, workout_id: str, description: str) -> Dict[str, Any]:
+        """
+        Update a workout's description/notes.
+        
+        The Hevy API requires the full workout object to be sent with the update.
+        This method handles fetching the current workout, cleaning the data,
+        and sending the update.
+        
+        Args:
+            workout_id: The workout ID to update
+            description: The description/notes to set
+            
+        Returns:
+            Updated workout object with new description
+            
+        Raises:
+            Exception: If the update fails
+        """
+        # Get the current workout data
+        workouts = self.list_workouts(page=1, page_size=1)
+        current_workout = None
+        for w in workouts.get('workouts', []):
+            if w.get('id') == workout_id:
+                current_workout = w
+                break
+        
+        if not current_workout:
+            raise Exception(f"Workout {workout_id} not found")
+        
+        # Clean exercise data - remove index fields and ensure notes are non-empty
+        exercises = []
+        for ex in current_workout.get('exercises', []):
+            clean_ex = {
+                'exercise_template_id': ex.get('exercise_template_id'),
+                'notes': ex.get('notes') or '-',  # Ensure notes is not empty
+                'sets': []
+            }
+            
+            for s in ex.get('sets', []):
+                clean_set = {
+                    'type': s.get('type'),
+                    'weight_kg': s.get('weight_kg'),
+                    'reps': s.get('reps'),
+                    'distance_meters': s.get('distance_meters'),
+                    'duration_seconds': s.get('duration_seconds'),
+                    'custom_metric': s.get('custom_metric'),
+                    'rpe': s.get('rpe')
+                }
+                clean_ex['sets'].append(clean_set)
+            
+            exercises.append(clean_ex)
+        
+        # Prepare the update payload with all required fields
+        data = {
+            'workout': {
+                'title': current_workout.get('title'),
+                'description': description,
+                'start_time': current_workout.get('start_time'),
+                'end_time': current_workout.get('end_time'),
+                'exercises': exercises,
+                'is_private': current_workout.get('is_private', False)
+            }
+        }
+        
+        response = self._make_request('PUT', f'/v1/workouts/{workout_id}', data=data)
+        # Extract the workout object from the response (API returns nested structure)
+        workout_list = response.get('workout', [])
+        if isinstance(workout_list, list) and len(workout_list) > 0:
+            return workout_list[0]
+        return response
+    
     def create_routine_from_file(self, file_path: str) -> Dict[str, Any]:
         """
         Create a routine from a JSON file.
