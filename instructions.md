@@ -15,9 +15,10 @@
 
 ### Hombro
 * Elevaciones laterales de los brazos con mancuernas es Lateral Raise (Dumbbell) 422B08F1
-* Elevación frontal con mancuerna es 8293E554
-* Elevación frontal con barra es BD86EFD5
-* Press militar en banca con mancuerna individual equivale a Shoulder press dumbbell 878CD1D0
+* Elevación frontal con mancuerna es Front Raise (Dumbbell) 8293E554
+* Elevación frontal con barra es Front Raise (Barbell) BD86EFD5
+* Press militar en banca con mancuerna equivale a Shoulder press dumbbell 878CD1D0
+* Press hombro en banca con barra equivale a Seated Overhead Press (Barbell) 91AF29E0
 * Deltoides posterior en maquina especifica equivale a Rear Delt Reverse Fly (Machine) D8281C62
 * Remo al cuello con barra Upright Row (Barbell) 7AB9A362
 * Pájaro en polea Rear Delt Reverse Fly (Dumbbell) E5988A0A

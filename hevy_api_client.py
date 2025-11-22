@@ -214,6 +214,18 @@ class HevyAPIClient:
         """
         return self._make_request("GET", "/v1/exercise_templates")
     
+    def get_exercise_history(self, exercise_template_id: str) -> Dict[str, Any]:
+        """
+        Get exercise history for a specific exercise template.
+        
+        Args:
+            exercise_template_id: The exercise template ID
+            
+        Returns:
+            Exercise history with all workouts for this exercise
+        """
+        return self._make_request("GET", f"/v1/exercise_history/{exercise_template_id}")
+    
     def create_routine_from_file(self, file_path: str) -> Dict[str, Any]:
         """
         Create a routine from a JSON file.
