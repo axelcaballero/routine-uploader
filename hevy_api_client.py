@@ -244,6 +244,18 @@ class HevyAPIClient:
         params = {"page": page, "pageSize": page_size}
         return self._make_request("GET", "/v1/workouts", params=params)
     
+    def get_workout(self, workout_id: str) -> Dict[str, Any]:
+        """
+        Get detailed information for a specific workout.
+        
+        Args:
+            workout_id: The workout ID to retrieve
+            
+        Returns:
+            Detailed workout object with all exercises and sets
+        """
+        return self._make_request("GET", f"/v1/workouts/{workout_id}")
+    
     def update_workout(self, workout_id: str, description: str) -> Dict[str, Any]:
         """
         Update a workout's description/notes.

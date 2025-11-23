@@ -9,12 +9,14 @@ Step-by-step process:
 4. Fetch all routines and filter by folder_id
 5. Extract día numbers from routine titles
 6. Find next routine by día number
+7. Estimate duration from workout history
 """
 
 import sys
 import os
 import json
 import re
+from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from hevy_api_client import HevyAPIClient
@@ -81,34 +83,91 @@ def get_next_routine(folder_routines: List[Dict[str, Any]], current_dia: int) ->
         return sorted_routines[0] if sorted_routines else None
 
 
+def get_estimated_duration(client: HevyAPIClient, routine_id: str) -> Optional[str]:
+    """Get estimated workout duration based on historical data for the same routine."""
+    try:
+        all_workouts = []
+        page = 1
+        while True:
+            workouts = client.list_workouts(page=page, page_size=10)
+            workouts_list = workouts.get('workouts', [])
+            if not workouts_list:
+                break
+            all_workouts.extend(workouts_list)
+            if page >= workouts.get('page_count', 1):
+                break
+            page += 1
+        
+        # Find workouts with matching routine_id and duration
+        durations = []
+        for workout in all_workouts:
+            if workout.get('routine_id') == routine_id:
+                workout_id = workout.get('id')
+                full_workout = client.get_workout(workout_id)
+                start = full_workout.get('start_time')
+                end = full_workout.get('end_time')
+                
+                if start and end:
+                    s = datetime.fromisoformat(start.replace('Z', '+00:00'))
+                    e = datetime.fromisoformat(end.replace('Z', '+00:00'))
+                    dur = e - s
+                    durations.append(int(dur.total_seconds()))
+        
+        if durations:
+            # Calculate average
+            avg_seconds = sum(durations) // len(durations)
+            mins = avg_seconds // 60
+            secs = avg_seconds % 60
+            return f"{mins}m {secs}s"
+    
+    except Exception:
+        pass
+    
+    return None
+
+
 def display_next_workout(client: HevyAPIClient, routine: Dict[str, Any]) -> None:
-    """Display the next workout details."""
+    """Display the next workout details in readable format."""
     routine_id = routine.get('id')
     full_routine = client.get_routine(routine_id)
     routine_data = full_routine.get('routine', {})
     
-    print("\n" + "="*66)
-    print("YOUR NEXT WORKOUT")
-    print("="*66)
     print(f"\n📅 Routine: {routine_data.get('title')}")
     print(f"💪 Total Exercises: {len(routine_data.get('exercises', []))}")
     
+    # Get estimated duration if available (from same routine_id)
+    estimated_duration = get_estimated_duration(client, routine_id)
+    if estimated_duration:
+        print(f"⏱️  Estimated Duration: {estimated_duration}")
+    
     print("\nExercises:")
-    total_sets = 0
     for idx, exercise in enumerate(routine_data.get('exercises', []), 1):
         title = exercise.get('title', 'Unknown')
         sets = exercise.get('sets', [])
         normal_sets = [s for s in sets if s.get('type') == 'normal']
-        reps = normal_sets[0].get('reps', '?') if normal_sets else '?'
-        
-        total_sets += len(normal_sets)
-        
         notes = exercise.get('notes', '')
-        notes_str = f" - {notes}" if notes else ""
         
-        print(f"  {idx}. {title} ({reps} reps) ({len(normal_sets)} sets){notes_str}")
-    
-    print(f"\nTotal: {total_sets} sets")
+        # Get reps from first normal set
+        reps = normal_sets[0].get('reps', '?') if normal_sets else '?'
+        set_count = len(normal_sets)
+        
+        print(f"  {idx}. {title}")
+        print(f"     Reps: {reps} × {set_count} sets")
+        
+        # Only show notes if they contain useful descriptive info
+        if notes:
+            filtered_notes = notes
+            # Remove rep scheme patterns (e.g., "4x6-8rep.", "3x20rep.", etc.)
+            filtered_notes = re.sub(r'\d+x\d+(?:-\d+)?rep\.?', '', filtered_notes)
+            # Remove percentages and effort indicators
+            filtered_notes = re.sub(r'\s*\(.*?\)', '', filtered_notes)
+            filtered_notes = re.sub(r'\s+o\s+más', '', filtered_notes)
+            filtered_notes = re.sub(r'\s*\d+%\+?', '', filtered_notes)
+            filtered_notes = filtered_notes.strip()
+            
+            # Only display if there's meaningful content left
+            if filtered_notes and len(filtered_notes) > 2:
+                print(f"     Notes: {filtered_notes}")
 
 
 def save_next_workout_info(next_routine: Dict[str, Any]) -> None:
@@ -127,8 +186,6 @@ def save_next_workout_info(next_routine: Dict[str, Any]) -> None:
     
     with open(output_file, 'w') as f:
         json.dump(next_workout_info, f, indent=2)
-    
-    print(f"✅ Next workout saved to data/next_workout.json")
 
 
 def main():
@@ -136,9 +193,6 @@ def main():
     client = HevyAPIClient()
     
     try:
-        print("Connected to Hevy API")
-        print("Fetching most recent workout...")
-        
         # Step 1: Get latest workout
         latest_workout = get_most_recent_workout(client)
         if not latest_workout:
@@ -149,10 +203,7 @@ def main():
         latest_routine_id = latest_workout.get('routine_id')
         current_dia = extract_dia_number(latest_title)
         
-        print(f"Most recent: {latest_title} (Día {current_dia})")
-        
         # Step 2-3: Get routine details to extract folder_id
-        print("Getting routine folder...")
         current_routine = client.get_routine(latest_routine_id)
         folder_id = current_routine.get('routine', {}).get('folder_id')
         
@@ -160,15 +211,10 @@ def main():
             print("Could not determine routine folder")
             return
         
-        print(f"Folder ID: {folder_id}")
-        
         # Step 4-5: Fetch routines in folder and extract día numbers
-        print("Fetching all routines in folder...")
         folder_routines = get_routines_in_folder(client, folder_id)
-        print(f"Found {len(folder_routines)} routines in folder")
         
         # Step 6: Find next routine
-        print("Finding next workout in sequence...")
         next_routine = get_next_routine(folder_routines, current_dia)
         
         if next_routine:
