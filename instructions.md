@@ -54,6 +54,7 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Extensión en polea alta con cuerda es Triceps Rope Pushdown | 94B7239B
 * Patada de mula individual es Kickback (Dumbbell) | 6127A3AD | Con mancuerna
 * Press francés en banca plana es Skullcrusher (Barbell) | 875F585F
+* Extensión de los brazos sentado con barra es Triceps Extension (Barbell) | 2F8D3067
 
 ## Espalda
 
