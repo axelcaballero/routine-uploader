@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
 """
 Script to upload routine JSON files to Hevy API.
 """

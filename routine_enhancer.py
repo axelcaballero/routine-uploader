@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
 """
 Routine Template Enhancer
 Automatically populates missing warmup weights and reps for new routine templates

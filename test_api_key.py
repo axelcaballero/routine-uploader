@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
 """
 Quick test script to verify your Hevy API credentials
 """

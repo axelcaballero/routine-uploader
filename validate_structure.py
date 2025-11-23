@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
 """
 Pre-upload validator for Hevy routine JSON files
 Catches structural errors BEFORE sending to API
