@@ -24,7 +24,7 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 
 * Elevaciones laterales de los brazos con mancuernas es Lateral Raise (Dumbbell) | 422B08F1
 * Elevaciones laterales de los brazos en maquina es Lateral Raise (Machine) | D5D0354D
-* Elevación frontal con mancuerna es Front Raise (Dumbbell) | 8293E554
+* Elevación frontal con mancuerna es Front Raise (Dumbbell) | 8293E554 | Si dice individual, duplicar repeticiones.
 * Elevación frontal con barra es Front Raise (Barbell) | BD86EFD5
 * Press militar en banca con mancuerna es Shoulder Press (Dumbbell) | 878CD1D0
 * Press hombro en banca con barra es Seated Overhead Press (Barbell) | 91AF29E0
@@ -38,10 +38,10 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Curl de biceps boca abajo sobre banco inclinado es Spider Curl (Dumbbell) | 90427D4A
 * Curl de bíceps boca abajo sobre banco inclinado (con barra) es Spider Curl (Barbell) | 2348AB72
 * Curl de bíceps en polea con cuerda es Hammer Curl (Cable) | 36E8F14E
-* Curl Alternado con mancuerna sentado es Bicep Curl (Dumbbell) | 37FCC2BB
+* Curl Alternado con mancuerna es Bicep Curl (Dumbbell) | 37FCC2BB | Duplicar repeticiones. Si dice "sentado" incluir en notas.
 * Curl de bíceps con barra olímpica es Bicep Curl (Barbell) | A5AC6449
 * Predicador banca Scott barra Z es Preacher Curl (Barbell) | 4F942934
-* Predicador banca Scott con mancuerna individual es Preacher Curl (Dumbbell) | FAB6EB2F
+* Predicador banca Scott con mancuerna individual es Preacher Curl (Dumbbell) | FAB6EB2F | Duplicar repeticiones.
 * Concentrado con mancuerna es Concentration Curl | 724CDE60 | Duplicar repeticiones.
 * Martillos dobles es Hammer Curl (Dumbbell) | 7E3BC8B6
 
@@ -64,8 +64,8 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Remo en polea baja es Seated Cable Row (Bar Grip) | F1D60854
 * Remo con mancuerna en banco inclinado es Chest Supported Incline Row (Dumbbell) | 914F3A96
 * Remo hammer es Seated Row (Machine) | 1DF4A847
-* Jalón mancuerna es Dumbbell Row | F1E57334
-* Jalón en polea alta es Single Arm Cable Row | D0C4A899
+* Jalón mancuerna es Dumbbell Row | F1E57334 | Duplicar repeticiones.
+* Jalón en polea alta es Single Arm Cable Row | D0C4A899 | Duplicar repeticiones.
 * Pull over con polea alta brazos extendidos es Straight Arm Lat Pulldown (Cable) | D2387AB1
 * Polea agarre estrecho es Lat Pulldown (Close Grip Cable) | 4E5257DE
 * Polea tras nuca es Lat Pulldown (Cable) | 6A6C31A5 | Agregar "tras nuca" en notas
@@ -85,9 +85,9 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Extension de pierna es Leg Extension (Machine) | 75A4F6C4
 * ½ Sentadilla es Half Squat | 17df7730-4222-4482-a0af-de14feb1529a
 * Hack Squat es Hack Squat (Machine) | 1E42FD5F
-* Desplantes búlgaros es Bulgarian Lunges | 0d2c58fa-8cf3-4e4d-ac1c-c6db5262d972
-* Desplantes recorridos con mancuerna es Lunge (Dumbbell) | B537D09F | Agregar "recorrido" en notas
-* Desplantes fijos con barra es Barbell Lunge | 6E6EE645 | Agregar "fijos" en notas
+* Desplantes búlgaros es Bulgarian Lunges | 0d2c58fa-8cf3-4e4d-ac1c-c6db5262d972 | Duplicar repeticiones.
+* Desplantes recorridos con mancuerna es Lunge (Dumbbell) | B537D09F | Duplicar repeticiones. Agregar "recorrido" en notas
+* Desplantes fijos con barra es Barbell Lunge | 6E6EE645 | Duplicar repeticiones. Agregar "fijos" en notas
 * Curl de bíceps femoral acostado es Lying Leg Curl (Machine) | B8127AD1
 * Curl de piernas sentado en máquina es Seated Leg Curl (Machine) | 11A123F3
 * Aductores sentado en máquina es Hip Adduction (Machine) | 8BEBFED6 | Cierra piernas

@@ -1,10 +1,7 @@
 # hevy api manifiesto
 
-Necesito que me ayudes a convertir una rutina en texto a una rutina en formato JSON para la api del app Hevy.
+## Información de entrada
 
-# manifiesto
-
-## Información de entrada:
 * La informacion de esta captura se utilizará para alimentar un archivo JSON para capturar las rutinas en la aplicacion Hevy.
 * El contendo generado sera un archivo JSON
 * pregunta el valor actual de new_routine_folder_id
@@ -35,15 +32,17 @@ Necesito que me ayudes a convertir una rutina en texto a una rutina en formato J
 }
 
 ### Consideraciones
+
 * El nombre de la rutina siempre empieza con “Día ”
 * “Combinación” es un “superset”, usualmente de los 2 ejercicios siguientes.
 * “Triserie” también es un superset, pero de los 3 ejercicios siguientes.
 * “Indvidual “ es solo un ejercicio, significa que este ejercicio no forma parte del superset anterior.
 * Los ejercicios vienen numeros (ej. ejercicio 1 - , ejercicio 2) omite esta información.
 * En el primer renglón viene la información detallando numero de series y repeticiones (ej. Ejercicio 2 - 3x12-15rep. (incremento de peso)) esta información se debera guardar tal cual en la llave “notes”
-* En el segundo renglón viene el nombre del ejercicio (util para traducir al ingles y encontrar el “exercise_template_id”) . 
+* En el segundo renglón viene el nombre del ejercicio (util para traducir al ingles y encontrar el “exercise_template_id”) .
 
 ### Reglas
+
 * No debes asumir ids si no encuentras equivalencias.
 * No debes generar ids placeholders, deja el valor vacio para detectar rapidamente que falta ese valor.
 * No pongas valores de memoria.
@@ -55,7 +54,8 @@ Necesito que me ayudes a convertir una rutina en texto a una rutina en formato J
 * Si no hay ejercicios pendientes de id, siempre genera el json sin necesidad de confirmacion
 * Despues de darte ids faltantes, genera el json sin necesidad de confirmacion
 
-## Preferencias en rutinas:
+## Preferencias en rutinas
+
 * 4 x 12 rep significa 4 series y 12 repeticiones cada una.
 * 3 x 12-15 rep significa 3 series de 12 a 15 repeticiones. Utiliza siempre el numero más alto, quedaria en 3 series de 15 repeticiones.
 * 1 vuelta x sistema asc/des (6, 8, 10, 12, + 12, 10, 8, 6 rep.) significa que seran varias series seguidas. Primera serie de 6 repeticiones, segunda serie de 8, tercera de 10, cuarta de 12, quinta de 12, sexta de 10, septima de 8 y finalmente una ultima serie de 6 repeticiones. Las series 2, 3 y 4 marcalas como dropsets.
@@ -65,31 +65,30 @@ Necesito que me ayudes a convertir una rutina en texto a una rutina en formato J
 * Cuando hagas un super set, ponle rest_seconds de 0 a todos los ejercicios excepto al ultimo ejercicio del set, a ese ponle 120 segundos.
 * Cuando el nombre de un ejercicio incluya “individual”,  “alternado”, “barra olimpica”, “barra z”, “pronado”, “supino”, “neutro”, “sentado”, “(con cuerda)” anexa esta información como parte de las notas en la propiedad "notes” pero conservando la info de repeticiones ej. “3x12-15rep. (incremento de peso) alternado”
 * Cuando un ejercicio de mancuernas diga “individual”, duplica el numero de repeticiones, es decir, 3x12-15rep. pasaria a tener 30 repeticiones.
-* Para el ejercicio de biceps “1. Alternado con mancuernas “ o “2-Alternado con mancuernas sentado” duplicar el numero de repeticiones.
-* Para el ejercicio de biceps “8-Concentrado con mancuerna” duplicar el numero de repeticiones.
-* Para el ejercicio de espalda “14-Jalón mancuerna” duplicar el numero de repeticiones.
-* Para el ejercicio de espalda “9-Jalón en polea alta” duplicar el numero de repeticiones.
-* Para el ejercicio de hombro “Elevación frontal con mancuerna individual” duplicar el numero de repeticiones.
-* Para cualquier ejercicio de pierna que lleve “desplantes” duplicar el numero de repeticiones.
 * Cuando el nombre del ejercicio incluya Adduction, anexar en propiedad notes “cierre piernas”. Cuando el nombre del ejerjecicio incluya Abduction, anexad “abre piernas”
 * Cuando un ejercicio de press no especifique mancuerna, es con barra.
 * Cuando la descripcion del ejercicio indique “sistema bulgaro” y detalle el tiempo de recuperacion 10-30seg, modificar el rest_seconds a 30 segundos.
 * Cuando la descripcion del ejercicio indique 10-20seg. de recuperación modifica rest_seconds a 20 segundos.
 * Cuando la descripcion del ejercicio indique “1 vuelta × sistema 21 rep.” significa 3 series de 7 repeticiones.
-### Los ejercicios:
+
+### Los ejercicios
+
 * Los ejercicios dentro de la propiedad "exercises" no llevan nombre, el valor clave es “exercise_template_id”, no incluir ninguna llave como “title” o “name” en este objeto
 * "exercise_template_id" solo puede contener una id alfanumerica, jamas una frase o palabras comunes.
-* Obtener el exercise_template_id traduciendo el nombre en español del ejercicio a ingles, y encontrar el valor equivalente en el schema ( ej. press de pecho en banca plana -> Bench Press (Barbell).
+* Obtener el exercise_template_id traduciendo el nombre en español del ejercicio a ingles, y encontrar el valor equivalente en el schema ( ej. press de pecho en banca plana -> Bench Press (Barbell)).
 * El descanso default es de 60 segundos, rest_seconds = 60.
-* En “notes” van las notas 
+* En “notes” van las notas
 
-### Los sets:
+### Los sets
+
 * Crea siempre al inicio de sets un set del tipo warmup de 12 repeticiones.
 
 ## Preferencias en equivalencias de ejercicios
+
 * Evita el uso de coincidencias parciales en los siguientes ejercicios definidos por mi, sigue al pie de la letra las indicaciones
 
 Si la rutina es de Core, estas son las reglas:
+
 * 2 series
 * 20 segundos de descanso entre serie "rest_seconds": 20
 * 30 segundos objetivo de cada ejercicio de tiempo, “duration_seconds": 30. Solo cuando te lo indique yo mismo que el ejercicio es de tiempo.

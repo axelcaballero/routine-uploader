@@ -11,6 +11,15 @@ Comprehensive Python tool for managing and analyzing your Hevy workout routines 
 - ✅ **API Client Library**: Full-featured Python client for Hevy API interactions
 - ✅ **Data Analysis**: Squat low-point analysis and other analytics
 
+## 📋 ROUTINE CREATION RULES
+
+**IMPORTANT:** Before creating any routines, read [`ROUTINE_CREATION_RULES.md`](ROUTINE_CREATION_RULES.md) which documents critical rules for:
+- Rep range interpretation (always use maximum value)
+- "Duplicar repeticiones" handling (double reps per set)
+- Exercise-specific requirements
+
+Load this file at the start of every chat/session involving routine creation.
+
 ## Quick Start
 
 ### 1. Setup
