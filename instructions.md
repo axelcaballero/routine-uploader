@@ -42,6 +42,7 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Curl de bíceps con barra olímpica es Bicep Curl (Barbell) | A5AC6449
 * Predicador banca Scott barra Z es Preacher Curl (Barbell) | 4F942934
 * Predicador banca Scott con mancuerna individual es Preacher Curl (Dumbbell) | FAB6EB2F
+* Concentrado con mancuerna es Concentration Curl | 724CDE60 | Duplicar repeticiones.
 * Martillos dobles es Hammer Curl (Dumbbell) | 7E3BC8B6
 
 ## Triceps

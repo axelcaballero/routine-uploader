@@ -1,0 +1,188 @@
+{
+  "routine": {
+    "title": "Example – All Set Types Reference",
+    "folder_id": 1812915,
+    "exercises": [
+      {
+        "exercise_template_id": "79D0BB3A",
+        "superset_id": null,
+        "rest_seconds": 20,
+        "notes": "Bench Press - Standard warmup + normal sets",
+        "sets": [
+          {
+            "type": "warmup",
+            "weight_kg": 40,
+            "reps": 12,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "normal",
+            "weight_kg": 60,
+            "reps": 6,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "normal",
+            "weight_kg": 60,
+            "reps": 8,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          }
+        ]
+      },
+      {
+        "exercise_template_id": "D04AC939",
+        "superset_id": null,
+        "rest_seconds": 20,
+        "notes": "Squat - With drop set (heavy to light)",
+        "sets": [
+          {
+            "type": "warmup",
+            "weight_kg": 50,
+            "reps": 12,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "normal",
+            "weight_kg": 100,
+            "reps": 6,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "dropset",
+            "weight_kg": 100,
+            "reps": 6,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null,
+            "notes": "First weight in drop set"
+          },
+          {
+            "type": "dropset",
+            "weight_kg": 80,
+            "reps": 8,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null,
+            "notes": "Reduced weight, more reps"
+          },
+          {
+            "type": "dropset",
+            "weight_kg": 60,
+            "reps": 10,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null,
+            "notes": "Final drop, maximum volume"
+          }
+        ]
+      },
+      {
+        "exercise_template_id": "6A6C31A5",
+        "superset_id": null,
+        "rest_seconds": 20,
+        "notes": "Lat Pulldown - Normal and failure sets",
+        "sets": [
+          {
+            "type": "warmup",
+            "weight_kg": 30,
+            "reps": 12,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "normal",
+            "weight_kg": 60,
+            "reps": 8,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "failure",
+            "weight_kg": 50,
+            "reps": 15,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null,
+            "notes": "Go to muscular failure"
+          }
+        ]
+      },
+      {
+        "exercise_template_id": "878CD1D0",
+        "superset_id": null,
+        "rest_seconds": 20,
+        "notes": "Shoulder Press - Normal sets",
+        "sets": [
+          {
+            "type": "warmup",
+            "weight_kg": 20,
+            "reps": 12,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "normal",
+            "weight_kg": 35,
+            "reps": 8,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "normal",
+            "weight_kg": 35,
+            "reps": 8,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          }
+        ]
+      },
+      {
+        "exercise_template_id": "1DF4A847",
+        "superset_id": null,
+        "rest_seconds": 20,
+        "notes": "Seated Row - Normal sets",
+        "sets": [
+          {
+            "type": "warmup",
+            "weight_kg": 30,
+            "reps": 12,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "normal",
+            "weight_kg": 50,
+            "reps": 8,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "normal",
+            "weight_kg": 55,
+            "reps": 6,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          }
+        ]
+      }
+    ]
+  }
+}
