@@ -30,39 +30,84 @@ class ExerciseValidator:
         
         Returns:
             Dictionary mapping exercise names to their template IDs
-            Format: {
-                "category": {
-                    "spanish_name": "template_id",
-                    ...
-                }
-            }
         """
         exercise_map = {}
         
         try:
             with open(self.instructions_path, 'r', encoding='utf-8') as f:
-                content = f.read()
+                lines = f.readlines()
             
-            # Split by category headers
-            categories = re.split(r'^### ', content, flags=re.MULTILINE)[1:]
+            current_category = None
+            current_exercise = None
             
-            for category_block in categories:
-                lines = category_block.split('\n')
-                category_name = lines[0].strip()
-                exercise_map[category_name] = {}
+            for line in lines:
+                line = line.strip()
                 
-                # Parse exercise lines
-                for line in lines[1:]:
-                    # Match pattern: * Spanish name equivale/es ... ID
-                    match = re.search(
-                        r'\* ([^*]+?)\s+(?:equivale|es)\s+(?:.*?\s)?([A-Fa-f0-9\-]{8,})\s*$',
-                        line.strip()
-                    )
-                    
+                # Detect category headers
+                if re.match(r'^##+ \w+', line):
+                    current_category = re.sub(r'^##+ ', '', line)
+                    if current_category:
+                        exercise_map[current_category] = {}
+                    continue
+                
+                # Detect exercise entries starting with *
+                if line.startswith('*'):
+                    # Extract exercise name and possible ID from this line
+                    match = re.match(r'\*\s+(.+)', line)
                     if match:
-                        spanish_name = match.group(1).strip()
-                        template_id = match.group(2).strip()
-                        exercise_map[category_name][spanish_name] = template_id
+                        content = match.group(1)
+                        
+                        # Check for pipe-delimited format: Spanish name | ID | NOTES
+                        if '|' in content:
+                            parts = content.split('|')
+                            if len(parts) >= 2:
+                                exercise_part = parts[0].strip()
+                                id_part = parts[1].strip()
+                                # Remove parentheses and check if it's a valid ID
+                                template_id = id_part.replace('(', '').replace(')', '').strip()
+                                
+                                # Extract exercise name (Spanish part before "es")
+                                exercise_name = re.sub(r'\s+(?:es|equivale)\s+.+$', '', exercise_part, flags=re.IGNORECASE)
+                                exercise_name = exercise_name.strip()
+                                
+                                if current_category and exercise_name and len(template_id) >= 8:
+                                    exercise_map[current_category][exercise_name] = template_id
+                                current_exercise = None
+                        else:
+                            # Fallback to old format without pipes (for backward compatibility)
+                            # Look for an ID (hex or UUID) anywhere in the line
+                            id_match = re.search(r'([A-Fa-f0-9]{8}(?:[A-Fa-f0-9]{4}|\-[A-Fa-f0-9]{4})*(?:\-[A-Fa-f0-9]{12})?)\)?\s*(?:\.|$)', content)
+                            
+                            if id_match:
+                                # Full exercise line with ID
+                                template_id = id_match.group(1).strip()
+                                # Remove the ID from content to get exercise name
+                                exercise_name = content[:id_match.start()].strip()
+                                # Remove English descriptions (after "es", "equivale", etc.)
+                                exercise_name = re.sub(r'\s+(?:es|equivale)\s+.+$', '', exercise_name, flags=re.IGNORECASE)
+                                exercise_name = exercise_name.strip()
+                                
+                                if current_category and exercise_name and len(template_id) >= 8:
+                                    exercise_map[current_category][exercise_name] = template_id
+                                current_exercise = None
+                            else:
+                                # Exercise without ID (might be continued on next line)
+                                current_exercise = (content, current_category)
+                
+                # Handle wrapped IDs (ID on next line)
+                elif current_exercise:
+                    id_match = re.search(r'^([A-Fa-f0-9]{8}(?:[A-Fa-f0-9]{4}|\-[A-Fa-f0-9]{4})*(?:\-[A-Fa-f0-9]{12})?)', line)
+                    if id_match:
+                        template_id = id_match.group(1).strip()
+                        exercise_name = current_exercise[0]
+                        category = current_exercise[1]
+                        # Remove English descriptions
+                        exercise_name = re.sub(r'\s+(?:es|equivale)\s+.+$', '', exercise_name, flags=re.IGNORECASE)
+                        exercise_name = exercise_name.strip()
+                        
+                        if category and exercise_name and len(template_id) >= 8:
+                            exercise_map[category][exercise_name] = template_id
+                        current_exercise = None
             
             return exercise_map
         
@@ -93,18 +138,20 @@ class ExerciseValidator:
         
         return None
     
-    def validate_routine(self, routine_data: Dict, verbose: bool = False) -> Tuple[bool, List[str]]:
+    def validate_routine(self, routine_data: Dict, verbose: bool = False, interactive: bool = False) -> Tuple[bool, List[str]]:
         """
         Validate all exercises in a routine against instructions.md.
         
         Args:
             routine_data: Routine JSON data
             verbose: If True, print detailed information
+            interactive: If True, prompt user for missing exercises
             
         Returns:
             Tuple of (is_valid, list_of_errors)
         """
         errors = []
+        missing_exercises = []  # Track exercises not found
         exercises = routine_data.get('routine', {}).get('exercises', [])
         
         print(f"\n🔍 Validating {len(exercises)} exercises against instructions.md...\n")
@@ -135,6 +182,13 @@ class ExerciseValidator:
                 status = "⚠"
                 message = f"{i}. {ex_id} - NOT FOUND IN instructions.md! Notes: {notes[:50]}"
                 errors.append(message)
+                # Store missing exercise info for interactive mode
+                missing_exercises.append({
+                    'index': i,
+                    'ex_id': ex_id,
+                    'notes': notes,
+                    'exercise_data': exercise
+                })
             
             if verbose or status == "⚠":
                 print(f"   {status} {message}")
@@ -145,16 +199,101 @@ class ExerciseValidator:
             print("\n✅ All exercise IDs are valid!")
         else:
             print(f"\n❌ Found {len(errors)} validation error(s)!")
+            
+            # In interactive mode, ask user about missing exercises
+            if interactive and missing_exercises:
+                print("\n📝 Processing missing exercises...")
+                for missing in missing_exercises:
+                    self._handle_missing_exercise(missing)
         
         return is_valid, errors
     
-    def validate_from_file(self, routine_path: str, verbose: bool = False) -> Tuple[bool, List[str]]:
+    def _handle_missing_exercise(self, missing_info: Dict) -> None:
+        """
+        Interactively handle a missing exercise by asking user for details
+        and adding it to instructions.md
+        
+        Args:
+            missing_info: Dict with exercise_template_id, notes, and index
+        """
+        print(f"\n❓ Exercise #{missing_info['index']} not found: {missing_info['ex_id']}")
+        print(f"   Notes: {missing_info['notes']}")
+        
+        # Ask for exercise details
+        exercise_name = input("   Enter Spanish exercise name: ").strip()
+        if not exercise_name:
+            print("   ⏭️  Skipping this exercise")
+            return
+        
+        category = input("   Enter category (Pecho/Hombro/Espalda/Biceps/Triceps/Pierna/Core): ").strip()
+        if not category:
+            print("   ⏭️  Skipping this exercise")
+            return
+        
+        english_name = input("   Enter English exercise name (optional): ").strip()
+        
+        # Add to instructions.md
+        self._add_exercise_to_instructions(exercise_name, english_name, missing_info['ex_id'], category)
+        
+        # Reload the exercise map
+        self.exercise_map = self._parse_instructions()
+        print(f"   ✅ Added '{exercise_name}' to instructions.md in category '{category}'")
+    
+    def _add_exercise_to_instructions(self, spanish_name: str, english_name: str, template_id: str, category: str) -> None:
+        """
+        Add a new exercise entry to instructions.md
+        
+        Args:
+            spanish_name: Spanish name of the exercise
+            english_name: English name/description of the exercise
+            template_id: Hevy template ID
+            category: Exercise category
+        """
+        try:
+            with open(self.instructions_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Find the category section
+            category_pattern = f"^## {category}\n"
+            if not re.search(category_pattern, content, re.MULTILINE):
+                print(f"   ⚠️  Category '{category}' not found in instructions.md")
+                return
+            
+            # Create the new entry in pipe-delimited format
+            if english_name:
+                new_entry = f"* {spanish_name} es {english_name} | {template_id}\n"
+            else:
+                new_entry = f"* {spanish_name} | {template_id}\n"
+            
+            # Find where to insert (before the next category header or at end of section)
+            insert_pattern = f"(^## {category}\n(?:.*?\n)*?)(^## |\\Z)"
+            
+            def replacer(match):
+                section = match.group(1)
+                next_part = match.group(2)
+                # Insert before the last newline if section ends with newline
+                if section.endswith('\n'):
+                    return section + new_entry + next_part
+                return section + '\n' + new_entry + next_part
+            
+            new_content = re.sub(insert_pattern, replacer, content, flags=re.MULTILINE)
+            
+            # Write back
+            with open(self.instructions_path, 'w', encoding='utf-8') as f:
+                f.write(new_content)
+                
+        except Exception as e:
+            print(f"   ❌ Error adding exercise to instructions.md: {e}")
+
+    
+    def validate_from_file(self, routine_path: str, verbose: bool = False, interactive: bool = False) -> Tuple[bool, List[str]]:
         """
         Validate a routine JSON file.
         
         Args:
             routine_path: Path to routine JSON file
             verbose: If True, print detailed information
+            interactive: If True, prompt user for missing exercises
             
         Returns:
             Tuple of (is_valid, list_of_errors)
@@ -166,7 +305,7 @@ class ExerciseValidator:
             routine_title = routine_data.get('routine', {}).get('title', 'Unknown')
             print(f"📋 Validating: {routine_title}")
             
-            return self.validate_routine(routine_data, verbose=verbose)
+            return self.validate_routine(routine_data, verbose=verbose, interactive=interactive)
         
         except FileNotFoundError:
             error_msg = f"Routine file not found: {routine_path}"
@@ -204,7 +343,7 @@ def main():
         help="Path to routine JSON file to validate"
     )
     parser.add_argument(
-        "-i", "--instructions",
+        "-inst", "--instructions",
         default="instructions.md",
         help="Path to instructions.md (default: instructions.md)"
     )
@@ -212,6 +351,11 @@ def main():
         "-v", "--verbose",
         action="store_true",
         help="Print detailed validation information"
+    )
+    parser.add_argument(
+        "-i", "--interactive",
+        action="store_true",
+        help="Prompt for missing exercises and add them to instructions.md"
     )
     parser.add_argument(
         "--list",
@@ -231,7 +375,7 @@ def main():
         parser.print_help()
         return
     
-    is_valid, errors = validator.validate_from_file(args.routine_file, verbose=args.verbose)
+    is_valid, errors = validator.validate_from_file(args.routine_file, verbose=args.verbose, interactive=args.interactive)
     
     if not is_valid:
         print("\n❌ Validation failed! Please correct the exercise IDs.")
