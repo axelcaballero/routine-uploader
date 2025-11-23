@@ -83,6 +83,7 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Sentadilla isometrica es Iso Squat | c0ef33ba-3c50-4ced-a565-8caf48fff0ad
 * Peso muerto con mancuernas es Romanian Deadlift | 72CFFAD5
 * Extension de pierna es Leg Extension (Machine) | 75A4F6C4
+* Extensiones es Leg Extension (Machine) | 75A4F6C4
 * ½ Sentadilla es Half Squat | 17df7730-4222-4482-a0af-de14feb1529a
 * Hack Squat es Hack Squat (Machine) | 1E42FD5F
 * Desplantes búlgaros es Bulgarian Lunges | 0d2c58fa-8cf3-4e4d-ac1c-c6db5262d972 | Duplicar repeticiones.
