@@ -1,0 +1,1442 @@
+[
+  {
+    "date": "2025-01-14",
+    "weight": 20.41168092460379,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-01-14T21:43:35+00:00"
+  },
+  {
+    "date": "2025-01-14",
+    "weight": 58.96707822663317,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-01-14T21:43:35+00:00"
+  },
+  {
+    "date": "2025-01-14",
+    "weight": 58.96707822663317,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-01-14T21:43:35+00:00"
+  },
+  {
+    "date": "2025-01-14",
+    "weight": 58.96707822663317,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-01-14T21:43:35+00:00"
+  },
+  {
+    "date": "2025-01-14",
+    "weight": 61.235042773811365,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-01-14T21:43:35+00:00"
+  },
+  {
+    "date": "2025-01-14",
+    "weight": 61.235042773811365,
+    "reps": 9,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-01-14T21:43:35+00:00"
+  },
+  {
+    "date": "2025-01-23",
+    "weight": 20.41168092460379,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-01-23T22:13:06+00:00"
+  },
+  {
+    "date": "2025-01-23",
+    "weight": 56.69911367945497,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-01-23T22:13:06+00:00"
+  },
+  {
+    "date": "2025-01-23",
+    "weight": 61.235042773811365,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-01-23T22:13:06+00:00"
+  },
+  {
+    "date": "2025-01-23",
+    "weight": 61.235042773811365,
+    "reps": 9,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-01-23T22:13:06+00:00"
+  },
+  {
+    "date": "2025-01-23",
+    "weight": 61.235042773811365,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-01-23T22:13:06+00:00"
+  },
+  {
+    "date": "2025-01-23",
+    "weight": 61.235042773811365,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-01-23T22:13:06+00:00"
+  },
+  {
+    "date": "2025-02-04",
+    "weight": 20.41168092460379,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-02-04T22:09:12+00:00"
+  },
+  {
+    "date": "2025-02-04",
+    "weight": 61.235042773811365,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-02-04T22:09:12+00:00"
+  },
+  {
+    "date": "2025-02-04",
+    "weight": 61.235042773811365,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-02-04T22:09:12+00:00"
+  },
+  {
+    "date": "2025-02-04",
+    "weight": 61.235042773811365,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-02-04T22:09:12+00:00"
+  },
+  {
+    "date": "2025-02-04",
+    "weight": 61.235042773811365,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-02-04T22:09:12+00:00"
+  },
+  {
+    "date": "2025-02-04",
+    "weight": 61.235042773811365,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-02-04T22:09:12+00:00"
+  },
+  {
+    "date": "2025-02-14",
+    "weight": 20.41168092460379,
+    "reps": 10,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D1 feb",
+    "timestamp": "2025-02-14T17:38:48+00:00"
+  },
+  {
+    "date": "2025-02-14",
+    "weight": 52.16318458509857,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D1 feb",
+    "timestamp": "2025-02-14T17:38:48+00:00"
+  },
+  {
+    "date": "2025-02-14",
+    "weight": 54.43114913227677,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D1 feb",
+    "timestamp": "2025-02-14T17:38:48+00:00"
+  },
+  {
+    "date": "2025-02-14",
+    "weight": 56.69911367945497,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 feb",
+    "timestamp": "2025-02-14T17:38:48+00:00"
+  },
+  {
+    "date": "2025-02-14",
+    "weight": 58.96707822663317,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 feb",
+    "timestamp": "2025-02-14T17:38:48+00:00"
+  },
+  {
+    "date": "2025-02-14",
+    "weight": 58.96707822663317,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9.5,
+    "workout_title": "D1 feb",
+    "timestamp": "2025-02-14T17:38:48+00:00"
+  },
+  {
+    "date": "2025-03-06",
+    "weight": 20,
+    "reps": 15,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-03-06T22:59:36+00:00"
+  },
+  {
+    "date": "2025-03-06",
+    "weight": 30,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 6,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-03-06T22:59:36+00:00"
+  },
+  {
+    "date": "2025-03-06",
+    "weight": 50,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-03-06T22:59:36+00:00"
+  },
+  {
+    "date": "2025-03-06",
+    "weight": 50,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-03-06T22:59:36+00:00"
+  },
+  {
+    "date": "2025-03-06",
+    "weight": 50,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-03-06T22:59:36+00:00"
+  },
+  {
+    "date": "2025-03-06",
+    "weight": 50,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-03-06T22:59:36+00:00"
+  },
+  {
+    "date": "2025-04-12",
+    "weight": 0,
+    "reps": 15,
+    "type": "warmup",
+    "rpe": 7.5,
+    "workout_title": "D1 feb",
+    "timestamp": "2025-04-12T18:25:08+00:00"
+  },
+  {
+    "date": "2025-04-12",
+    "weight": 43.091326396385774,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D1 feb",
+    "timestamp": "2025-04-12T18:25:08+00:00"
+  },
+  {
+    "date": "2025-04-12",
+    "weight": 47.62725549074217,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 feb",
+    "timestamp": "2025-04-12T18:25:08+00:00"
+  },
+  {
+    "date": "2025-04-12",
+    "weight": 47.62725549074217,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 feb",
+    "timestamp": "2025-04-12T18:25:08+00:00"
+  },
+  {
+    "date": "2025-04-12",
+    "weight": 47.62725549074217,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 feb",
+    "timestamp": "2025-04-12T18:25:08+00:00"
+  },
+  {
+    "date": "2025-04-19",
+    "weight": 20.41168092460379,
+    "reps": 15,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-04-19T17:14:05+00:00"
+  },
+  {
+    "date": "2025-04-19",
+    "weight": 29.937132022752223,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 7,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-04-19T17:14:05+00:00"
+  },
+  {
+    "date": "2025-04-19",
+    "weight": 43.091326396385774,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-04-19T17:14:05+00:00"
+  },
+  {
+    "date": "2025-04-19",
+    "weight": 43.091326396385774,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-04-19T17:14:05+00:00"
+  },
+  {
+    "date": "2025-04-19",
+    "weight": 43.091326396385774,
+    "reps": 15,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-04-19T17:14:05+00:00"
+  },
+  {
+    "date": "2025-04-19",
+    "weight": 49.895220037920375,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-04-19T17:14:05+00:00"
+  },
+  {
+    "date": "2025-04-23",
+    "weight": 61.235042773811365,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D5 Hombro y Pecho + 28min cardio",
+    "timestamp": "2025-04-23T14:38:03+00:00"
+  },
+  {
+    "date": "2025-04-23",
+    "weight": 61.235042773811365,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D5 Hombro y Pecho + 28min cardio",
+    "timestamp": "2025-04-23T14:38:03+00:00"
+  },
+  {
+    "date": "2025-04-23",
+    "weight": 61.235042773811365,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D5 Hombro y Pecho + 28min cardio",
+    "timestamp": "2025-04-23T14:38:03+00:00"
+  },
+  {
+    "date": "2025-04-23",
+    "weight": 61.235042773811365,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D5 Hombro y Pecho + 28min cardio",
+    "timestamp": "2025-04-23T14:38:03+00:00"
+  },
+  {
+    "date": "2025-04-28",
+    "weight": 20.41168092460379,
+    "reps": 15,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-04-28T23:44:34+00:00"
+  },
+  {
+    "date": "2025-04-28",
+    "weight": 34.01946820767298,
+    "reps": 15,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-04-28T23:44:34+00:00"
+  },
+  {
+    "date": "2025-04-28",
+    "weight": 43.091326396385774,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-04-28T23:44:34+00:00"
+  },
+  {
+    "date": "2025-04-28",
+    "weight": 43.091326396385774,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-04-28T23:44:34+00:00"
+  },
+  {
+    "date": "2025-04-28",
+    "weight": 47.62725549074217,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-04-28T23:44:34+00:00"
+  },
+  {
+    "date": "2025-04-28",
+    "weight": 47.62725549074217,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-04-28T23:44:34+00:00"
+  },
+  {
+    "date": "2025-05-10",
+    "weight": 20.41168092460379,
+    "reps": 15,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-10T16:51:43+00:00"
+  },
+  {
+    "date": "2025-05-10",
+    "weight": 43.091326396385774,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-10T16:51:43+00:00"
+  },
+  {
+    "date": "2025-05-10",
+    "weight": 47.62725549074217,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-10T16:51:43+00:00"
+  },
+  {
+    "date": "2025-05-10",
+    "weight": 47.62725549074217,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-10T16:51:43+00:00"
+  },
+  {
+    "date": "2025-05-10",
+    "weight": 47.62725549074217,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-10T16:51:43+00:00"
+  },
+  {
+    "date": "2025-05-10",
+    "weight": 47.62725549074217,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-10T16:51:43+00:00"
+  },
+  {
+    "date": "2025-05-17",
+    "weight": 20.41168092460379,
+    "reps": 15,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-17T18:59:15+00:00"
+  },
+  {
+    "date": "2025-05-17",
+    "weight": 47.62725549074217,
+    "reps": 11,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-17T18:59:15+00:00"
+  },
+  {
+    "date": "2025-05-17",
+    "weight": 47.62725549074217,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-17T18:59:15+00:00"
+  },
+  {
+    "date": "2025-05-17",
+    "weight": 47.62725549074217,
+    "reps": 15,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-17T18:59:15+00:00"
+  },
+  {
+    "date": "2025-05-17",
+    "weight": 52.16318458509857,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-17T18:59:15+00:00"
+  },
+  {
+    "date": "2025-05-25",
+    "weight": 20.41168092460379,
+    "reps": 15,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-25T02:53:04+00:00"
+  },
+  {
+    "date": "2025-05-25",
+    "weight": 47.62725549074217,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-25T02:53:04+00:00"
+  },
+  {
+    "date": "2025-05-25",
+    "weight": 47.62725549074217,
+    "reps": 13,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-25T02:53:04+00:00"
+  },
+  {
+    "date": "2025-05-25",
+    "weight": 47.62725549074217,
+    "reps": 13,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-25T02:53:04+00:00"
+  },
+  {
+    "date": "2025-05-25",
+    "weight": 47.62725549074217,
+    "reps": 14,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-25T02:53:04+00:00"
+  },
+  {
+    "date": "2025-05-25",
+    "weight": 47.62725549074217,
+    "reps": 14,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D1 Pecho y hombro + 28min cardio",
+    "timestamp": "2025-05-25T02:53:04+00:00"
+  },
+  {
+    "date": "2025-05-31",
+    "weight": 20.41168092460379,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-05-31T17:32:20+00:00"
+  },
+  {
+    "date": "2025-05-31",
+    "weight": 49.895220037920375,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-05-31T17:32:20+00:00"
+  },
+  {
+    "date": "2025-05-31",
+    "weight": 47.62725549074217,
+    "reps": 8,
+    "type": "dropset",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-05-31T17:32:20+00:00"
+  },
+  {
+    "date": "2025-05-31",
+    "weight": 45.35929094356398,
+    "reps": 10,
+    "type": "dropset",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-05-31T17:32:20+00:00"
+  },
+  {
+    "date": "2025-05-31",
+    "weight": 43.091326396385774,
+    "reps": 12,
+    "type": "dropset",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-05-31T17:32:20+00:00"
+  },
+  {
+    "date": "2025-05-31",
+    "weight": 43.091326396385774,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-05-31T17:32:20+00:00"
+  },
+  {
+    "date": "2025-05-31",
+    "weight": 45.35929094356398,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-05-31T17:32:20+00:00"
+  },
+  {
+    "date": "2025-05-31",
+    "weight": 47.62725549074217,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9.5,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-05-31T17:32:20+00:00"
+  },
+  {
+    "date": "2025-05-31",
+    "weight": 49.895220037920375,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 10,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-05-31T17:32:20+00:00"
+  },
+  {
+    "date": "2025-06-11",
+    "weight": 20.41168092460379,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-06-11T22:26:16+00:00"
+  },
+  {
+    "date": "2025-06-11",
+    "weight": 49.895220037920375,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-06-11T22:26:16+00:00"
+  },
+  {
+    "date": "2025-06-11",
+    "weight": 47.62725549074217,
+    "reps": 8,
+    "type": "dropset",
+    "rpe": 8,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-06-11T22:26:16+00:00"
+  },
+  {
+    "date": "2025-06-11",
+    "weight": 45.35929094356398,
+    "reps": 10,
+    "type": "dropset",
+    "rpe": 8,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-06-11T22:26:16+00:00"
+  },
+  {
+    "date": "2025-06-11",
+    "weight": 43.091326396385774,
+    "reps": 12,
+    "type": "dropset",
+    "rpe": 8,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-06-11T22:26:16+00:00"
+  },
+  {
+    "date": "2025-06-11",
+    "weight": 43.091326396385774,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-06-11T22:26:16+00:00"
+  },
+  {
+    "date": "2025-06-11",
+    "weight": 45.35929094356398,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-06-11T22:26:16+00:00"
+  },
+  {
+    "date": "2025-06-11",
+    "weight": 47.62725549074217,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-06-11T22:26:16+00:00"
+  },
+  {
+    "date": "2025-06-11",
+    "weight": 49.895220037920375,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro + 25min HIIT + core",
+    "timestamp": "2025-06-11T22:26:16+00:00"
+  },
+  {
+    "date": "2025-06-25",
+    "weight": 45,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-06-25T22:58:35+00:00"
+  },
+  {
+    "date": "2025-06-25",
+    "weight": 54.5,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-06-25T22:58:35+00:00"
+  },
+  {
+    "date": "2025-06-25",
+    "weight": 52,
+    "reps": 8,
+    "type": "dropset",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-06-25T22:58:35+00:00"
+  },
+  {
+    "date": "2025-06-25",
+    "weight": 50,
+    "reps": 10,
+    "type": "dropset",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-06-25T22:58:35+00:00"
+  },
+  {
+    "date": "2025-06-25",
+    "weight": 45.5,
+    "reps": 12,
+    "type": "dropset",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-06-25T22:58:35+00:00"
+  },
+  {
+    "date": "2025-06-25",
+    "weight": 45.5,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-06-25T22:58:35+00:00"
+  },
+  {
+    "date": "2025-06-25",
+    "weight": 50,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-06-25T22:58:35+00:00"
+  },
+  {
+    "date": "2025-06-25",
+    "weight": 52,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-06-25T22:58:35+00:00"
+  },
+  {
+    "date": "2025-06-25",
+    "weight": 54.5,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-06-25T22:58:35+00:00"
+  },
+  {
+    "date": "2025-07-03",
+    "weight": 43.091326396385774,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-03T18:59:33+00:00"
+  },
+  {
+    "date": "2025-07-03",
+    "weight": 58.96707822663317,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-03T18:59:33+00:00"
+  },
+  {
+    "date": "2025-07-03",
+    "weight": 54.43114913227677,
+    "reps": 8,
+    "type": "dropset",
+    "rpe": 8,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-03T18:59:33+00:00"
+  },
+  {
+    "date": "2025-07-03",
+    "weight": 49.895220037920375,
+    "reps": 10,
+    "type": "dropset",
+    "rpe": 8,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-03T18:59:33+00:00"
+  },
+  {
+    "date": "2025-07-03",
+    "weight": 45.35929094356398,
+    "reps": 12,
+    "type": "dropset",
+    "rpe": 8,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-03T18:59:33+00:00"
+  },
+  {
+    "date": "2025-07-03",
+    "weight": 47.62725549074217,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-03T18:59:33+00:00"
+  },
+  {
+    "date": "2025-07-03",
+    "weight": 52.16318458509857,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-03T18:59:33+00:00"
+  },
+  {
+    "date": "2025-07-03",
+    "weight": 56.69911367945497,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 10,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-03T18:59:33+00:00"
+  },
+  {
+    "date": "2025-07-03",
+    "weight": 58.96707822663317,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 10,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-03T18:59:33+00:00"
+  },
+  {
+    "date": "2025-07-15",
+    "weight": 20.41168092460379,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-15T19:46:20+00:00"
+  },
+  {
+    "date": "2025-07-15",
+    "weight": 56.245520770019326,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-15T19:46:20+00:00"
+  },
+  {
+    "date": "2025-07-15",
+    "weight": 56.245520770019326,
+    "reps": 8,
+    "type": "dropset",
+    "rpe": 9.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-15T19:46:20+00:00"
+  },
+  {
+    "date": "2025-07-15",
+    "weight": 52.16318458509857,
+    "reps": 10,
+    "type": "dropset",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-15T19:46:20+00:00"
+  },
+  {
+    "date": "2025-07-15",
+    "weight": 47.17366258130653,
+    "reps": 12,
+    "type": "dropset",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-15T19:46:20+00:00"
+  },
+  {
+    "date": "2025-07-15",
+    "weight": 47.17366258130653,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-15T19:46:20+00:00"
+  },
+  {
+    "date": "2025-07-15",
+    "weight": 52.16318458509857,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-15T19:46:20+00:00"
+  },
+  {
+    "date": "2025-07-15",
+    "weight": 56.245520770019326,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-15T19:46:20+00:00"
+  },
+  {
+    "date": "2025-07-15",
+    "weight": 56.245520770019326,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D2 - Pecho y hombro",
+    "timestamp": "2025-07-15T19:46:20+00:00"
+  },
+  {
+    "date": "2025-07-21",
+    "weight": 20.41168092460379,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-21T21:41:33+00:00"
+  },
+  {
+    "date": "2025-07-21",
+    "weight": 56.69911367945497,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 9.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-21T21:41:33+00:00"
+  },
+  {
+    "date": "2025-07-21",
+    "weight": 52.16318458509857,
+    "reps": 8,
+    "type": "dropset",
+    "rpe": 8.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-21T21:41:33+00:00"
+  },
+  {
+    "date": "2025-07-21",
+    "weight": 52.16318458509857,
+    "reps": 10,
+    "type": "dropset",
+    "rpe": 9,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-21T21:41:33+00:00"
+  },
+  {
+    "date": "2025-07-21",
+    "weight": 47.62725549074217,
+    "reps": 12,
+    "type": "dropset",
+    "rpe": 9,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-21T21:41:33+00:00"
+  },
+  {
+    "date": "2025-07-21",
+    "weight": 47.62725549074217,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-21T21:41:33+00:00"
+  },
+  {
+    "date": "2025-07-21",
+    "weight": 52.16318458509857,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-21T21:41:33+00:00"
+  },
+  {
+    "date": "2025-07-21",
+    "weight": 52.16318458509857,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-21T21:41:33+00:00"
+  },
+  {
+    "date": "2025-07-21",
+    "weight": 56.69911367945497,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 10,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-21T21:41:33+00:00"
+  },
+  {
+    "date": "2025-07-28",
+    "weight": 20.41168092460379,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-28T22:17:25+00:00"
+  },
+  {
+    "date": "2025-07-28",
+    "weight": 56.69911367945497,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-28T22:17:25+00:00"
+  },
+  {
+    "date": "2025-07-28",
+    "weight": 54.43114913227677,
+    "reps": 8,
+    "type": "dropset",
+    "rpe": 8.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-28T22:17:25+00:00"
+  },
+  {
+    "date": "2025-07-28",
+    "weight": 52.16318458509857,
+    "reps": 10,
+    "type": "dropset",
+    "rpe": 8.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-28T22:17:25+00:00"
+  },
+  {
+    "date": "2025-07-28",
+    "weight": 49.895220037920375,
+    "reps": 12,
+    "type": "dropset",
+    "rpe": 9,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-28T22:17:25+00:00"
+  },
+  {
+    "date": "2025-07-28",
+    "weight": 47.62725549074217,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-28T22:17:25+00:00"
+  },
+  {
+    "date": "2025-07-28",
+    "weight": 52.16318458509857,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-28T22:17:25+00:00"
+  },
+  {
+    "date": "2025-07-28",
+    "weight": 54.43114913227677,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-28T22:17:25+00:00"
+  },
+  {
+    "date": "2025-07-28",
+    "weight": 56.69911367945497,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-07-28T22:17:25+00:00"
+  },
+  {
+    "date": "2025-08-05",
+    "weight": 20.41168092460379,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-08-05T18:37:46+00:00"
+  },
+  {
+    "date": "2025-08-05",
+    "weight": 56.69911367945497,
+    "reps": 6,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-08-05T18:37:46+00:00"
+  },
+  {
+    "date": "2025-08-05",
+    "weight": 56.69911367945497,
+    "reps": 8,
+    "type": "dropset",
+    "rpe": 9,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-08-05T18:37:46+00:00"
+  },
+  {
+    "date": "2025-08-05",
+    "weight": 52.16318458509857,
+    "reps": 10,
+    "type": "dropset",
+    "rpe": 8.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-08-05T18:37:46+00:00"
+  },
+  {
+    "date": "2025-08-05",
+    "weight": 52.16318458509857,
+    "reps": 12,
+    "type": "dropset",
+    "rpe": 10,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-08-05T18:37:46+00:00"
+  },
+  {
+    "date": "2025-08-05",
+    "weight": 52.16318458509857,
+    "reps": 12,
+    "type": "normal",
+    "rpe": 9.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-08-05T18:37:46+00:00"
+  },
+  {
+    "date": "2025-08-05",
+    "weight": 52.16318458509857,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 10,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-08-05T18:37:46+00:00"
+  },
+  {
+    "date": "2025-08-05",
+    "weight": 56.69911367945497,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-08-05T18:37:46+00:00"
+  },
+  {
+    "date": "2025-08-05",
+    "weight": 56.69911367945497,
+    "reps": 5,
+    "type": "normal",
+    "rpe": 9.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho",
+    "timestamp": "2025-08-05T18:37:46+00:00"
+  },
+  {
+    "date": "2025-08-28",
+    "weight": 20.41168092460379,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "Morning workout \u2600\ufe0f",
+    "timestamp": "2025-08-28T17:32:13+00:00"
+  },
+  {
+    "date": "2025-08-28",
+    "weight": 43.091326396385774,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "Morning workout \u2600\ufe0f",
+    "timestamp": "2025-08-28T17:32:13+00:00"
+  },
+  {
+    "date": "2025-08-28",
+    "weight": 43.091326396385774,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8,
+    "workout_title": "Morning workout \u2600\ufe0f",
+    "timestamp": "2025-08-28T17:32:13+00:00"
+  },
+  {
+    "date": "2025-08-28",
+    "weight": 47.62725549074217,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "Morning workout \u2600\ufe0f",
+    "timestamp": "2025-08-28T17:32:13+00:00"
+  },
+  {
+    "date": "2025-08-28",
+    "weight": 49.895220037920375,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "Morning workout \u2600\ufe0f",
+    "timestamp": "2025-08-28T17:32:13+00:00"
+  },
+  {
+    "date": "2025-10-19",
+    "weight": 20.41168092460379,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D\u00eda 8 \u2013 Pecho + core",
+    "timestamp": "2025-10-19T02:24:55+00:00"
+  },
+  {
+    "date": "2025-10-19",
+    "weight": 43.091326396385774,
+    "reps": 9,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D\u00eda 8 \u2013 Pecho + core",
+    "timestamp": "2025-10-19T02:24:55+00:00"
+  },
+  {
+    "date": "2025-10-19",
+    "weight": 52.16318458509857,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D\u00eda 8 \u2013 Pecho + core",
+    "timestamp": "2025-10-19T02:24:55+00:00"
+  },
+  {
+    "date": "2025-10-19",
+    "weight": 52.16318458509857,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D\u00eda 8 \u2013 Pecho + core",
+    "timestamp": "2025-10-19T02:24:55+00:00"
+  },
+  {
+    "date": "2025-10-19",
+    "weight": 54.43114913227677,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D\u00eda 8 \u2013 Pecho + core",
+    "timestamp": "2025-10-19T02:24:55+00:00"
+  },
+  {
+    "date": "2025-11-03",
+    "weight": 20,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D\u00eda 8 \u2013 Pecho + core",
+    "timestamp": "2025-11-03T23:05:57+00:00"
+  },
+  {
+    "date": "2025-11-03",
+    "weight": 45,
+    "reps": 10,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D\u00eda 8 \u2013 Pecho + core",
+    "timestamp": "2025-11-03T23:05:57+00:00"
+  },
+  {
+    "date": "2025-11-03",
+    "weight": 52.5,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 8.5,
+    "workout_title": "D\u00eda 8 \u2013 Pecho + core",
+    "timestamp": "2025-11-03T23:05:57+00:00"
+  },
+  {
+    "date": "2025-11-03",
+    "weight": 55,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D\u00eda 8 \u2013 Pecho + core",
+    "timestamp": "2025-11-03T23:05:57+00:00"
+  },
+  {
+    "date": "2025-11-03",
+    "weight": 60,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D\u00eda 8 \u2013 Pecho + core",
+    "timestamp": "2025-11-03T23:05:57+00:00"
+  },
+  {
+    "date": "2025-11-14",
+    "weight": 20.41168092460379,
+    "reps": 12,
+    "type": "warmup",
+    "rpe": 6,
+    "workout_title": "D\u00eda 1 \u2013 Pecho y Hombro",
+    "timestamp": "2025-11-14T20:01:52+00:00"
+  },
+  {
+    "date": "2025-11-14",
+    "weight": 56.69911367945497,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho y Hombro",
+    "timestamp": "2025-11-14T20:01:52+00:00"
+  },
+  {
+    "date": "2025-11-14",
+    "weight": 56.69911367945497,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9,
+    "workout_title": "D\u00eda 1 \u2013 Pecho y Hombro",
+    "timestamp": "2025-11-14T20:01:52+00:00"
+  },
+  {
+    "date": "2025-11-14",
+    "weight": 58.96707822663317,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho y Hombro",
+    "timestamp": "2025-11-14T20:01:52+00:00"
+  },
+  {
+    "date": "2025-11-14",
+    "weight": 58.96707822663317,
+    "reps": 8,
+    "type": "normal",
+    "rpe": 9.5,
+    "workout_title": "D\u00eda 1 \u2013 Pecho y Hombro",
+    "timestamp": "2025-11-14T20:01:52+00:00"
+  }
+]

@@ -1,0 +1,56 @@
+{
+  "routine": {
+    "title": "Día X – [Workout Name]",
+    "folder_id": 1812915,
+    "exercises": [
+      {
+        "exercise_template_id": "EXERCISE_ID_HERE",
+        "superset_id": null,
+        "rest_seconds": 20,
+        "notes": "[Exercise name] - [Sets]x[Reps] [Intensity]%",
+        "sets": [
+          {
+            "type": "warmup",
+            "weight_kg": 0,
+            "reps": 12,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "normal",
+            "weight_kg": 0,
+            "reps": 6,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "normal",
+            "weight_kg": 0,
+            "reps": 7,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "normal",
+            "weight_kg": 0,
+            "reps": 8,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          },
+          {
+            "type": "normal",
+            "weight_kg": 0,
+            "reps": 8,
+            "distance_meters": null,
+            "duration_seconds": null,
+            "custom_metric": null
+          }
+        ]
+      }
+    ]
+  }
+}
