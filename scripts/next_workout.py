@@ -9,11 +9,11 @@ Step-by-step process:
 4. Fetch all routines and filter by folder_id
 5. Extract día numbers from routine titles
 6. Find next routine by día number
-7. Estimate duration from workout history (optional, use --estimate flag)
+7. Estimate duration from workout history (enabled by default)
 
 Usage:
-    python scripts/next_workout.py              # Quick mode (no duration estimate)
-    python scripts/next_workout.py --estimate   # With duration estimation
+    python scripts/next_workout.py              # With duration estimation (default)
+    python scripts/next_workout.py --no-estimate # Skip duration estimation (faster)
 """
 
 import sys
@@ -46,8 +46,13 @@ def extract_dia_number(routine_title: str) -> Optional[int]:
     return None
 
 
+def is_core_routine(routine_title: str) -> bool:
+    """Check if a routine is a core/abs routine."""
+    return 'core' in routine_title.lower()
+
+
 def get_routines_in_folder(client: HevyAPIClient, folder_id: int) -> List[Dict[str, Any]]:
-    """Fetch all routines and filter by folder_id."""
+    """Fetch all routines and filter by folder_id, including core routines."""
     all_routines = []
     page = 1
     
@@ -60,23 +65,51 @@ def get_routines_in_folder(client: HevyAPIClient, folder_id: int) -> List[Dict[s
             break
         page += 1
     
-    # Filter by folder_id and extract día numbers
+    # Filter by folder_id and extract día numbers (including core routines)
     folder_routines = []
+    core_routines = []
+    
     for routine in all_routines:
         if routine.get('folder_id') == folder_id:
-            dia_number = extract_dia_number(routine.get('title', ''))
-            if dia_number:
-                routine['dia_number'] = dia_number
-                folder_routines.append(routine)
+            title = routine.get('title', '')
+            
+            # Check if it's a core routine
+            if is_core_routine(title):
+                core_routines.append(routine)
+            else:
+                dia_number = extract_dia_number(title)
+                if dia_number:
+                    routine['dia_number'] = dia_number
+                    folder_routines.append(routine)
     
-    return folder_routines
+    return folder_routines, core_routines
 
 
-def get_next_routine(folder_routines: List[Dict[str, Any]], current_dia: int) -> Optional[Dict[str, Any]]:
-    """Find next routine by día number."""
+def get_next_routine(folder_routines: List[Dict[str, Any]], core_routines: List[Dict[str, Any]], current_dia: int, last_was_core: bool) -> Optional[Dict[str, Any]]:
+    """
+    Find next routine by día number, alternating with core routines.
+    
+    Logic:
+    - If last workout was a día routine, check if there's a core routine to do
+    - If last workout was core, return next día routine
+    - Core routines can be done between any día workouts
+    """
     # Sort by día number
     sorted_routines = sorted(folder_routines, key=lambda x: x.get('dia_number', 0))
     
+    # If last was core, return next día routine
+    if last_was_core:
+        # Find routines with día > current_dia
+        next_routines = [r for r in sorted_routines if r.get('dia_number', 0) > current_dia]
+        
+        # If found, return the next one; otherwise wrap around to first
+        if next_routines:
+            return next_routines[0]
+        else:
+            return sorted_routines[0] if sorted_routines else None
+    
+    # Last was a día routine - could suggest core next, or next día
+    # For now, return next día (user can manually choose core)
     # Find routines with día > current_dia
     next_routines = [r for r in sorted_routines if r.get('dia_number', 0) > current_dia]
     
@@ -387,8 +420,8 @@ def save_next_workout_info(next_routine: Dict[str, Any]) -> None:
 
 def main():
     """Main function to determine and display next workout."""
-    # Check for --estimate flag
-    estimate_duration = '--estimate' in sys.argv
+    # Check for --estimate flag (default: True, can disable with --no-estimate)
+    estimate_duration = '--no-estimate' not in sys.argv
     
     client = HevyAPIClient()
     
@@ -402,13 +435,39 @@ def main():
         latest_title = latest_workout.get('title')
         latest_routine_id = latest_workout.get('routine_id')
         
+        # Check if last workout was a core routine
+        last_was_core = is_core_routine(latest_title)
+        
         # Extract día number from latest workout (even if not from routine)
-        current_dia = extract_dia_number(latest_title)
+        # If it was core, we need to find the last día workout
+        if last_was_core:
+            print(f"Latest workout: {latest_title} (Core routine)")
+            print("Looking for last día workout to determine next...")
+            
+            # Find the most recent non-core workout
+            page = 1
+            while page <= 5:
+                workouts = client.list_workouts(page=page, page_size=10)
+                for workout in workouts.get('workouts', []):
+                    workout_title = workout.get('title', '')
+                    if not is_core_routine(workout_title):
+                        current_dia = extract_dia_number(workout_title)
+                        if current_dia:
+                            print(f"Last día workout was: {workout_title}")
+                            if not latest_routine_id and workout.get('routine_id'):
+                                latest_routine_id = workout.get('routine_id')
+                            break
+                if current_dia:
+                    break
+                page += 1
+        else:
+            current_dia = extract_dia_number(latest_title)
         
         # Handle case where workout wasn't created from a routine
         if not latest_routine_id:
-            print(f"Latest workout: {latest_title}")
-            print("(Not created from a routine, but using día number to find next)")
+            if not last_was_core:
+                print(f"Latest workout: {latest_title}")
+                print("(Not created from a routine, but using día number to find next)")
             
             # Search through recent workouts to find one with a routine_id (to get folder_id)
             print("Looking for a routine-based workout to determine folder...")
@@ -436,11 +495,15 @@ def main():
             print("Could not determine routine folder")
             return
         
-        # Step 4-5: Fetch routines in folder and extract día numbers
-        folder_routines = get_routines_in_folder(client, folder_id)
+        # Step 4-5: Fetch routines in folder and extract día numbers (including core)
+        folder_routines, core_routines = get_routines_in_folder(client, folder_id)
+        
+        # Show core routines available if any
+        if core_routines and not last_was_core:
+            print(f"\n💡 {len(core_routines)} core routine(s) available in this folder")
         
         # Step 6: Find next routine
-        next_routine = get_next_routine(folder_routines, current_dia)
+        next_routine = get_next_routine(folder_routines, core_routines, current_dia, last_was_core)
         
         if next_routine:
             display_next_workout(client, next_routine, skip_estimation=not estimate_duration)
