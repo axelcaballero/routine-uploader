@@ -39,16 +39,33 @@ def get_most_recent_workout(client: HevyAPIClient) -> Optional[Dict[str, Any]]:
 
 
 def extract_dia_number(routine_title: str) -> Optional[int]:
-    """Extract the día number from a routine title."""
-    match = re.search(r'Día\s*(\d+)', routine_title, re.IGNORECASE)
+    """Extract the día number from a routine title.
+    
+    Only extracts from main sequence routines (e.g., 'Día 4').
+    Ignores core routines with slash pattern (e.g., 'Día 4/10').
+    """
+    # Match 'Día X' but NOT 'Día X/Y' (core routines)
+    match = re.search(r'Día\s*(\d+)(?![/\d])', routine_title, re.IGNORECASE)
     if match:
         return int(match.group(1))
     return None
 
 
 def is_core_routine(routine_title: str) -> bool:
-    """Check if a routine is a core/abs routine."""
-    return 'core' in routine_title.lower()
+    """Check if a routine is a core/abs routine.
+    
+    Detects core routines by:
+    1. 'core' keyword in title
+    2. 'Día X/Y' pattern (e.g., 'Día 4/10')
+    """
+    title_lower = routine_title.lower()
+    # Check for 'core' keyword
+    if 'core' in title_lower:
+        return True
+    # Check for 'Día X/Y' pattern (indicates core/alternate routine)
+    if re.search(r'día\s*\d+/\d+', title_lower):
+        return True
+    return False
 
 
 def get_routines_in_folder(client: HevyAPIClient, folder_id: int) -> List[Dict[str, Any]]:
