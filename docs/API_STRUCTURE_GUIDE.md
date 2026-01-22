@@ -54,6 +54,38 @@
 
 ---
 
+### 3. ❌ RPE Field Not Allowed in Routines (Root Cause of Third Failure)
+**Error:** `API Error: 400 - {"error":"\"routine.exercises[0].sets[0].rpe\" is not allowed"}`
+
+**Problem:** The `rpe` field is ONLY valid for workouts, NOT for routine creation. Routines are templates and cannot include RPE values.
+
+**Wrong:**
+```json
+{
+  "type": "normal",
+  "weight_kg": 60,
+  "reps": 6,
+  "rpe": null    // ❌ NOT ALLOWED IN ROUTINES
+}
+```
+
+**Correct:**
+```json
+{
+  "type": "normal",
+  "weight_kg": 60,
+  "reps": 6,
+  "distance_meters": null,
+  "duration_seconds": null
+}
+```
+
+**Key Distinction:**
+- **Routines** = Templates for future workouts (no RPE)
+- **Workouts** = Actual completed sessions (can include RPE)
+
+---
+
 ## Required Fields for Each Exercise
 
 ```json
@@ -68,8 +100,8 @@
       "weight_kg": 40,
       "reps": 12,
       "distance_meters": null,
-      "duration_seconds": null,
-      "custom_metric": null
+      "duration_seconds": null
+      // ⚠️ NO "rpe" field in routines!
     }
   ]
 }
@@ -158,8 +190,9 @@ For exercises like "Sentadilla isométrica" (60-second hold):
 ## Quick Checklist Before Upload
 
 - [ ] Routine wrapped in `"routine"` key?
-- [ ] `folder_id` set to `1812915`?
+- [ ] `folder_id` set to correct folder (e.g., HSF 13 = `1986567`)?
 - [ ] All set types are valid per Hevy API: `"warmup"`, `"normal"`, `"dropset"`, or `"failure"`?
+- [ ] **NO `rpe` field in any sets** (RPE only valid for workouts, NOT routines)?
 - [ ] All exercise IDs validated against `instructions.md`?
 - [ ] Warmup sets included for each exercise (usually first set)?
 - [ ] Duration-based exercises use `duration_seconds` with `weight_kg: 0, reps: 0`?

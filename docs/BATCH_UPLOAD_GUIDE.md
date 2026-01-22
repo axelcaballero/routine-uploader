@@ -4,24 +4,72 @@
 
 The `batch_routine_uploader.py` tool safely handles importing multiple routines from the routine-extractor project, with built-in validation and safety checks for bulk operations.
 
+⚠️ **IMPORTANT:** Always validate routines against [ROUTINE_CREATION_RULES.md](../ROUTINE_CREATION_RULES.md) BEFORE uploading. See [Pre-Upload Validation](#pre-upload-validation) section below.
+
+---
+
+## Pre-Upload Validation
+
+**REQUIRED STEP:** Before using batch_routine_uploader.py, validate all routines against project rules.
+
+### Why This Matters
+Past uploads violated rules (missing warmup sets, incorrect rest times) because rule validation was skipped. This required emergency API updates to fix already-uploaded routines. **Prevention is better than retroactive fixes.**
+
+### Validation Steps
+
+1. **Read Complete Rules**
+   ```bash
+   # Review all 205 lines
+   cat ROUTINE_CREATION_RULES.md
+   ```
+
+2. **Run Rules Compliance Validator**
+   ```bash
+   python validate_rules_compliance.py input/dia_*.json
+   ```
+   
+   This checks:
+   - ✅ Rep ranges use maximum value
+   - ✅ Exercises requiring doubled reps (11 specific exercises)
+   - ✅ Warmup sets present (12 or 24 reps)
+   - ✅ No RPE fields
+   - ✅ Correct rest_seconds (60 default, exceptions noted)
+   - ✅ Valid set types
+   - ✅ Core routine special rules
+
+3. **Review Pre-Upload Checklist**
+   ```bash
+   cat PRE_UPLOAD_CHECKLIST.md
+   ```
+
+4. **Only After All Checks Pass**
+   ```bash
+   python batch_routine_uploader.py --batch-file input/routines.json
+   ```
+
 ---
 
 ## Safety Features
 
-### 🛡️ Three-Phase Process
+### 🛡️ Four-Phase Process
 
-1. **Validation Phase** - Checks ALL routines before uploading ANY
+1. **Rules Validation Phase** - ⚠️ **MANUAL STEP** (run validate_rules_compliance.py)
+   - Validates against ROUTINE_CREATION_RULES.md
+   - Checks warmup sets, rest times, rep doubling, etc.
+   - **Must pass before proceeding**
+
+2. **Structure Validation Phase** - Checks ALL routines before uploading ANY
    - Structure validation
    - Exercise ID validation  
    - Required fields check
    - Fails fast if any errors found
 
-2. **Confirmation Phase** - Interactive approval (unless `--no-interactive`)
+3. **Confirmation Phase** - Interactive approval (unless `--no-interactive`)
    - Lists all routines to be created
    - Shows exercise counts
    - Requires explicit confirmation
 
-3. **Upload Phase** - Creates routines with progress tracking
+4. **Upload Phase** - Creates routines with progress tracking
    - Individual error handling per routine
    - Continues on single failure
    - Detailed summary at end
@@ -197,6 +245,79 @@ Total routines: 12
    ```
 
 3. **Fix any validation errors** in the extracted file
+
+---
+
+## Handling Missing Exercises
+
+### When Exercise IDs Are Not Found
+
+If validation fails with "NOT FOUND IN instructions.md" errors:
+
+**❌ DO NOT:**
+- Invent or guess exercise IDs
+- Create placeholder IDs
+- Automatically search and assign IDs
+
+**✅ DO:**
+1. Note the missing Spanish exercise names
+2. Manually look up the correct exercise in Hevy app or API
+3. Add the mapping to `instructions.md` following the format:
+   ```
+   * Spanish Name es English Equivalent | ACTUAL_HEX_ID
+   ```
+4. Re-run validation after updating instructions.md
+
+### Fuzzy Matching for Minor Variations
+
+**IMPORTANT:** The conversion system uses **fuzzy matching (≥85% similarity)** to handle minor variations between PDF extraction and instructions.md:
+
+**Common variations automatically handled:**
+- Plural differences: "Peso muerto con mancuerna" → "Peso muerto con mancuernas"
+- Accent differences: "Fondos en maquina" → "Fondos en máquina"
+- Case differences: "Dominadas con apoyo" → "Dominadas con Apoyo"
+- Minor typos: "Martillo dobles" → "Martillos dobles"
+- Word additions: "Alternado con mancuerna" → "Curl Alternado con mancuerna"
+
+**Why fuzzy matching:**
+- PDF extraction may have minor text variations
+- Spanish plural/singular inconsistencies
+- Accent marks may be missing or added
+- Reduces manual mapping work for near-identical exercises
+
+**When fuzzy matching fails (<85% similarity):**
+- Completely different exercise names
+- Abbreviated vs full names
+- Names with multiple possible interpretations
+- In these cases, manual mapping in instructions.md is required
+
+**Technical Details:**
+- Uses Python's `difflib.get_close_matches()` 
+- Cutoff threshold: 0.85 (85% similarity)
+- Only matches if confidence is high enough
+- Logs all fuzzy matches for transparency
+
+**Example Workflow:**
+```bash
+# 1. Validation fails with missing exercises
+venv/bin/python batch_routine_uploader.py file.json --dry-run
+# Output: ❌ Pullover con mancuernas - NOT FOUND IN instructions.md
+
+# 2. Look up exercise in Hevy (use list command or app)
+python exercise_validator.py --list | grep -i pullover
+
+# 3. Add to instructions.md
+echo "* Pullover con mancuernas es Dumbbell Pullover | EA42E2F4" >> instructions.md
+
+# 4. Retry validation
+venv/bin/python batch_routine_uploader.py file.json --dry-run
+```
+
+**Why This Matters:**
+- Maintains data integrity by using real Hevy exercise IDs
+- Prevents API errors from invalid IDs
+- Builds reusable exercise mappings in instructions.md
+- Follows manifesto principle: "No debes asumir ids si no encuentras equivalencias"
 
 4. **Upload when ready**
    ```bash

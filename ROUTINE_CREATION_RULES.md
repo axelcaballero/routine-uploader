@@ -2,6 +2,18 @@
 
 **Last Updated:** 22 de noviembre de 2025
 
+## ⚠️ MANDATORY PRE-UPLOAD VALIDATION
+
+**BEFORE creating or uploading ANY routine:**
+1. ✅ Read this ENTIRE file (lines 1-205)
+2. ✅ Run `validate_rules_compliance.py` on all JSON files
+3. ✅ Review [PRE_UPLOAD_CHECKLIST.md](PRE_UPLOAD_CHECKLIST.md)
+4. ✅ Only upload after ALL checks pass
+
+**Why:** Past uploads violated rules (missing warmup sets, wrong rest times) because validation was skipped. This caused emergency fixes via API. Prevention is better than retroactive fixes.
+
+---
+
 These rules are CRITICAL for routine creation and must be applied to every routine. Reference this file at the start of every chat session.
 
 ---
@@ -75,6 +87,41 @@ These exercises MUST have reps doubled for BOTH warmup and normal sets:
 - Always before normal working sets
 - Weight should be lighter than working weight (~40-50%)
 - If exercise has "Duplicar repeticiones": warmup = **24 reps** (12 × 2)
+
+---
+
+## Rule 5: NO RPE Field in Routines
+
+**CRITICAL:** The `rpe` field is **NOT allowed** in routine creation. It is only valid for workout logs.
+
+### ✅ CORRECT (Routines)
+```json
+{
+  "type": "normal",
+  "weight_kg": 60,
+  "reps": 8,
+  "distance_meters": null,
+  "duration_seconds": null
+}
+```
+
+### ❌ WRONG (Contains RPE)
+```json
+{
+  "type": "normal",
+  "weight_kg": 60,
+  "reps": 8,
+  "distance_meters": null,
+  "duration_seconds": null,
+  "rpe": null  // ❌ NOT ALLOWED IN ROUTINES
+}
+```
+
+**Why:** Routines are templates for future workouts. RPE (Rate of Perceived Exertion) is a subjective measure that can only be recorded during actual workout execution, not planned in advance.
+
+**API Error if included:** `"routine.exercises[0].sets[0].rpe" is not allowed`
+
+**Reference:** API_STRUCTURE_GUIDE.md Section 3
 
 ---
 
