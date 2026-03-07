@@ -34,9 +34,7 @@ def validate_routine_structure(file_path):
         if "title" not in routine:
             errors.append("❌ Missing routine.title")
         if "folder_id" not in routine:
-            errors.append("❌ Missing routine.folder_id (should be 1812915)")
-        elif routine["folder_id"] != 1812915:
-            warnings.append(f"⚠️  Unusual folder_id: {routine['folder_id']} (typically 1812915)")
+            warnings.append("⚠️  Missing routine.folder_id (set one in JSON or use --folder-title for this upload session)")
         
         if "exercises" not in routine:
             errors.append("❌ Missing routine.exercises array")

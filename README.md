@@ -222,12 +222,21 @@ Identifies:
 # Upload a single routine
 python routine_uploader.py routine.json
 
+# Upload to a specific folder for this session (creates folder if missing)
+python routine_uploader.py routine.json --folder-title "HSF 15"
+
 # Upload all routines from a directory
 python routine_uploader.py ./routines/
 
 # Preview without uploading (dry-run)
 python routine_uploader.py routine.json --dry-run
+
+# Dry-run with session folder verification
+python routine_uploader.py routine.json --dry-run --folder-title "HSF 15"
 ```
+
+`--folder-title` is session-scoped: it only applies to that command run.
+If omitted, uploader uses each routine file's existing `folder_id`.
 
 ### Update Workout Notes
 
@@ -350,6 +359,9 @@ python scripts/advanced_visualizations.py
 
 # Upload a routine
 python routine_uploader.py routine.json
+
+# Upload with per-session folder override
+python routine_uploader.py routine.json --folder-title "HSF 15"
 ```
 
 ---

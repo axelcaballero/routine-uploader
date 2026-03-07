@@ -18,6 +18,16 @@ class RoutineTextParser:
     def __init__(self, exercise_mappings_file: str = "instructions.md"):
         self.exercise_mappings = self._load_exercise_mappings(exercise_mappings_file)
         self.folder_id = 1812915
+        self.core_keywords = [
+            'core', 'plancha', 'plank', 'crunch', 'abdominal', 'abs',
+            'oblicuo', 'oblique', 'mountain climber', 'vacio abdominal',
+            'v up', 'v-up', 'toe touch', 'side plank', 'bicycle crunch',
+            'reverse crunch', 'leg raise', 'elbow to knee'
+        ]
+        self.muscle_group_keywords = [
+            'pecho', 'espalda', 'hombro', 'pierna', 'biceps', 'triceps',
+            'chest', 'back', 'shoulder', 'leg', 'arms', 'push', 'pull'
+        ]
     
     def _normalize_text(self, text: str) -> str:
         """Normalize text for matching - remove accents and handle variations."""
@@ -146,30 +156,82 @@ class RoutineTextParser:
                 result['reps'] = result['reps_max']
             else:
                 result['reps'] = result['reps_min']
+
+        # Cluster fallback from manifesto rule:
+        # "cluster" => 30s rest and minimum 3 sets of 6 reps when not specified
+        if result['sets'] == 0 and 'cluster' in description.lower():
+            result['sets'] = 3
+            result['reps'] = 6
         
         return result
+
+    def _is_mixed_muscle_core_title(self, routine_title: str) -> bool:
+        """Detect titles like 'Espalda + Core' to avoid global Core overrides."""
+        normalized_title = self._normalize_text(routine_title)
+        if 'core' not in normalized_title:
+            return False
+        return any(keyword in normalized_title for keyword in self.muscle_group_keywords)
+
+    def _is_core_routine_title(self, routine_title: str) -> bool:
+        """Detect Core-only routine titles (e.g., 'D1 Core', 'Día 7 – Core')."""
+        normalized_title = self._normalize_text(routine_title)
+        if 'core' not in normalized_title:
+            return False
+        return not any(keyword in normalized_title for keyword in self.muscle_group_keywords)
+
+    def _is_explicit_core_time_exercise(self, exercise_name: str, description_line: str) -> bool:
+        """Return True only when exercise is explicitly Core and explicitly time-based."""
+        normalized_name = self._normalize_text(exercise_name)
+        normalized_description = self._normalize_text(description_line)
+        combined_text = f"{normalized_name} {normalized_description}"
+
+        is_core_exercise = any(keyword in combined_text for keyword in self.core_keywords)
+        has_time_marker = bool(re.search(r'\d+\s*(seg|sec|s|min|mins|minuto|minutos)', combined_text))
+        has_time_word = any(marker in combined_text for marker in ['tiempo', 'duracion', 'duration'])
+
+        return is_core_exercise and (has_time_marker or has_time_word)
+
+    def _determine_rest_seconds(self, routine_title: str, exercise_name: str, description_line: str) -> int:
+        """Apply rest policy with Core routine override (2 series/20s handled elsewhere)."""
+        combined_text = self._normalize_text(f"{exercise_name} {description_line}")
+
+        if self._is_core_routine_title(routine_title):
+            return 20
+
+        if 'cluster' in combined_text:
+            return 30
+
+        if self._is_explicit_core_time_exercise(exercise_name, description_line):
+            return 20
+
+        if self._is_mixed_muscle_core_title(routine_title):
+            return 60
+
+        return 60
     
-    def _create_sets_array(self, sets_info: Dict, exercise_name: str) -> List[Dict]:
-        """Create sets array based on parsed information."""
+    def _create_sets_array(self, sets_info: Dict, exercise_name: str, routine_title: str) -> List[Dict]:
+        """Create sets array based on parsed information and routine-level policies."""
         sets = []
+        is_core_routine = self._is_core_routine_title(routine_title)
         
         # Check if exercise requires doubled reps
         needs_doubling = any(keyword in exercise_name.lower() 
                             for keyword in ['alternado', 'individual', 'desplantes'])
         
-        # Warmup set
-        warmup_reps = 24 if needs_doubling else 12
-        sets.append({
-            "type": "warmup",
-            "weight_kg": 0,
-            "reps": warmup_reps,
-            "distance_meters": None,
-            "duration_seconds": None,
-            "custom_metric": None
-        })
+        # Warmup set (non-Core only)
+        if not is_core_routine:
+            warmup_reps = 24 if needs_doubling else 12
+            sets.append({
+                "type": "warmup",
+                "weight_kg": 0,
+                "reps": warmup_reps,
+                "distance_meters": None,
+                "duration_seconds": None,
+                "custom_metric": None
+            })
         
         # Drop set
-        if sets_info['is_dropset'] and sets_info['dropset_reps']:
+        if (not is_core_routine) and sets_info['is_dropset'] and sets_info['dropset_reps']:
             for reps in sets_info['dropset_reps']:
                 final_reps = reps * 2 if needs_doubling else reps
                 sets.append({
@@ -182,11 +244,19 @@ class RoutineTextParser:
                 })
         else:
             # Normal sets
-            reps = sets_info['reps']
+            if sets_info['reps']:
+                reps = sets_info['reps']
+            elif is_core_routine:
+                reps = 0
+            else:
+                reps = 12
+
             if needs_doubling:
                 reps *= 2
+
+            target_sets = 2 if is_core_routine else sets_info['sets']
             
-            for _ in range(sets_info['sets']):
+            for _ in range(target_sets):
                 sets.append({
                     "type": "normal",
                     "weight_kg": 0,
@@ -198,7 +268,7 @@ class RoutineTextParser:
         
         return sets
     
-    def _parse_exercise_block(self, lines: List[str]) -> Optional[Dict]:
+    def _parse_exercise_block(self, lines: List[str], routine_title: str) -> Optional[Dict]:
         """
         Parse an exercise block.
         
@@ -220,14 +290,15 @@ class RoutineTextParser:
         
         # Find exercise ID
         exercise_id = self._find_exercise_id(exercise_name)
+        rest_seconds = self._determine_rest_seconds(routine_title, exercise_name, description_line)
         
         # Create exercise object
         exercise = {
             "exercise_template_id": exercise_id or "",
             "superset_id": None,
-            "rest_seconds": 20,
+            "rest_seconds": rest_seconds,
             "notes": f"{exercise_name} - {description_line.split('-', 1)[1].strip() if '-' in description_line else description_line}",
-            "sets": self._create_sets_array(sets_info, exercise_name)
+            "sets": self._create_sets_array(sets_info, exercise_name, routine_title)
         }
         
         return exercise
@@ -290,7 +361,10 @@ class RoutineTextParser:
             if line.startswith('Ejercicio'):
                 # Parse previous exercise if exists
                 if exercise_lines and current_routine:
-                    exercise = self._parse_exercise_block(exercise_lines)
+                    exercise = self._parse_exercise_block(
+                        exercise_lines,
+                        current_routine.get('title', '')
+                    )
                     if exercise:
                         current_exercises.append(exercise)
                 
@@ -302,7 +376,10 @@ class RoutineTextParser:
         
         # Parse last exercise
         if exercise_lines and current_routine:
-            exercise = self._parse_exercise_block(exercise_lines)
+            exercise = self._parse_exercise_block(
+                exercise_lines,
+                current_routine.get('title', '')
+            )
             if exercise:
                 current_exercises.append(exercise)
         

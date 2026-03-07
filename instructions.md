@@ -19,6 +19,7 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Curl de pie en polea baja es Low Cable Fly Crossovers | 293483AD
 * Iso lateral pecho hammer es Iso-Lateral Chest Press (Machine) | 24706DCD
 * Lagartijas es Push up | 392887AA
+* Pullover con mancuernas es Pullover (Dumbbell) | 67280085
 
 ## Hombro
 
@@ -39,6 +40,7 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Curl de bíceps boca abajo sobre banco inclinado (con barra) es Spider Curl (Barbell) | 2348AB72
 * Curl de bíceps en polea con cuerda es Hammer Curl (Cable) | 36E8F14E
 * Curl Alternado con mancuerna es Bicep Curl (Dumbbell) | 37FCC2BB | Duplicar repeticiones. Si dice "sentado" incluir en notas.
+* Biceps en banca Scott es Preacher Curl (Machine) | 1E9A6B8E
 * Curl de bíceps con barra olímpica es Bicep Curl (Barbell) | A5AC6449
 * Predicador banca Scott barra Z es Preacher Curl (Barbell) | 4F942934
 * Predicador banca Scott con mancuerna individual es Preacher Curl (Dumbbell) | FAB6EB2F | Duplicar repeticiones.
@@ -78,8 +80,8 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 
 * Prensa de piernas inclinado es Leg Press (Machine) | C7973E0E
 * Prensa horizontal en maquina es Leg Press Horizontal (Machine) | 0EB695C9
-* Puente en banca es Barbell Glute Bridge | d9971d8c-2d3a-4527-a213-6445d4a6bcca
-* Sentadilla profunda es Squat (Barbell) | D04AC939
+* Puente en banca es Hip Thrust (Machine) | 68CE0B9B
+* Sentadilla profunda es Full Squat (Barbell) | 1283BBA6
 * Sentadilla isometrica es Iso Squat | c0ef33ba-3c50-4ced-a565-8caf48fff0ad
 * Peso muerto con mancuernas es Romanian Deadlift | 72CFFAD5
 * Extension de pierna es Leg Extension (Machine) | 75A4F6C4
@@ -117,3 +119,6 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Crunch abdominal alterno es Bicycle Crunch | A41C7261
 * Crunch abdominal con codo a rodilla es Elbow to Knee | A01BE509
 * Swiss Ball V-Up and Pass es V Up | 6BE68B62
+* Crunch abdominal en maquina es Crunch (Machine) | EB43ADD4
+* Elevación de rodillas en silla romana es Knee Raise Parallel Bars | 98237BA2
+* Abdominales elevación de piernas frontales (barra paralelas) es Leg Raise Parallel Bars | 0482DA98

@@ -37,14 +37,14 @@ The `batch_routine_uploader.py` tool safely handles importing multiple routines 
     {
       "routine": {
         "title": "Día 1 – Pecho y Hombro",
-        "folder_id": 1812915,
+            "folder_id": 1234567,
         "exercises": [...]
       }
     },
     {
       "routine": {
         "title": "Día 2 – Espalda + Core",
-        "folder_id": 1812915,
+            "folder_id": 1234567,
         "exercises": [...]
       }
     }
@@ -57,11 +57,13 @@ The `batch_routine_uploader.py` tool safely handles importing multiple routines 
 {
   "routine": {
     "title": "Día 1 – Pecho y Hombro",
-    "folder_id": 1812915,
+      "folder_id": 1234567,
     "exercises": [...]
   }
 }
 ```
+
+`folder_id` can be overridden per upload session using `--folder-title`.
 
 ---
 
@@ -73,10 +75,13 @@ The `batch_routine_uploader.py` tool safely handles importing multiple routines 
 # 1. Dry run first - validate without uploading
 venv/bin/python batch_routine_uploader.py extracted_routines.json --dry-run
 
-# 2. If validation passes, upload with confirmation
-venv/bin/python batch_routine_uploader.py extracted_routines.json
+# 2. (Optional) Verify/create folder for this session and apply to all routines
+venv/bin/python batch_routine_uploader.py extracted_routines.json --dry-run --folder-title "HSF 15"
 
-# 3. Review summary and verify in Hevy app
+# 3. If validation passes, upload with confirmation
+venv/bin/python batch_routine_uploader.py extracted_routines.json --folder-title "HSF 15"
+
+# 4. Review summary and verify in Hevy app
 ```
 
 ### Command Options
@@ -93,6 +98,9 @@ venv/bin/python batch_routine_uploader.py file.json --no-interactive
 
 # Skip warmup weight enhancement
 venv/bin/python batch_routine_uploader.py file.json --no-enhance
+
+# Apply one folder for this session (finds or creates it)
+venv/bin/python batch_routine_uploader.py file.json --folder-title "HSF 15"
 ```
 
 ---
@@ -193,7 +201,7 @@ Total routines: 12
    ```bash
    cd ../routine-uploader
    venv/bin/python batch_routine_uploader.py \
-     ../routine-extractor/extracted_routines.json --dry-run
+       ../routine-extractor/extracted_routines.json --dry-run --folder-title "HSF 15"
    ```
 
 3. **Fix any validation errors** in the extracted file
@@ -201,7 +209,7 @@ Total routines: 12
 4. **Upload when ready**
    ```bash
    venv/bin/python batch_routine_uploader.py \
-     ../routine-extractor/extracted_routines.json
+       ../routine-extractor/extracted_routines.json --folder-title "HSF 15"
    ```
 
 ---
@@ -234,7 +242,7 @@ Before uploading 6-12 routines:
 - [ ] Review all validation errors and warnings
 - [ ] Check exercise IDs against `instructions.md`
 - [ ] Verify routine titles follow "Día X – Name" pattern
-- [ ] Confirm folder_id is correct (1812915)
+- [ ] Verify session folder with `--folder-title` (or confirm each routine `folder_id`)
 - [ ] Have backup of extracted file
 - [ ] Start with small batch (1-3 routines) to test
 - [ ] Use interactive mode for first upload

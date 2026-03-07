@@ -38,6 +38,7 @@ class HevyAPIClient:
             "api-key": self.api_key,
             "Content-Type": "application/json",
         }
+        self._folder_cache: Dict[str, Dict[str, Any]] = {}
     
     def _make_request(
         self, 
@@ -183,6 +184,92 @@ class HevyAPIClient:
             Folder data
         """
         return self._make_request("GET", f"/v1/routine_folders/{folder_id}")
+
+    def find_routine_folder_by_title(
+        self,
+        folder_title: str,
+        page_size: int = 10
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Find an existing routine folder by title.
+
+        Args:
+            folder_title: Folder title to search for
+            page_size: Number of folders to fetch per page
+
+        Returns:
+            Folder object if found, otherwise None
+        """
+        normalized_title = folder_title.strip().casefold()
+        page_size = min(max(1, page_size), 10)
+        page = 1
+
+        while True:
+            response = self.list_routine_folders(page=page, page_size=page_size)
+            folders = response.get("routine_folders", [])
+
+            for folder in folders:
+                existing_title = str(folder.get("title", "")).strip().casefold()
+                if existing_title == normalized_title:
+                    return folder
+
+            if len(folders) < page_size:
+                break
+
+            page += 1
+
+        return None
+
+    def ensure_routine_folder(self, folder_title: str) -> Dict[str, Any]:
+        """
+        Ensure a routine folder exists, creating it if needed.
+
+        Args:
+            folder_title: Folder title to find or create
+
+        Returns:
+            Folder object
+        """
+        cache_key = folder_title.strip().casefold()
+        cached_folder = self._folder_cache.get(cache_key)
+        if cached_folder:
+            return cached_folder
+
+        existing_folder = self.find_routine_folder_by_title(folder_title)
+        if existing_folder:
+            self._folder_cache[cache_key] = existing_folder
+            return existing_folder
+
+        response = self.create_routine_folder(folder_title)
+        created_folder = response.get("routine_folder")
+
+        if isinstance(created_folder, dict):
+            self._folder_cache[cache_key] = created_folder
+            return created_folder
+
+        if isinstance(created_folder, list) and created_folder:
+            self._folder_cache[cache_key] = created_folder[0]
+            return created_folder[0]
+
+        raise Exception(f"Failed to create routine folder '{folder_title}'")
+
+    def ensure_routine_folder_id(self, folder_title: str) -> Any:
+        """
+        Ensure a routine folder exists and return its ID.
+
+        Args:
+            folder_title: Folder title to find or create
+
+        Returns:
+            Folder ID
+        """
+        folder = self.ensure_routine_folder(folder_title)
+        folder_id = folder.get("id")
+
+        if not folder_id:
+            raise Exception(f"Routine folder '{folder_title}' has no ID")
+
+        return folder_id
     
     def update_routine(self, routine_id: str, routine_data: Dict[str, Any]) -> Dict[str, Any]:
         """

@@ -71,10 +71,11 @@ These exercises MUST have reps doubled for BOTH warmup and normal sets:
 
 ## Rule 4: Warmup Sets
 
-- Default warmup: **12 reps**
-- Always before normal working sets
+- Non-Core default warmup: **12 reps**
+- Non-Core routines include warmup before normal working sets
+- Core routines do **not** include warmup sets
 - Weight should be lighter than working weight (~40-50%)
-- If exercise has "Duplicar repeticiones": warmup = **24 reps** (12 × 2)
+- If non-Core exercise has "Duplicar repeticiones": warmup = **24 reps** (12 × 2)
 
 ---
 
@@ -91,7 +92,17 @@ Do NOT use any other set types.
 
 ---
 
-## Rule 6: Other Exercise Notes
+## Rule 6: Rest Seconds Policy
+
+- Non-Core routines: default `rest_seconds` is **60**
+- Core routines: use `rest_seconds` **20** for all exercises
+- Core routines: use **2 normal series** per exercise (no warmup)
+- If exercise description includes **"cluster"** in non-Core routines: use **30** seconds
+- If routine title mixes muscle group + Core (e.g., "Espalda + Core"), do **not** apply Core-routine global overrides
+
+---
+
+## Rule 7: Other Exercise Notes
 
 - **"Si dice individual, duplicar repeticiones"** (8293E554): Only apply if spec says "individual"
 - **"Agregar 'con triangulo' en notas"** (93A552C6): Add descriptive note to exercise notes field
@@ -106,9 +117,11 @@ Do NOT use any other set types.
 Before uploading any routine, verify:
 
 - [ ] All rep ranges use the MAXIMUM value for normal sets
-- [ ] All "Duplicar repeticiones" exercises have doubled warmup reps (24)
+- [ ] Non-Core "Duplicar repeticiones" exercises have doubled warmup reps (24)
 - [ ] All "Duplicar repeticiones" exercises have doubled normal set reps
 - [ ] Only warmup/normal/dropset/failure set types used
+- [ ] Core routines have no warmup sets, use 2 normal series, and `rest_seconds` = 20
+- [ ] Non-Core routines keep `rest_seconds` = 60 unless cluster (30)
 - [ ] Exercise IDs validated against instructions.md
 - [ ] Notes field includes any required descriptive text
 

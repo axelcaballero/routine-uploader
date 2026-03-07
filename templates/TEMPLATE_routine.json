@@ -6,7 +6,7 @@
       {
         "exercise_template_id": "EXERCISE_ID_HERE",
         "superset_id": null,
-        "rest_seconds": 20,
+        "rest_seconds": 60,
         "notes": "[Exercise name] - [Sets]x[Reps] [Intensity]%",
         "sets": [
           {

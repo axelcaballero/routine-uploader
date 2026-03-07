@@ -22,13 +22,17 @@ python exercise_validator.py input/my_routine.json
 
 ```bash
 python routine_uploader.py input/my_routine.json
+
+# Session folder override (finds or creates folder for this run)
+python routine_uploader.py input/my_routine.json --folder-title "HSF 15"
 ```
 
 ## What Happens During Upload?
 
-1. ✅ **Validation** - All exercise IDs checked against instructions.md
-2. ✅ **Enhancement** - Warmup weights auto-populated from history
-3. ✅ **Upload** - Routine sent to Hevy API
+1. ✅ **Folder Verification (optional)** - If `--folder-title` is provided, uploader finds or creates that folder for this session
+2. ✅ **Validation** - All exercise IDs checked against instructions.md
+3. ✅ **Enhancement** - Warmup weights auto-populated from history
+4. ✅ **Upload** - Routine sent to Hevy API
 
 If validation fails, upload stops with helpful error message.
 
@@ -76,6 +80,7 @@ python routine_uploader.py input/my_routine.json --no-validate
 | `python exercise_validator.py --list \| grep -i "biceps"` | Find specific exercise IDs |
 | `python routine_uploader.py input/` | Upload all routines in directory |
 | `python routine_uploader.py file.json --dry-run` | Preview upload without sending |
+| `python routine_uploader.py file.json --dry-run --folder-title "HSF 15"` | Verify session folder + preview upload |
 
 ## Categories Available
 

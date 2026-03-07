@@ -60,7 +60,7 @@
 {
   "exercise_template_id": "91AF29E0",
   "superset_id": null,
-  "rest_seconds": 20,
+  "rest_seconds": 60,
   "notes": "Exercise description and set scheme",
   "sets": [
     {
@@ -85,7 +85,7 @@
 | `routine.folder_id` | number | ✅ | Always use: 1812915 |
 | `exercise_template_id` | string | ✅ | 8-char hex OR UUID format |
 | `superset_id` | null | ✅ | Always null (we don't use supersets) |
-| `rest_seconds` | number | ✅ | Usually 15-20 seconds |
+| `rest_seconds` | number | ✅ | Non-Core default 60; Core routines use 20 for all exercises; cluster in non-Core uses 30 |
 | `notes` | string | ✅ | Exercise description with intensity notes |
 | `type` | string | ✅ | **MUST be**: "warmup" or "normal" |
 | `weight_kg` | number | ✅ | 0 for isometric/duration-based exercises |
@@ -107,7 +107,7 @@ Per https://api.hevyapp.com/docs/#/ - only these 4 types are officially supporte
 ```
 
 ### "warmup" Type
-- First set in each exercise (light, prep set)
+- First set in each exercise for non-Core routines (light, prep set)
 - Example: `40kg x 12 reps` (before work sets)
 - Often auto-populated from exercise history
 
@@ -161,9 +161,12 @@ For exercises like "Sentadilla isométrica" (60-second hold):
 - [ ] `folder_id` set to `1812915`?
 - [ ] All set types are valid per Hevy API: `"warmup"`, `"normal"`, `"dropset"`, or `"failure"`?
 - [ ] All exercise IDs validated against `instructions.md`?
-- [ ] Warmup sets included for each exercise (usually first set)?
+- [ ] Non-Core routine: warmup sets included (usually first set)?
+- [ ] Core routine: no warmup sets included?
 - [ ] Duration-based exercises use `duration_seconds` with `weight_kg: 0, reps: 0`?
 - [ ] `superset_id` is `null` for all exercises?
+- [ ] Core routine: each exercise has 2 normal series and `rest_seconds` = 20?
+- [ ] Non-Core routine: `rest_seconds` follows 60 default (or 30 for cluster)?
 - [ ] Exercise notes include sets/reps/intensity info?
 
 ---
