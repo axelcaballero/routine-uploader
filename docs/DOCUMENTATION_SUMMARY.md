@@ -52,13 +52,13 @@ This is THE core innovation that enables the system to work correctly:
 2. Extract routine_id
 3. Get routine details to extract **folder_id** (KEY: prevents mixing programs)
 4. Fetch ALL routines and filter by folder_id
-5. Extract día numbers from routine titles
-6. Find next routine by día number (with wraparound)
+5. Extract day numbers from routine titles
+6. Find next routine by day number (with wraparound)
 
 Why folder_id matters: Users may have multiple training programs. Filtering by folder_id ensures you only see routines from the current program sequence.
 
 ### Data Saved for Future Use
-- `data/next_workout.json` - Cached next workout (routine_id, title, día_number, folder_id)
+- `data/next_workout.json` - Cached next workout (routine_id, title, day_number, folder_id)
 - `data/bench_press_data_2025.json` - 160 sets with metrics
 - `data/squat_data_2025.json` - 101 sets with metrics
 - `data/shoulder_press_data_2025.json` - 183 sets with metrics

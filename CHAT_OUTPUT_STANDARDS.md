@@ -12,12 +12,12 @@ When user requests information (next workout, workout duration, etc.), display t
 
 ### ❌ WRONG - Summary Only
 ```
-✅ Next workout: Día 9 – Pierna (6 exercises, clean output displayed here in chat)
+✅ Next workout: Day 9 - Legs (6 exercises, clean output displayed here in chat)
 ```
 
 ### ✅ CORRECT - Full Output
 ```
-📅 Routine: Día 9 – Pierna
+📅 Routine: Day 9 - Legs
 💪 Total Exercises: 6
 
 Exercises:

@@ -10,7 +10,7 @@
 **Wrong:**
 ```json
 {
-  "name": "Día X",
+  "name": "Day X",
   "description": "...",
   "exercises": [...]
 }
@@ -20,7 +20,7 @@
 ```json
 {
   "routine": {
-    "title": "Día X",
+    "title": "Day X - Focus",
     "folder_id": 1812915,
     "exercises": [...]
   }

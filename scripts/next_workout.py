@@ -7,8 +7,8 @@ Step-by-step process:
 2. Extract routine_id from latest workout
 3. Get routine details to extract folder_id
 4. Fetch all routines and filter by folder_id
-5. Extract día numbers from routine titles
-6. Find next routine by día number
+5. Extract day numbers from routine titles
+6. Find next routine by day number
 7. Estimate duration from workout history
 """
 
@@ -34,9 +34,9 @@ def get_most_recent_workout(client: HevyAPIClient) -> Optional[Dict[str, Any]]:
     return workouts_list[0]
 
 
-def extract_dia_number(routine_title: str) -> Optional[int]:
-    """Extract the día number from a routine title."""
-    match = re.search(r'Día\s*(\d+)', routine_title, re.IGNORECASE)
+def extract_day_number(routine_title: str) -> Optional[int]:
+    """Extract the day number from a Spanish or English routine title."""
+    match = re.search(r'(?:día|dia|day)\s*(\d+)', routine_title, re.IGNORECASE)
     if match:
         return int(match.group(1))
     return None
@@ -56,25 +56,25 @@ def get_routines_in_folder(client: HevyAPIClient, folder_id: int) -> List[Dict[s
             break
         page += 1
     
-    # Filter by folder_id and extract día numbers
+    # Filter by folder_id and extract day numbers
     folder_routines = []
     for routine in all_routines:
         if routine.get('folder_id') == folder_id:
-            dia_number = extract_dia_number(routine.get('title', ''))
-            if dia_number:
-                routine['dia_number'] = dia_number
+            day_number = extract_day_number(routine.get('title', ''))
+            if day_number:
+                routine['day_number'] = day_number
                 folder_routines.append(routine)
     
     return folder_routines
 
 
-def get_next_routine(folder_routines: List[Dict[str, Any]], current_dia: int) -> Optional[Dict[str, Any]]:
-    """Find next routine by día number."""
-    # Sort by día number
-    sorted_routines = sorted(folder_routines, key=lambda x: x.get('dia_number', 0))
+def get_next_routine(folder_routines: List[Dict[str, Any]], current_day: int) -> Optional[Dict[str, Any]]:
+    """Find next routine by day number."""
+    # Sort by day number
+    sorted_routines = sorted(folder_routines, key=lambda x: x.get('day_number', 0))
     
-    # Find routines with día > current_dia
-    next_routines = [r for r in sorted_routines if r.get('dia_number', 0) > current_dia]
+    # Find routines with day number > current_day
+    next_routines = [r for r in sorted_routines if r.get('day_number', 0) > current_day]
     
     # If found, return the next one; otherwise wrap around to first
     if next_routines:
@@ -180,7 +180,7 @@ def save_next_workout_info(next_routine: Dict[str, Any]) -> None:
     next_workout_info = {
         'routine_id': next_routine.get('id'),
         'title': next_routine.get('title'),
-        'dia_number': next_routine.get('dia_number'),
+        'day_number': next_routine.get('day_number'),
         'folder_id': next_routine.get('folder_id')
     }
     
@@ -201,7 +201,7 @@ def main():
         
         latest_title = latest_workout.get('title')
         latest_routine_id = latest_workout.get('routine_id')
-        current_dia = extract_dia_number(latest_title)
+        current_day = extract_day_number(latest_title)
         
         # Step 2-3: Get routine details to extract folder_id
         current_routine = client.get_routine(latest_routine_id)
@@ -211,11 +211,11 @@ def main():
             print("Could not determine routine folder")
             return
         
-        # Step 4-5: Fetch routines in folder and extract día numbers
+        # Step 4-5: Fetch routines in folder and extract day numbers
         folder_routines = get_routines_in_folder(client, folder_id)
         
         # Step 6: Find next routine
-        next_routine = get_next_routine(folder_routines, current_dia)
+        next_routine = get_next_routine(folder_routines, current_day)
         
         if next_routine:
             display_next_workout(client, next_routine)

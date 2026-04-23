@@ -78,8 +78,8 @@ class BatchRoutineUploader:
         Expected format:
         {
           "routines": [
-            { "routine": { "title": "Día 1 – ...", "exercises": [...] } },
-            { "routine": { "title": "Día 2 – ...", "exercises": [...] } }
+                        { "routine": { "title": "Day 1 - ...", "exercises": [...] } },
+                        { "routine": { "title": "Day 2 - ...", "exercises": [...] } }
           ]
         }
         
@@ -346,13 +346,13 @@ Input format:
   Batch format (multiple routines):
     {
       "routines": [
-        { "routine": { "title": "Día 1 – ...", ... } },
-        { "routine": { "title": "Día 2 – ...", ... } }
+                { "routine": { "title": "Day 1 - ...", ... } },
+                { "routine": { "title": "Day 2 - ...", ... } }
       ]
     }
   
   Single routine format (also accepted):
-    { "routine": { "title": "Día 1 – ...", ... } }
+        { "routine": { "title": "Day 1 - ...", ... } }
         """
     )
     

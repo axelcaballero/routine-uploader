@@ -33,7 +33,7 @@
 
 ### Consideraciones
 
-* El nombre de la rutina siempre empieza con “Día ”
+* El nombre de la rutina se recibe en español, pero al guardarse debe convertirse al formato en inglés “Day N - ...”
 * “Combinación” es un “superset”, usualmente de los 2 ejercicios siguientes.
 * “Triserie” también es un superset, pero de los 3 ejercicios siguientes.
 * “Indvidual “ es solo un ejercicio, significa que este ejercicio no forma parte del superset anterior.

@@ -113,7 +113,7 @@ python scripts/next_workout.py
 2. Extracts the routine ID from that workout
 3. Retrieves routine details to get the folder ID
 4. Fetches all routines and filters by folder ID (ensures correct routine sequence)
-5. Extracts día numbers from routine titles
+5. Extracts day numbers from routine titles
 6. Finds the next routine in numerical sequence (with wraparound)
 
 **Output:**
@@ -124,12 +124,12 @@ python scripts/next_workout.py
 **Example:**
 
 ```text
-Most recent: Día 7 – espalda y hombro (Día 7)
+Most recent: Day 7 - Back and Shoulders (Day 7)
 Folder ID: 1812915
 Found 16 routines in folder
 
 YOUR NEXT WORKOUT
-📅 Routine: Día 8 – Pecho
+📅 Routine: Day 8 - Chest
 💪 Total Exercises: 6
 Exercises:
   1. Bench Press (Dumbbell) (8 reps) (4 sets)

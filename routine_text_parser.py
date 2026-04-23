@@ -14,6 +14,7 @@ from typing import List, Dict, Optional, Tuple
 
 class RoutineTextParser:
     """Parses plain text routine descriptions into JSON format."""
+    ROUTINE_TITLE_PATTERN = re.compile(r'^(dia|día|day)\s*(\d+)\s*[-–:]?\s*(.*)$', re.IGNORECASE)
     
     def __init__(self, exercise_mappings_file: str = "instructions.md"):
         self.exercise_mappings = self._load_exercise_mappings(exercise_mappings_file)
@@ -28,6 +29,17 @@ class RoutineTextParser:
             'pecho', 'espalda', 'hombro', 'pierna', 'biceps', 'triceps',
             'chest', 'back', 'shoulder', 'leg', 'arms', 'push', 'pull'
         ]
+        self.routine_title_keyword_map = {
+            'pecho': 'Chest',
+            'espalda': 'Back',
+            'hombro': 'Shoulders',
+            'hombros': 'Shoulders',
+            'pierna': 'Legs',
+            'piernas': 'Legs',
+            'biceps': 'Biceps',
+            'triceps': 'Triceps',
+            'core': 'Core'
+        }
     
     def _normalize_text(self, text: str) -> str:
         """Normalize text for matching - remove accents and handle variations."""
@@ -61,6 +73,64 @@ class RoutineTextParser:
             print(f"Warning: {file_path} not found. Exercise ID resolution will be limited.")
         
         return mappings
+
+    def _translate_routine_focus(self, routine_focus: str) -> str:
+        """Translate Spanish muscle-group routine labels to English."""
+        normalized_focus = self._normalize_text(routine_focus)
+        if not normalized_focus:
+            return ""
+
+        translated_focus = normalized_focus
+        separator_map = {
+            r'\s+\+\s+': ' + ',
+            r'\s+y\s+': ' and ',
+            r'\s+e\s+': ' and ',
+            r'\s*/\s*': ' / '
+        }
+        for pattern, replacement in separator_map.items():
+            translated_focus = re.sub(pattern, replacement, translated_focus)
+
+        for spanish_term, english_term in sorted(
+            self.routine_title_keyword_map.items(),
+            key=lambda item: len(item[0]),
+            reverse=True
+        ):
+            translated_focus = re.sub(
+                rf'\b{re.escape(spanish_term)}\b',
+                english_term,
+                translated_focus,
+                flags=re.IGNORECASE
+            )
+
+        translated_focus = re.sub(r'\s+', ' ', translated_focus).strip(' -–:')
+        parts = re.split(r'( \+ | and | / )', translated_focus)
+        formatted_parts = []
+        for part in parts:
+            if part in {' + ', ' and ', ' / '}:
+                formatted_parts.append(part)
+                continue
+
+            mapped_term = self.routine_title_keyword_map.get(part.lower())
+            if mapped_term:
+                formatted_parts.append(mapped_term)
+            else:
+                formatted_parts.append(' '.join(word.capitalize() for word in part.split()))
+
+        translated_focus = ''.join(formatted_parts).strip()
+        return translated_focus or routine_focus.strip()
+
+    def _translate_routine_title(self, routine_title: str) -> str:
+        """Translate incoming Spanish routine titles to English titles for saved routines."""
+        match = self.ROUTINE_TITLE_PATTERN.match(routine_title.strip())
+        if not match:
+            return routine_title.strip()
+
+        day_number = match.group(2)
+        routine_focus = match.group(3).strip()
+        translated_focus = self._translate_routine_focus(routine_focus)
+        if translated_focus:
+            return f"Day {day_number} - {translated_focus}"
+        return f"Day {day_number}"
     
     def _find_exercise_id(self, exercise_name: str) -> Optional[str]:
         """Find exercise ID by name (fuzzy matching)."""
@@ -173,7 +243,7 @@ class RoutineTextParser:
         return any(keyword in normalized_title for keyword in self.muscle_group_keywords)
 
     def _is_core_routine_title(self, routine_title: str) -> bool:
-        """Detect Core-only routine titles (e.g., 'D1 Core', 'Día 7 – Core')."""
+        """Detect Core-only routine titles (e.g., 'D1 Core', 'Day 7 - Core')."""
         normalized_title = self._normalize_text(routine_title)
         if 'core' not in normalized_title:
             return False
@@ -308,7 +378,7 @@ class RoutineTextParser:
         Parse a text file containing multiple routine descriptions.
         
         Expected format:
-          Día 1 – PECHO Y HOMBRO
+                    Día 1 – PECHO Y HOMBRO
           PECHO 4
           Ejercicio 1 - 4x6-8rep. (85% o más)
           1-Press de pecho en banca plana
@@ -316,8 +386,10 @@ class RoutineTextParser:
           3-Cristo con mancuerna
           ...
           
-          Día 2 – ESPALDA + CORE
+                    Día 2 – ESPALDA + CORE
           ...
+
+                Saved routine titles are translated to English, e.g. "Day 1 - Chest and Shoulders".
         """
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -336,8 +408,8 @@ class RoutineTextParser:
             if not line:
                 continue
             
-            # Check for new routine (starts with "Día")
-            if line.startswith('Día'):
+            # Check for new routine title and save the English title variant
+            if self.ROUTINE_TITLE_PATTERN.match(line):
                 # Save previous routine if exists
                 if current_routine and current_exercises:
                     current_routine['exercises'] = current_exercises
@@ -345,7 +417,7 @@ class RoutineTextParser:
                 
                 # Start new routine
                 current_routine = {
-                    "title": line,
+                    "title": self._translate_routine_title(line),
                     "folder_id": self.folder_id,
                     "exercises": []
                 }

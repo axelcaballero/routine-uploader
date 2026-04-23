@@ -36,14 +36,14 @@ The `batch_routine_uploader.py` tool safely handles importing multiple routines 
   "routines": [
     {
       "routine": {
-        "title": "Día 1 – Pecho y Hombro",
+            "title": "Day 1 - Chest and Shoulders",
             "folder_id": 1234567,
         "exercises": [...]
       }
     },
     {
       "routine": {
-        "title": "Día 2 – Espalda + Core",
+            "title": "Day 2 - Back + Core",
             "folder_id": 1234567,
         "exercises": [...]
       }
@@ -56,7 +56,7 @@ The `batch_routine_uploader.py` tool safely handles importing multiple routines 
 ```json
 {
   "routine": {
-    "title": "Día 1 – Pecho y Hombro",
+      "title": "Day 1 - Chest and Shoulders",
       "folder_id": 1234567,
     "exercises": [...]
   }
