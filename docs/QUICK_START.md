@@ -34,6 +34,14 @@ cp TEMPLATE_routine.json input/dia_X_name.json
 ./routines.sh upload input/dia_X_name.json
 ```
 
+### 📁 Check Your Routine Folders (Optional)
+```bash
+# See all your routine folders and which one is most recent
+python get_recent_folder.py
+```
+
+This helps you verify the folder where routines will be uploaded before sending them.
+
 ---
 
 ## Common Mistakes & Fixes

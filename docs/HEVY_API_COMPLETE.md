@@ -144,6 +144,62 @@ for template in templates.get('exercises', []):
 }
 ```
 
+## 📁 Routine Folder Management
+
+### View All Routine Folders
+To quickly see all your routine folders and identify the most recent one:
+
+```bash
+python get_recent_folder.py
+```
+
+**Output shows:**
+- Ranking of all routine folders (most recent first)
+- Folder names and their index position
+- Folder IDs for API operations
+- Highlights the most recent folder
+
+### Using Folders in Routine Uploads
+When uploading routines, specify the folder_id:
+
+```bash
+# Single routine to specific folder
+python routine_uploader.py routine.json --folder-title "HSF 15"
+
+# Batch upload to folder
+python batch_routine_uploader.py extracted_routines.json --folder-title "HSF 15"
+```
+
+### Available Folder Methods
+
+| Method | Purpose |
+|--------|---------|
+| `list_routine_folders(page, page_size)` | Get all folders |
+| `get_routine_folder(folder_id)` | Get specific folder |
+| `find_routine_folder_by_title(title)` | Search for folder by name |
+| `ensure_routine_folder(title)` | Find or create folder |
+| `create_routine_folder(title)` | Create new folder |
+
+### Python Example
+```python
+from hevy_api_client import HevyAPIClient
+
+client = HevyAPIClient()
+
+# List all folders
+folders = client.list_routine_folders()
+for folder in folders.get('routine_folders', []):
+    print(f"{folder['title']} (ID: {folder['id']})")
+
+# Find or create a folder
+folder = client.ensure_routine_folder("HSF 15")
+folder_id = folder['id']
+
+# Upload routine to folder
+routine_data['routine']['folder_id'] = folder_id
+response = client.create_routine(routine_data)
+```
+
 ## Troubleshooting
 
 ### Import Error

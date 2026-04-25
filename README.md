@@ -238,6 +238,47 @@ python routine_uploader.py routine.json --dry-run --folder-title "HSF 15"
 `--folder-title` is session-scoped: it only applies to that command run.
 If omitted, uploader uses each routine file's existing `folder_id`.
 
+### View Your Routine Folders
+
+To see all your routine folders and identify the most recent one:
+
+```bash
+# Display all folders ranked by recency
+python get_recent_folder.py
+```
+
+This shows:
+- All your routine folders in order (most recent first)
+- Folder IDs for API operations
+- Highlights the current/most recent folder
+
+### Create a New Routine Folder
+
+When you're ready to upload routines to a new cycle:
+
+```bash
+# Auto-increment naming: HSF 15 → HSF 16
+# Asks for confirmation before creating
+python create_new_folder.py
+```
+
+Or create with a custom name:
+
+```bash
+python folder_manager.py create "Custom Folder Name"
+```
+
+For detailed folder management and workflows, see [`docs/ROUTINE_FOLDER_MANAGEMENT.md`](docs/ROUTINE_FOLDER_MANAGEMENT.md).
+
+### Post-Creation Validation Table
+
+After each routine creation, always provide this validation table in chat:
+
+| # | Exercise | Sets x Reps | Intensity | Weight |
+|---|---|---|---|---|
+
+This is the standard review format to quickly validate the uploaded routine.
+
 ### Update Workout Notes
 
 Add or update workout description/notes (e.g., location, equipment used):
