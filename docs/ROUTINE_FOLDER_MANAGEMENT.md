@@ -152,8 +152,8 @@ python get_recent_folder.py
 ### 1.5 Post-Creation Validation Output (Required)
 After creating any routine, always return a summary table in chat using this exact format:
 
-| # | Exercise | Sets x Reps | Intensity | Weight |
-|---|---|---|---|---|
+| # | source exercise name | Hevy excercise name | Sets x Reps |
+| - | -------------------- | ------------------- | ----------- |
 
 Include one row per exercise and keep the values aligned with the routine that was uploaded.
 This table is used as the final user validation checkpoint after each routine creation.

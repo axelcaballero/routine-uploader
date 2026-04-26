@@ -328,8 +328,8 @@ For detailed folder management and workflows, see [`docs/ROUTINE_FOLDER_MANAGEME
 
 After each routine creation, always provide this validation table in chat:
 
-| # | Exercise | Sets x Reps | Intensity | Weight |
-|---|---|---|---|---|
+| # | source exercise name | Hevy excercise name | Sets x Reps |
+| - | -------------------- | ------------------- | ----------- |
 
 This is the standard review format to quickly validate the uploaded routine.
 
