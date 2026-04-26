@@ -82,6 +82,7 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Prensa horizontal en maquina es Leg Press Horizontal (Machine) | 0EB695C9
 * Puente en banca es Hip Thrust (Machine) | 68CE0B9B
 * Sentadilla profunda es Full Squat (Barbell) | 1283BBA6
+* Sentadilla frontal con barra es Front Squat | 5046D0A9
 * Sentadilla isometrica es Iso Squat | c0ef33ba-3c50-4ced-a565-8caf48fff0ad
 * Peso muerto con mancuernas es Romanian Deadlift | 72CFFAD5
 * Extension de pierna es Leg Extension (Machine) | 75A4F6C4
@@ -91,6 +92,7 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Desplantes búlgaros es Bulgarian Lunges | 0d2c58fa-8cf3-4e4d-ac1c-c6db5262d972 | Duplicar repeticiones.
 * Desplantes recorridos con mancuerna es Lunge (Dumbbell) | B537D09F | Duplicar repeticiones. Agregar "recorrido" en notas
 * Desplantes fijos con barra es Barbell Lunge | 6E6EE645 | Duplicar repeticiones. Agregar "fijos" en notas
+* Desplante fijo con mancuerna individual (hacia atrás, sin alternar pierna) es Reverse Lunge (Dumbbell) | FFDA283B | Duplicar repeticiones. Agregar "fijos" en notas.
 * Curl de bíceps femoral acostado es Lying Leg Curl (Machine) | B8127AD1
 * Curl de piernas sentado en máquina es Seated Leg Curl (Machine) | 11A123F3
 * Aductores sentado en máquina es Hip Adduction (Machine) | 8BEBFED6 | Cierra piernas

@@ -72,7 +72,7 @@ When an exercise specifies a rep range (e.g., "4x6-8rep"), ALL normal sets must 
 
 ## Rule 2: "Duplicar Repeticiones" Doubles Reps Per Set
 
-When an exercise in instructions.md has the note "Duplicar repeticiones", it means the exercise is performed individually per limb (arm or leg). **Multiply both warmup AND normal set reps by 2**.
+When an exercise in exercise_mappings.md has the note "Duplicar repeticiones", it means the exercise is performed individually per limb (arm or leg). **Multiply both warmup AND normal set reps by 2**.
 
 ### ✅ CORRECT
 - Spec: `4x12rep` with "Duplicar repeticiones"
@@ -167,6 +167,30 @@ When an exercise uses the cluster system:
 
 ---
 
+## Rule 8: Unmapped Exercise Policy (Strict)
+
+- **No placeholders.** Never leave `exercise_template_id` empty.
+- **No guessed IDs.** Do not infer or substitute approximate template IDs.
+- If **any** exercise is unmatched in `exercise_mappings.md`, stop routine creation immediately.
+- Report **only** the unmapped exercises so mappings can be fixed first.
+- Do not save/upload routines until all exercises are mapped.
+
+---
+
+## Rule 9: Summary Output Format (Required)
+
+After every successful routine creation/upload, return the validation table in this exact schema:
+
+`# | source exercise name | Hevy excercise name | Sets x Reps`
+
+- `Sets x Reps` must include warmup and working sets (e.g., `1x12 + 4x8`)
+- Cluster format must include warmup and cluster detail (e.g., `1x12 + cluster: 3x8 + 1x6`)
+- Add a footer line after the table:
+  - `Routine note: <routine notes text>`
+  - If missing: `Routine note: (none)`
+
+---
+
 ## Application Checklist
 
 Before uploading any routine, verify:
@@ -178,8 +202,10 @@ Before uploading any routine, verify:
 - [ ] Only warmup/normal/dropset/failure set types used
 - [ ] Core routines have no warmup sets, use 2 normal series, and `rest_seconds` = 20
 - [ ] Non-Core routines keep `rest_seconds` = 60 unless cluster (30, 4 sets: 3×8 + 1×6)
-- [ ] Exercise IDs validated against instructions.md
+- [ ] Exercise IDs validated against exercise_mappings.md
+- [ ] No unmapped exercises remain (no placeholders, no guessed IDs)
 - [ ] Notes field includes any required descriptive text
+- [ ] Summary table uses required 4 columns and includes routine note footer
 
 ---
 

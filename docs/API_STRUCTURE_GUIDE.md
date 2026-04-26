@@ -160,7 +160,7 @@ For exercises like "Sentadilla isométrica" (60-second hold):
 - [ ] Routine wrapped in `"routine"` key?
 - [ ] `folder_id` set to `1812915`?
 - [ ] All set types are valid per Hevy API: `"warmup"`, `"normal"`, `"dropset"`, or `"failure"`?
-- [ ] All exercise IDs validated against `instructions.md`?
+- [ ] All exercise IDs validated against `exercise_mappings.md`?
 - [ ] Non-Core routine: warmup sets included (usually first set)?
 - [ ] Core routine: no warmup sets included?
 - [ ] Duration-based exercises use `duration_seconds` with `weight_kg: 0, reps: 0`?
@@ -176,7 +176,7 @@ For exercises like "Sentadilla isométrica" (60-second hold):
 Instead of manually building JSON, copy `/template_routine.json` and modify only:
 1. `routine.title` → Exercise name
 2. Exercise array → Add/remove exercises from the template examples
-3. `exercise_template_id` → Exercise IDs from `instructions.md`
+3. `exercise_template_id` → Exercise IDs from `exercise_mappings.md`
 4. Set weights and reps → Based on your workout plan
 
 This prevents structural errors and ensures compliance with Hevy API constraints.

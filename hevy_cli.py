@@ -65,8 +65,8 @@ def _safe_cell(value: str) -> str:
     return value.replace("|", "/").strip()
 
 
-def _load_exercise_name_index(instructions_path: str = "instructions.md") -> dict[str, tuple[str, str]]:
-    """Build exercise ID -> (source exercise name, Hevy exercise name) index from instructions.md."""
+def _load_exercise_name_index(instructions_path: str = "exercise_mappings.md") -> dict[str, tuple[str, str]]:
+    """Build exercise ID -> (source exercise name, Hevy exercise name) index from exercise_mappings.md."""
     exercise_index: dict[str, tuple[str, str]] = {}
     pattern = re.compile(r"^\*\s+(.+?)\s+es\s+(.+?)\s+\|\s+([A-Za-z0-9-]+)")
 
@@ -126,6 +126,14 @@ def _format_sets_x_reps(exercise: dict[str, Any]) -> str:
     if not isinstance(sets, list):
         return "-"
 
+    warmup_reps = [
+        int(series.get("reps"))
+        for series in sets
+        if isinstance(series, dict)
+        and series.get("type") == "warmup"
+        and isinstance(series.get("reps"), int)
+    ]
+
     normal_reps = [
         int(series.get("reps"))
         for series in sets
@@ -134,25 +142,36 @@ def _format_sets_x_reps(exercise: dict[str, Any]) -> str:
         and isinstance(series.get("reps"), int)
     ]
 
-    if not normal_reps:
+    if not warmup_reps and not normal_reps:
         return "-"
 
     notes = str(exercise.get("notes", "")).lower()
     is_cluster = "cluster" in notes
-    if is_cluster:
-        return f"cluster: {_collapse_reps_for_cluster(normal_reps)}"
+    normal_part = ""
+    if normal_reps:
+        if is_cluster:
+            normal_part = f"cluster: {_collapse_reps_for_cluster(normal_reps)}"
+        elif len(set(normal_reps)) == 1:
+            normal_part = f"{len(normal_reps)}x{normal_reps[0]}"
+        else:
+            normal_part = " + ".join(f"1x{rep}" for rep in normal_reps)
 
-    if len(set(normal_reps)) == 1:
-        return f"{len(normal_reps)}x{normal_reps[0]}"
+    warmup_part = _collapse_reps_for_cluster(warmup_reps) if warmup_reps else ""
 
-    return " + ".join(f"1x{rep}" for rep in normal_reps)
+    if warmup_part and normal_part:
+        return f"{warmup_part} + {normal_part}"
+    if warmup_part:
+        return warmup_part
+    return normal_part
 
 
-def _print_routine_summary_table(routine_file: str, instructions_path: str = "instructions.md") -> int:
+def _print_routine_summary_table(routine_file: str, instructions_path: str = "exercise_mappings.md") -> int:
     payload = _load_json_payload(routine_file)
     routine = payload.get("routine")
     if not isinstance(routine, dict):
         raise ValueError(f"Invalid routine JSON: missing 'routine' object in {routine_file}")
+
+    routine_note = str(routine.get("notes", "")).strip()
 
     exercises = routine.get("exercises", [])
     if not isinstance(exercises, list):
@@ -170,6 +189,12 @@ def _print_routine_summary_table(routine_file: str, instructions_path: str = "in
         hevy_name = _safe_cell(_extract_hevy_name(exercise, exercise_index))
         sets_x_reps = _safe_cell(_format_sets_x_reps(exercise))
         print(f"| {index} | {source_name} | {hevy_name} | {sets_x_reps} |")
+
+    print("")
+    if routine_note:
+        print(f"Routine note: {routine_note}")
+    else:
+        print("Routine note: (none)")
 
     return 0
 
@@ -284,9 +309,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     summary_table_parser.add_argument("routine_file", help="Routine JSON file to summarize")
     summary_table_parser.add_argument(
+        "--mappings",
         "--instructions",
-        default="instructions.md",
-        help="Path to instructions.md for exercise name mapping (default: instructions.md)",
+        dest="mappings_file",
+        default="exercise_mappings.md",
+        help="Path to exercise_mappings.md for exercise name mapping (default: exercise_mappings.md)",
     )
 
     folders_parser = subparsers.add_parser("folders", help="Routine folder utilities")
@@ -355,7 +382,7 @@ def main() -> int:
         if args.command == "list-input":
             return _list_input_routines(args.input_dir)
         if args.command == "summary-table":
-            return _print_routine_summary_table(args.routine_file, args.instructions)
+            return _print_routine_summary_table(args.routine_file, args.mappings_file)
         routines_parser = next(action for action in parser._actions if isinstance(action, argparse._SubParsersAction))
         routines_parser.choices["routines"].print_help()
         return 1

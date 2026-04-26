@@ -16,7 +16,7 @@ class RoutineTextParser:
     """Parses plain text routine descriptions into JSON format."""
     ROUTINE_TITLE_PATTERN = re.compile(r'^(dia|día|day)\s*(\d+)\s*[-–:]?\s*(.*)$', re.IGNORECASE)
     
-    def __init__(self, exercise_mappings_file: str = "instructions.md"):
+    def __init__(self, exercise_mappings_file: str = "exercise_mappings.md"):
         self.exercise_mappings = self._load_exercise_mappings(exercise_mappings_file)
         self.folder_id = 1812915
         self.core_keywords = [
@@ -54,7 +54,7 @@ class RoutineTextParser:
         return text.lower().strip()
         
     def _load_exercise_mappings(self, file_path: str) -> Dict[str, str]:
-        """Load exercise name to ID mappings from instructions.md"""
+        """Load exercise name to ID mappings from exercise_mappings.md"""
         mappings = {}
         
         try:
@@ -503,12 +503,44 @@ class RoutineTextParser:
             print(f"⚠️  WARNING: {len(missing_ids)} exercise(s) missing IDs:")
             for item in missing_ids:
                 print(f"   [{item['routine']}] Exercise {item['exercise_num']}: {item['description']}")
-            print("\n   Review and add missing exercises to instructions.md")
+            print("\n   Review and add missing exercises to exercise_mappings.md")
             print("   Or use: python exercise_validator.py --interactive <output_file>")
         else:
             print("✅ All exercises have IDs!")
         
         print()
+
+    def collect_unmapped_exercises(self, routines: List[Dict]) -> List[Dict[str, str]]:
+        """Collect exercises with missing template IDs across parsed routines."""
+        unmapped: List[Dict[str, str]] = []
+
+        for routine_data in routines:
+            routine = routine_data.get('routine', {})
+            title = routine.get('title', 'Unknown')
+            exercises = routine.get('exercises', [])
+
+            for index, exercise in enumerate(exercises, 1):
+                if exercise.get('exercise_template_id'):
+                    continue
+
+                notes = exercise.get('notes', 'Unknown exercise')
+                source_name = notes.split(' - ', 1)[0].strip() if isinstance(notes, str) else 'Unknown exercise'
+                unmapped.append({
+                    'routine': title,
+                    'exercise_num': str(index),
+                    'source_name': source_name,
+                    'notes': notes,
+                })
+
+        return unmapped
+
+    def print_unmapped_exercises(self, unmapped: List[Dict[str, str]]) -> None:
+        """Print only unmapped exercises and stop guidance."""
+        print("\n❌ Unmapped exercises found. Stopping without saving/uploading.\n")
+        for item in unmapped:
+            print(f"- [{item['routine']}] Exercise {item['exercise_num']}: {item['source_name']}")
+            print(f"  Notes: {item['notes']}")
+        print("\nFix mappings in exercise_mappings.md, then rerun the parser.")
 
 
 def main():
@@ -529,9 +561,9 @@ Examples:
 Expected input format:
   Día 1 – PECHO Y HOMBRO
   PECHO 4
-  Ejercicio 1 - 4x6-8rep. (85% o más)
+    Ejercicio 1 - 4x6-8rep. (85%% o más)
   1-Press de pecho en banca plana
-  Ejercicio 2 - 4x12rep. (moderado peso 80%)
+    Ejercicio 2 - 4x12rep. (moderado peso 80%%)
   3-Cristo con mancuerna
   
   Día 2 – ESPALDA + CORE
@@ -544,8 +576,8 @@ Expected input format:
                        help='Output JSON file (default: extracted_routines.json)')
     parser.add_argument('--dry-run', action='store_true',
                        help='Parse and show summary without saving')
-    parser.add_argument('--mappings', default='instructions.md',
-                       help='Exercise mappings file (default: instructions.md)')
+    parser.add_argument('--mappings', default='exercise_mappings.md',
+                       help='Exercise mappings file (default: exercise_mappings.md)')
     
     args = parser.parse_args()
     
@@ -559,6 +591,12 @@ Expected input format:
         print(f"📂 Parsing: {args.input_file}\n")
         parser = RoutineTextParser(args.mappings)
         routines = parser.parse_text_file(args.input_file)
+
+        # Hard stop policy: never continue with unmapped exercises.
+        unmapped = parser.collect_unmapped_exercises(routines)
+        if unmapped:
+            parser.print_unmapped_exercises(unmapped)
+            sys.exit(1)
         
         # Print summary
         parser.print_summary(routines)

@@ -25,7 +25,7 @@ def get_shoulder_press_exercise(client: HevyAPIClient) -> Tuple[str, str]:
     Returns:
         Tuple of (template_id, exercise_name)
     """
-    # Using the known Dumbbell Shoulder Press ID from instructions.md
+    # Using the known Dumbbell Shoulder Press ID from exercise_mappings.md
     template_id = "878CD1D0"
     exercise_name = "Shoulder Press (Dumbbell)"
     

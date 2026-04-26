@@ -252,6 +252,14 @@ Output columns are fixed to:
 # | source exercise name | Hevy excercise name | Sets x Reps
 ```
 
+The command also appends a footer line:
+
+```text
+Routine note: <routine notes text>
+```
+
+`Sets x Reps` includes warmup + working sets (for example `1x12 + 4x8`).
+
 ### Update Workout Notes
 
 Add or update workout description/notes (e.g., location, equipment used):

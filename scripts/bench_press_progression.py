@@ -25,7 +25,7 @@ def find_bench_press_template(client: HevyAPIClient) -> Tuple[str, str]:
     Returns:
         Tuple of (template_id, exercise_name)
     """
-    # Using the known Barbell Bench Press ID from instructions.md
+    # Using the known Barbell Bench Press ID from exercise_mappings.md
     template_id = "79D0BB3A"
     exercise_name = "Bench Press (Barbell)"
     

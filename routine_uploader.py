@@ -30,7 +30,7 @@ def upload_routine_from_file(
         dry_run: If True, only show what would be done without uploading
         enhance: If True, auto-populate warmup weights from history
         warmup_strategy: Strategy for warmup weight ("recent", "average", "mode")
-        validate: If True, validate exercise IDs against instructions.md
+        validate: If True, validate exercise IDs against exercise_mappings.md
         
     Returns:
         True if successful, False otherwise
@@ -64,13 +64,13 @@ def upload_routine_from_file(
         exercises = routine_data.get('routine', {}).get('exercises', [])
         print(f"   Exercises: {len(exercises)}")
         
-        # Validate exercise IDs against instructions.md
+        # Validate exercise IDs against exercise_mappings.md
         if validate:
             print("   Validating exercise IDs...")
             validator = ExerciseValidator()
             is_valid, errors = validator.validate_routine(routine_data, verbose=False)
             if not is_valid:
-                print(f"   ❌ Validation failed: {len(errors)} exercise(s) not found in instructions.md")
+                print(f"   ❌ Validation failed: {len(errors)} exercise(s) not found in exercise_mappings.md")
                 for error in errors:
                     print(f"      {error}")
                 print("   Use: python exercise_validator.py --list  to see available exercises")
@@ -161,7 +161,7 @@ def main():
     parser.add_argument(
         "--no-validate",
         action="store_true",
-        help="Skip exercise ID validation against instructions.md"
+        help="Skip exercise ID validation against exercise_mappings.md"
     )
     parser.add_argument(
         "--folder-title",

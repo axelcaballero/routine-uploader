@@ -25,7 +25,7 @@ cp TEMPLATE_routine.json input/dia_X_name.json
 
 ### 2️⃣ Edit These 3 Things
 - `title`: "Día X – [Your Workout]"
-- `exercise_template_id`: From `instructions.md`
+- `exercise_template_id`: From `exercise_mappings.md`
 - `weight_kg` and `reps`: Your actual workout numbers
 
 ### 3️⃣ Validate & Upload
@@ -51,7 +51,7 @@ This helps you verify the folder where routines will be uploaded before sending 
 | Root key | `"exercises": [...]` | `"routine": { "exercises": [...] }` |
 | Set type | `"type": "set"` | `"type": "normal"` (or "warmup", "dropset", etc.) |
 | Folder ID | `"folder_id": 123` | `"folder_id": 1812915` |
-| Exercise ID | Missing | From `instructions.md` |
+| Exercise ID | Missing | From `exercise_mappings.md` |
 | Isometric | `"reps": 60` | `"duration_seconds": 60, "reps": 0` |
 
 ---
@@ -61,7 +61,7 @@ This helps you verify the folder where routines will be uploaded before sending 
 1. Check `API_STRUCTURE_GUIDE.md` for the error pattern
 2. Look for `"type"` field - is it `"warmup"` or `"normal"`?
 3. Verify `"routine"` key wraps everything
-4. Check `exercise_template_id` exists in `instructions.md`
+4. Check `exercise_template_id` exists in `exercise_mappings.md`
 
 ---
 

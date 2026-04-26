@@ -121,7 +121,7 @@ venv/bin/python batch_routine_uploader.py file.json --folder-title "HSF 15"
 
 [3/12] Día 3 – Pierna
    ❌ FAILED - 2 error(s)
-      • Exercise: Exercise ID 'INVALID123' not found in instructions.md
+      • Exercise: Exercise ID 'INVALID123' not found in exercise_mappings.md
       • Structure: Invalid set type: drop_set (should be dropset)
 
 ...
@@ -221,7 +221,7 @@ Total routines: 12
 | Error | Cause | Solution |
 |-------|-------|----------|
 | `Invalid format` | Wrong JSON structure | Use batch format `{"routines": [...]}` |
-| `Exercise ID not found` | ID missing from instructions.md | Add exercise mapping or use interactive validator |
+| `Exercise ID not found` | ID missing from exercise_mappings.md | Add exercise mapping or use interactive validator |
 | `Structure: Invalid set type` | Wrong set type name | Use `dropset` not `drop_set`, only warmup/normal/dropset/failure |
 | `Missing routine title` | No title field | Add `"title": "Día X – ..."` |
 | `API Error: 400` | Invalid field values | Check API_STRUCTURE_GUIDE.md |
@@ -240,7 +240,7 @@ Before uploading 6-12 routines:
 
 - [ ] Run with `--dry-run` first to validate
 - [ ] Review all validation errors and warnings
-- [ ] Check exercise IDs against `instructions.md`
+- [ ] Check exercise IDs against `exercise_mappings.md`
 - [ ] Verify routine titles follow "Día X – Name" pattern
 - [ ] Verify session folder with `--folder-title` (or confirm each routine `folder_id`)
 - [ ] Have backup of extracted file

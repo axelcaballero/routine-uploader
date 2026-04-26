@@ -2,7 +2,7 @@
 
 ## What Is Exercise Validation?
 
-Exercise validation ensures all exercise IDs in your routine templates match the authoritative source in `instructions.md`. This prevents upload failures and data integrity issues.
+Exercise validation ensures all exercise IDs in your routine templates match the authoritative source in `exercise_mappings.md`. This prevents upload failures and data integrity issues.
 
 ## Quick Start
 
@@ -30,7 +30,7 @@ python routine_uploader.py input/my_routine.json --folder-title "HSF 15"
 ## What Happens During Upload?
 
 1. ✅ **Folder Verification (optional)** - If `--folder-title` is provided, uploader finds or creates that folder for this session
-2. ✅ **Validation** - All exercise IDs checked against instructions.md
+2. ✅ **Validation** - All exercise IDs checked against exercise_mappings.md
 3. ✅ **Enhancement** - Warmup weights auto-populated from history
 4. ✅ **Upload** - Routine sent to Hevy API
 
@@ -41,8 +41,8 @@ If validation fails, upload stops with helpful error message.
 ### You See This Error
 
 ```text
-❌ Validation failed: 1 exercise(s) not found in instructions.md
-   1. BADID123 - NOT FOUND IN instructions.md!
+❌ Validation failed: 1 exercise(s) not found in exercise_mappings.md
+   1. BADID123 - NOT FOUND IN exercise_mappings.md!
 ```
 
 ### Follow These Steps
@@ -104,12 +104,12 @@ Run `--list` and search for similar exercises:
 python exercise_validator.py --list | grep -i "your_exercise"
 ```
 
-If still not found, the exercise may not be in instructions.md. Add it first.
+If still not found, the exercise may not be in exercise_mappings.md. Add it first.
 
 ### Validation says exercise not found but I know it exists
 
 1. Check for typos in the exercise ID
-2. Make sure instructions.md is up to date
+2. Make sure exercise_mappings.md is up to date
 3. Compare against the authoritative IDs in `--list` output
 
 ### I want to bypass validation
@@ -124,4 +124,4 @@ python routine_uploader.py input/my_routine.json --no-validate
 
 - **ROUTINE_ENHANCEMENT.md** - Complete validation documentation
 - **VALIDATION_SYSTEM_COMPLETE.md** - Technical implementation details
-- **instructions.md** - Authoritative exercise ID source
+- **exercise_mappings.md** - Authoritative exercise ID source

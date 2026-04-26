@@ -102,7 +102,7 @@ All scripts use the `HevyAPIClient` which connects to:
 - **Auth**: API key from environment variable `HEVY_API_KEY`
 - **Endpoint**: `/v1/exercise_history/{exerciseTemplateId}`
 
-Exercise template IDs (from `instructions.md`):
+Exercise template IDs (from `exercise_mappings.md`):
 
 - Bench Press (Barbell): `79D0BB3A`
 - Squat (Barbell): `D04AC939`

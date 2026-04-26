@@ -148,4 +148,4 @@ volume_progression_v2.json
 ## See Also
 - `QUICK_START.md` - Workflow reference
 - `TEMPLATE_routine.json` - Routine structure
-- `instructions.md` - Exercise mappings
+- `exercise_mappings.md` - Exercise mappings

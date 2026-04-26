@@ -53,7 +53,7 @@ Ejercicio 1 - 4x10rep. (moderado peso 80%)
 ## 4) Parse Text to JSON (Batch Format)
 
 ```bash
-python routine_text_parser.py input/dx_raw.txt -o input/dx_parsed.json --mappings instructions.md
+python routine_text_parser.py input/dx_raw.txt -o input/dx_parsed.json --mappings exercise_mappings.md
 ```
 
 Output format is batch JSON:

@@ -7,7 +7,7 @@ The exercise validation system has been successfully implemented and tested. All
 ### System Components
 
 1. **exercise_validator.py** (NEW)
-   - Parses `instructions.md` to extract authoritative exercise-to-ID mappings
+   - Parses `exercise_mappings.md` to extract authoritative exercise-to-ID mappings
    - Provides validation API for routine files
    - CLI tool for listing available exercises and validating routines
    - Regex-based parsing: `r'\* ([^*]+?)\s+(?:equivale|es)\s+(?:.*?\s)?([A-Fa-f0-9\-]{8,})\s*$'`
@@ -48,7 +48,7 @@ python3 exercise_validator.py input/dia_10_biceps_triceps.json -v
 **Result**: ✅ All 8 exercises validated successfully
 
 - Corrected exercise 7 ID from invalid `93A552C6` to correct `3765684D` (Copa doble)
-- All 8/8 exercises now match instructions.md
+- All 8/8 exercises now match exercise_mappings.md
 
 ### Test 3: Invalid Routine Detection
 
@@ -86,14 +86,14 @@ python3 routine_uploader.py input/dia_10_biceps_triceps.json --dry-run
 
 **Solution Implemented**:
 
-- Regex parser extracts authoritative mappings from instructions.md
+- Regex parser extracts authoritative mappings from exercise_mappings.md
 - Validation runs automatically before every upload
 - Prevents mismatches at the source
 - User-friendly error messages guide corrections
 
 ### Design Decisions
 
-1. **Authoritative Source**: `instructions.md` is now the single source of truth for exercise IDs
+1. **Authoritative Source**: `exercise_mappings.md` is now the single source of truth for exercise IDs
 2. **Automatic Validation**: Runs by default (can be disabled with --no-validate)
 3. **Graceful Degradation**: Validation errors don't crash the system; they provide clear guidance
 4. **User Flexibility**: Advanced users can bypass validation if needed with explicit flag
@@ -106,7 +106,7 @@ python3 routine_uploader.py input/dia_10_biceps_triceps.json --dry-run
 - ✅ `exercise_validator.py` (350+ lines)
   - ExerciseValidator class with full validation logic
   - CLI interface with --list flag support
-  - Regex-based instructions.md parser
+  - Regex-based exercise_mappings.md parser
 
 ### Modified Files
 
@@ -163,11 +163,11 @@ python exercise_validator.py --list | grep -i "biceps"
 
 The validation system prevents future exercise ID mismatches by:
 
-1. **Enforcing Source of Truth**: All IDs must match instructions.md
+1. **Enforcing Source of Truth**: All IDs must match exercise_mappings.md
 2. **Early Detection**: Invalid IDs caught before upload (not after)
 3. **Clear Guidance**: Error messages show exact issue and how to fix it
 4. **Accessibility**: Easy `--list` flag to see all valid options
-5. **Comprehensive Coverage**: All 80+ exercises from instructions.md are validated
+5. **Comprehensive Coverage**: All 80+ exercises from exercise_mappings.md are validated
 6. **User Education**: Documentation explains why validation matters
 
 ## Status: COMPLETE ✅
@@ -175,7 +175,7 @@ The validation system prevents future exercise ID mismatches by:
 All requirements met:
 
 - ✅ Warmup weight auto-population feature (enhanced)
-- ✅ Exercise ID validation against instructions.md
+- ✅ Exercise ID validation against exercise_mappings.md
 - ✅ Validation integrated into upload workflow
 - ✅ Prevention of future mismatches
 - ✅ All tests passing
