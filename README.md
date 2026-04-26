@@ -1,6 +1,6 @@
 # 🏋️ Hevy Training Toolkit
 
-> Comprehensive Python toolkit for managing Hevy routines, folders, workout history, and progression analysis, with a broader CLI surface ready for measurements and workout analytics.
+> Comprehensive Python toolkit for managing Hevy routines, folders, body measurements, workout history, and progression analysis through a single CLI and API client.
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Hevy API](https://img.shields.io/badge/Hevy-API-orange.svg)](https://api.hevyapp.com/docs/)
@@ -17,7 +17,7 @@
 | 📊 **Progression Tracking** | Track bench press, squat, and shoulder press with 1RM estimation (Epley formula) |
 | 📈 **Visualization Suite** | Generate multiple chart styles, dashboards, and comparisons from Hevy data |
 | 🔧 **Toolkit CLI & API Client** | Use `hevy_cli.py`, `hevy.sh`, and `HevyAPIClient` as the stable umbrella surface |
-| 🧭 **Expansion Ready** | Reserve first-class command spaces for body measurements and richer workout analytics |
+| 📏 **Body Measurements** | List, create, fetch, and update Hevy body measurements with safe default update behavior |
 
 ---
 
@@ -26,12 +26,12 @@
 ### Implemented Today
 
 - Routine creation, validation, enhancement, upload, and folder management
+- Body measurements retrieval, creation, and update workflows
 - Workout retrieval flows for next-workout planning and workout note updates
 - Strength progression tracking, visualizations, and exercise history analysis
 
 ### Planned Next
 
-- Body measurements retrieval and update workflows
 - Broader workout-history retrieval and analytics as first-class CLI domains
 - Additional Hevy data-management commands under the umbrella toolkit entrypoints
 
@@ -250,6 +250,18 @@ python hevy_cli.py routines validate input/dia_1_pecho_hsf16.json
 
 # Inspect recent folders
 python hevy_cli.py folders recent
+
+# List body measurements
+python hevy_cli.py measurements list
+
+# Get a measurement entry by date
+python hevy_cli.py measurements get 2026-04-26
+
+# Create a measurement entry
+python hevy_cli.py measurements create --date 2026-04-26 --weight-kg 80.4 --waist 81
+
+# Update one field while preserving the rest of the entry
+python hevy_cli.py measurements update 2026-04-26 --waist 79.5
 ```
 
 For shell-first workflows, `./hevy.sh` mirrors the same command structure. Existing routine-specific scripts remain available for compatibility.

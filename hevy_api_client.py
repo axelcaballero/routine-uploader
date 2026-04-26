@@ -7,17 +7,64 @@ Documentation: https://api.hevy.io/docs
 import os
 import json
 import requests
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Iterable
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
 
+BODY_MEASUREMENT_FIELDS = (
+    "weight_kg",
+    "lean_mass_kg",
+    "fat_percent",
+    "neck_cm",
+    "shoulder_cm",
+    "chest_cm",
+    "left_bicep_cm",
+    "right_bicep_cm",
+    "left_forearm_cm",
+    "right_forearm_cm",
+    "abdomen",
+    "waist",
+    "hips",
+    "left_thigh",
+    "right_thigh",
+    "left_calf",
+    "right_calf",
+)
+
+
 class HevyAPIClient:
     """Client for interacting with the Hevy API"""
     
     BASE_URL = "https://api.hevyapp.com"
+
+    @staticmethod
+    def _filter_body_measurement_fields(
+        measurement_data: Dict[str, Any],
+        *,
+        include_date: bool = False,
+        include_nulls: bool = True,
+    ) -> Dict[str, Any]:
+        """Return only supported body measurement fields."""
+        allowed_fields = set(BODY_MEASUREMENT_FIELDS)
+        if include_date:
+            allowed_fields.add("date")
+
+        filtered: Dict[str, Any] = {}
+        for field_name, value in measurement_data.items():
+            if field_name not in allowed_fields:
+                continue
+            if value is None and not include_nulls:
+                continue
+            filtered[field_name] = value
+        return filtered
+
+    @staticmethod
+    def body_measurement_fields() -> Iterable[str]:
+        """Return supported body measurement field names."""
+        return BODY_MEASUREMENT_FIELDS
     
     def __init__(self, api_key: Optional[str] = None):
         """
@@ -342,6 +389,73 @@ class HevyAPIClient:
             Detailed workout object with all exercises and sets
         """
         return self._make_request("GET", f"/v1/workouts/{workout_id}")
+
+    def list_body_measurements(self, page: int = 1, page_size: int = 10) -> Dict[str, Any]:
+        """Get a paginated list of body measurements for the authenticated user."""
+        params = {"page": page, "pageSize": page_size}
+        return self._make_request("GET", "/v1/body_measurements", params=params)
+
+    def get_body_measurement(self, date: str) -> Dict[str, Any]:
+        """Get a single body measurement entry by date (YYYY-MM-DD)."""
+        return self._make_request("GET", f"/v1/body_measurements/{date}")
+
+    def create_body_measurement(self, measurement_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a body measurement entry.
+
+        The request body must include a `date` field and may include any supported
+        body measurement fields documented by Hevy.
+        """
+        payload = self._filter_body_measurement_fields(
+            measurement_data,
+            include_date=True,
+            include_nulls=True,
+        )
+        if not payload.get("date"):
+            raise ValueError("Body measurement creation requires a 'date' field (YYYY-MM-DD).")
+        return self._make_request("POST", "/v1/body_measurements", data=payload)
+
+    def replace_body_measurement(self, date: str, measurement_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Replace a body measurement entry for a given date.
+
+        Hevy overwrites all fields on PUT and sets omitted fields to null.
+        This method sends only the supported measurement fields and leaves that
+        overwrite behavior intact.
+        """
+        payload = self._filter_body_measurement_fields(
+            measurement_data,
+            include_date=False,
+            include_nulls=True,
+        )
+        return self._make_request("PUT", f"/v1/body_measurements/{date}", data=payload)
+
+    def update_body_measurement(
+        self,
+        date: str,
+        measurement_data: Dict[str, Any],
+        *,
+        preserve_existing: bool = True,
+    ) -> Dict[str, Any]:
+        """Update a body measurement entry.
+
+        By default this preserves existing values for omitted fields to protect
+        callers from the API's null-on-omit PUT semantics. Set
+        `preserve_existing=False` to perform a full replacement.
+        """
+        updates = self._filter_body_measurement_fields(
+            measurement_data,
+            include_date=False,
+            include_nulls=True,
+        )
+        if preserve_existing:
+            current = self.get_body_measurement(date)
+            existing = self._filter_body_measurement_fields(
+                current,
+                include_date=False,
+                include_nulls=True,
+            )
+            existing.update(updates)
+            updates = existing
+        return self.replace_body_measurement(date, updates)
     
     def update_workout(self, workout_id: str, description: str) -> Dict[str, Any]:
         """

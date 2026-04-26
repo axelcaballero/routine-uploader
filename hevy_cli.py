@@ -4,10 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Callable, Iterator, Sequence
+from typing import Any, Callable, Iterator, Sequence
 
 import batch_routine_uploader
 import create_new_folder
@@ -17,6 +18,7 @@ import get_recent_folder
 import routine_uploader
 import test_api_key
 import validate_structure
+from hevy_api_client import HevyAPIClient
 
 
 @contextmanager
@@ -43,6 +45,69 @@ def _print_planned_capability(domain: str) -> int:
     print(f"{domain} commands are reserved for the upcoming Hevy toolkit expansion.")
     print("Planned scope includes body measurements management and workout retrieval/analysis.")
     return 0
+
+
+def _print_json(data: Any) -> int:
+    print(json.dumps(data, indent=2, ensure_ascii=False))
+    return 0
+
+
+def _load_json_payload(json_path: str) -> dict[str, Any]:
+    with open(json_path, "r", encoding="utf-8") as file_handle:
+        data = json.load(file_handle)
+    if not isinstance(data, dict):
+        raise ValueError(f"Expected a JSON object in {json_path}")
+    return data
+
+
+def _measurement_fields_from_args(args: argparse.Namespace) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for field_name in HevyAPIClient.body_measurement_fields():
+        field_value = getattr(args, field_name, None)
+        if field_value is not None:
+            payload[field_name] = field_value
+    return payload
+
+
+def _build_measurement_payload(args: argparse.Namespace, *, include_date: bool) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    if getattr(args, "json_file", None):
+        payload.update(_load_json_payload(args.json_file))
+    payload.update(_measurement_fields_from_args(args))
+
+    if include_date and getattr(args, "date", None):
+        payload["date"] = args.date
+    return payload
+
+
+def _add_measurement_field_arguments(parser: argparse.ArgumentParser) -> None:
+    for field_name in HevyAPIClient.body_measurement_fields():
+        parser.add_argument(f"--{field_name.replace('_', '-')}", dest=field_name, type=float)
+
+
+def _handle_measurements_command(args: argparse.Namespace) -> int:
+    client = HevyAPIClient()
+
+    if args.command == "fields":
+        return _print_json({"body_measurement_fields": list(HevyAPIClient.body_measurement_fields())})
+    if args.command == "list":
+        return _print_json(client.list_body_measurements(page=args.page, page_size=args.page_size))
+    if args.command == "get":
+        return _print_json(client.get_body_measurement(args.date))
+    if args.command == "create":
+        payload = _build_measurement_payload(args, include_date=True)
+        return _print_json(client.create_body_measurement(payload))
+    if args.command == "update":
+        payload = _build_measurement_payload(args, include_date=False)
+        return _print_json(
+            client.update_body_measurement(
+                args.date,
+                payload,
+                preserve_existing=not args.replace,
+            )
+        )
+
+    raise ValueError(f"Unsupported measurements command: {args.command}")
 
 
 def _list_input_routines(input_dir: str = "input") -> int:
@@ -110,7 +175,33 @@ def build_parser() -> argparse.ArgumentParser:
 
     folders_subparsers.add_parser("list", help="List routine folders")
 
-    subparsers.add_parser("measurements", help="Reserved umbrella namespace for body measurements")
+    measurements_parser = subparsers.add_parser("measurements", help="Body measurement workflows")
+    measurements_subparsers = measurements_parser.add_subparsers(dest="command")
+
+    measurements_fields_parser = measurements_subparsers.add_parser("fields", help="List supported body measurement fields")
+
+    measurements_list_parser = measurements_subparsers.add_parser("list", help="List body measurements")
+    measurements_list_parser.add_argument("--page", type=int, default=1, help="Page number (default: 1)")
+    measurements_list_parser.add_argument("--page-size", type=int, default=10, help="Page size, max 10 (default: 10)")
+
+    measurements_get_parser = measurements_subparsers.add_parser("get", help="Get a body measurement by date")
+    measurements_get_parser.add_argument("date", help="Measurement date in YYYY-MM-DD format")
+
+    measurements_create_parser = measurements_subparsers.add_parser("create", help="Create a body measurement entry")
+    measurements_create_parser.add_argument("--date", required=True, help="Measurement date in YYYY-MM-DD format")
+    measurements_create_parser.add_argument("--json-file", help="Optional JSON file with a measurement payload")
+    _add_measurement_field_arguments(measurements_create_parser)
+
+    measurements_update_parser = measurements_subparsers.add_parser("update", help="Update a body measurement entry")
+    measurements_update_parser.add_argument("date", help="Measurement date in YYYY-MM-DD format")
+    measurements_update_parser.add_argument("--json-file", help="Optional JSON file with a measurement payload")
+    measurements_update_parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="Send only the provided fields and let omitted fields become null",
+    )
+    _add_measurement_field_arguments(measurements_update_parser)
+
     subparsers.add_parser("workouts", help="Reserved umbrella namespace for workout history and analysis")
     auth_parser = subparsers.add_parser("auth", help="Verify Hevy API authentication")
     auth_parser.add_argument("api_key", nargs="?", help="Optional API key override")
@@ -156,7 +247,11 @@ def main() -> int:
         return 1
 
     if args.domain == "measurements":
-        return _print_planned_capability("Measurements")
+        if not args.command:
+            measurements_parser = next(action for action in parser._actions if isinstance(action, argparse._SubParsersAction))
+            measurements_parser.choices["measurements"].print_help()
+            return 1
+        return _handle_measurements_command(args)
 
     if args.domain == "workouts":
         return _print_planned_capability("Workout")
