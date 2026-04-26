@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
 """
 Routine Text Parser - Converts plain text routine descriptions to JSON format.
 

@@ -200,6 +200,23 @@ routine_data['routine']['folder_id'] = folder_id
 response = client.create_routine(routine_data)
 ```
 
+## Known API Limitations
+
+### `folder_id` Not Allowed in Routine Updates
+The Hevy API rejects `folder_id` when updating an existing routine via `PUT /v1/routines/{id}`:
+```
+400 Bad Request: "routine.folder_id" is not allowed
+```
+**Workaround**: Strip `folder_id` from the payload before calling `update_routine()`:
+```python
+import copy
+payload = copy.deepcopy(routine_data)
+payload['routine'].pop('folder_id', None)
+client.update_routine(routine_id, payload)
+```
+
+---
+
 ## Troubleshooting
 
 ### Import Error

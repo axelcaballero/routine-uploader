@@ -1,6 +1,6 @@
-# 🏋️ Hevy Training Toolkit
+# 🏋️ Hevy Routine Uploader & Progression Tracker
 
-> Comprehensive Python toolkit for managing Hevy routines, folders, body measurements, workout history, and progression analysis through a single CLI and API client.
+> Comprehensive Python toolkit for managing Hevy workout routines and tracking strength progression with beautiful visualizations.
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Hevy API](https://img.shields.io/badge/Hevy-API-orange.svg)](https://api.hevyapp.com/docs/)
@@ -12,28 +12,12 @@
 
 | Feature | Description |
 |---------|-------------|
-| 📝 **Routine & Folder Management** | Upload, validate, organize, and batch-process workout routines via Hevy API |
-| 🎯 **Workout Retrieval** | Determine the next workout in sequence and update workout notes from recent history |
 | 📊 **Progression Tracking** | Track bench press, squat, and shoulder press with 1RM estimation (Epley formula) |
-| 📈 **Visualization Suite** | Generate multiple chart styles, dashboards, and comparisons from Hevy data |
-| 🔧 **Toolkit CLI & API Client** | Use `hevy_cli.py`, `hevy.sh`, and `HevyAPIClient` as the stable umbrella surface |
-| 📏 **Body Measurements** | List, create, fetch, and update Hevy body measurements with safe default update behavior |
-
----
-
-## 🧭 Project Scope
-
-### Implemented Today
-
-- Routine creation, validation, enhancement, upload, and folder management
-- Body measurements retrieval, creation, and update workflows
-- Workout retrieval flows for next-workout planning and workout note updates
-- Strength progression tracking, visualizations, and exercise history analysis
-
-### Planned Next
-
-- Broader workout-history retrieval and analytics as first-class CLI domains
-- Additional Hevy data-management commands under the umbrella toolkit entrypoints
+| 📈 **Multiple Visualizations** | 5+ chart styles: minimal, gradient, area, dashboard, and comparison |
+| 🎯 **Next Workout Predictor** | Smart algorithm determines your next workout based on routine sequence |
+| 📝 **Routine Management** | Upload, list, and manage workout routines via Hevy API |
+| 🔧 **API Client Library** | Full-featured Python client for seamless Hevy API interactions |
+| 🔍 **Data Analysis** | Squat low-point analysis, deload detection, and trend analytics |
 
 ---
 
@@ -60,10 +44,8 @@ The project generates beautiful, professional-grade charts to track your progres
 ## 📚 Table of Contents
 
 - [Quick Start](#-quick-start)
-- [Project Scope](#-project-scope)
 - [Progression Tracking](#-progression-tracking--analysis)
 - [Routine Management](#-routine-management)
-- [CLI Usage](#-cli-usage)
 - [API Client Usage](#-api-client-usage)
 - [Documentation](#-documentation)
 - [Project Structure](#-project-structure)
@@ -83,8 +65,8 @@ The project generates beautiful, professional-grade charts to track your progres
 
 ```bash
 # Clone the repository
-git clone <your-repo-url> hevy-training-toolkit
-cd hevy-training-toolkit
+git clone https://github.com/axelcaballero/routine-uploader.git
+cd routine-uploader
 
 # Install dependencies
 pip install -r requirements.txt
@@ -94,15 +76,13 @@ cp .env.example .env
 # Edit .env and add: HEVY_API_KEY=your_key_here
 ```
 
-If your local checkout still uses the older folder name, keep using that directory name until you rename the repository.
-
 > ⚠️ **Security Note:** See [`SECURITY_SETUP.md`](docs/SECURITY_SETUP.md) for detailed instructions on safely configuring your API key.
 
 ### Test Your Setup
 
 ```bash
 # Verify API connection
-python hevy_cli.py auth
+python test_api_key.py
 ```
 
 ### 📋 Routine Creation Rules
@@ -234,104 +214,43 @@ Identifies:
 
 ---
 
-## 🖥️ CLI Usage
-
-Use the umbrella CLI for project-level commands:
-
-```bash
-# Authenticate against Hevy
-python hevy_cli.py auth
-
-# Upload routines
-python hevy_cli.py routines upload routine.json --dry-run
-
-# Validate routine JSON
-python hevy_cli.py routines validate input/dia_1_pecho_hsf16.json
-
-# Inspect recent folders
-python hevy_cli.py folders recent
-
-# List body measurements
-python hevy_cli.py measurements list
-
-# Get a measurement entry by date
-python hevy_cli.py measurements get 2026-04-26
-
-# Create a measurement entry
-python hevy_cli.py measurements create --date 2026-04-26 --weight-kg 80.4 --waist 81
-
-# Update one field while preserving the rest of the entry
-python hevy_cli.py measurements update 2026-04-26 --waist 79.5
-```
-
-For shell-first workflows, `./hevy.sh` mirrors the same command structure. Existing routine-specific scripts remain available for compatibility.
-
----
-
 ## 📝 Routine Management
 
 ### Upload Routines
 
 ```bash
 # Upload a single routine
-python hevy_cli.py routines upload routine.json
+python routine_uploader.py routine.json
 
 # Upload to a specific folder for this session (creates folder if missing)
-python hevy_cli.py routines upload routine.json --folder-title "HSF 15"
+python routine_uploader.py routine.json --folder-title "HSF 15"
 
 # Upload all routines from a directory
-python hevy_cli.py routines upload ./routines/
+python routine_uploader.py ./routines/
 
 # Preview without uploading (dry-run)
-python hevy_cli.py routines upload routine.json --dry-run
+python routine_uploader.py routine.json --dry-run
 
 # Dry-run with session folder verification
-python hevy_cli.py routines upload routine.json --dry-run --folder-title "HSF 15"
+python routine_uploader.py routine.json --dry-run --folder-title "HSF 15"
 ```
 
 `--folder-title` is session-scoped: it only applies to that command run.
 If omitted, uploader uses each routine file's existing `folder_id`.
 
-### View Your Routine Folders
+### Print Required Validation Table Format
 
-To see all your routine folders and identify the most recent one:
-
-```bash
-# Display all folders ranked by recency
-python hevy_cli.py folders recent
-```
-
-This shows:
-- All your routine folders in order (most recent first)
-- Folder IDs for API operations
-- Highlights the current/most recent folder
-
-### Create a New Routine Folder
-
-When you're ready to upload routines to a new cycle:
+Use the umbrella CLI to print the exact 4-column table format required in chat:
 
 ```bash
-# Auto-increment naming: HSF 15 → HSF 16
-# Asks for confirmation before creating
-python hevy_cli.py folders create-next
+python hevy_cli.py routines summary-table input/dia_1_pecho_hsf16.json
 ```
 
-Or create with a custom name:
+Output columns are fixed to:
 
-```bash
-python hevy_cli.py folders create "Custom Folder Name"
+```text
+# | source exercise name | Hevy excercise name | Sets x Reps
 ```
-
-For detailed folder management and workflows, see [`docs/ROUTINE_FOLDER_MANAGEMENT.md`](docs/ROUTINE_FOLDER_MANAGEMENT.md).
-
-### Post-Creation Validation Table
-
-After each routine creation, always provide this validation table in chat:
-
-| # | source exercise name | Hevy excercise name | Sets x Reps |
-| - | -------------------- | ------------------- | ----------- |
-
-This is the standard review format to quickly validate the uploaded routine.
 
 ### Update Workout Notes
 
@@ -432,7 +351,7 @@ templates = client.get_exercise_templates()
 
 ```bash
 # Test API connection
-python hevy_cli.py auth
+python test_api_key.py
 
 # What's my next workout?
 python scripts/next_workout.py
@@ -453,10 +372,10 @@ python scripts/analyze_squat_lowpoints.py
 python scripts/advanced_visualizations.py
 
 # Upload a routine
-python hevy_cli.py routines upload routine.json
+python routine_uploader.py routine.json
 
 # Upload with per-session folder override
-python hevy_cli.py routines upload routine.json --folder-title "HSF 15"
+python routine_uploader.py routine.json --folder-title "HSF 15"
 ```
 
 ---
@@ -464,12 +383,9 @@ python hevy_cli.py routines upload routine.json --folder-title "HSF 15"
 ## 📁 Project Structure
 
 ```text
-project-root/
-├── 📄 hevy_cli.py                  # Umbrella toolkit CLI
-├── 📄 hevy.sh                      # Shell wrapper for the umbrella CLI
+routine-uploader/
 ├── 📄 hevy_api_client.py           # Main API client
-├── 📄 routine_uploader.py          # Direct routine upload tool
-├── 📄 batch_routine_uploader.py    # Batch routine import tool
+├── 📄 routine_uploader.py          # Routine upload tool
 ├── 📄 test_api_key.py              # API connection test
 ├── 📄 requirements.txt             # Python dependencies
 │
@@ -502,12 +418,10 @@ project-root/
 │   └── EXAMPLE_all_set_types.json
 │
 └── 📂 docs/                        # Documentation
-    ├── NAMING_STRATEGY.md
     ├── QUICK_START.md
     ├── QUICK_REFERENCE.md
     ├── PROGRESSION_TRACKER_README.md
-    ├── SECURITY_SETUP.md
-    └── ...
+    └── SECURITY_SETUP.md
 ```
 
 ---

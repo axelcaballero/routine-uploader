@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from contextlib import contextmanager
 from pathlib import Path
@@ -58,6 +59,119 @@ def _load_json_payload(json_path: str) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError(f"Expected a JSON object in {json_path}")
     return data
+
+
+def _safe_cell(value: str) -> str:
+    return value.replace("|", "/").strip()
+
+
+def _load_exercise_name_index(instructions_path: str = "instructions.md") -> dict[str, tuple[str, str]]:
+    """Build exercise ID -> (source exercise name, Hevy exercise name) index from instructions.md."""
+    exercise_index: dict[str, tuple[str, str]] = {}
+    pattern = re.compile(r"^\*\s+(.+?)\s+es\s+(.+?)\s+\|\s+([A-Za-z0-9-]+)")
+
+    try:
+        with open(instructions_path, "r", encoding="utf-8") as file_handle:
+            for raw_line in file_handle:
+                match = pattern.match(raw_line.strip())
+                if not match:
+                    continue
+
+                source_name = match.group(1).strip()
+                hevy_name = match.group(2).strip()
+                exercise_id = match.group(3).strip().lower()
+                exercise_index[exercise_id] = (source_name, hevy_name)
+    except FileNotFoundError:
+        return {}
+
+    return exercise_index
+
+
+def _extract_source_name(exercise: dict[str, Any], exercise_index: dict[str, tuple[str, str]]) -> str:
+    exercise_id = str(exercise.get("exercise_template_id", "")).strip().lower()
+    notes = str(exercise.get("notes", "")).strip()
+
+    if notes:
+        # Exercise notes convention starts with source exercise name before the first hyphen.
+        source_from_notes = notes.split(" - ", 1)[0].strip()
+        if source_from_notes:
+            return source_from_notes
+
+    indexed = exercise_index.get(exercise_id)
+    if indexed:
+        return indexed[0]
+    return exercise_id or "Unknown"
+
+
+def _extract_hevy_name(exercise: dict[str, Any], exercise_index: dict[str, tuple[str, str]]) -> str:
+    exercise_id = str(exercise.get("exercise_template_id", "")).strip().lower()
+    indexed = exercise_index.get(exercise_id)
+    if indexed:
+        return indexed[1]
+    return exercise_id or "Unknown"
+
+
+def _collapse_reps_for_cluster(reps_list: list[int]) -> str:
+    grouped: list[tuple[int, int]] = []
+    for rep in reps_list:
+        if grouped and grouped[-1][0] == rep:
+            grouped[-1] = (rep, grouped[-1][1] + 1)
+        else:
+            grouped.append((rep, 1))
+    return " + ".join(f"{count}x{rep}" for rep, count in grouped)
+
+
+def _format_sets_x_reps(exercise: dict[str, Any]) -> str:
+    sets = exercise.get("sets", [])
+    if not isinstance(sets, list):
+        return "-"
+
+    normal_reps = [
+        int(series.get("reps"))
+        for series in sets
+        if isinstance(series, dict)
+        and series.get("type") == "normal"
+        and isinstance(series.get("reps"), int)
+    ]
+
+    if not normal_reps:
+        return "-"
+
+    notes = str(exercise.get("notes", "")).lower()
+    is_cluster = "cluster" in notes
+    if is_cluster:
+        return f"cluster: {_collapse_reps_for_cluster(normal_reps)}"
+
+    if len(set(normal_reps)) == 1:
+        return f"{len(normal_reps)}x{normal_reps[0]}"
+
+    return " + ".join(f"1x{rep}" for rep in normal_reps)
+
+
+def _print_routine_summary_table(routine_file: str, instructions_path: str = "instructions.md") -> int:
+    payload = _load_json_payload(routine_file)
+    routine = payload.get("routine")
+    if not isinstance(routine, dict):
+        raise ValueError(f"Invalid routine JSON: missing 'routine' object in {routine_file}")
+
+    exercises = routine.get("exercises", [])
+    if not isinstance(exercises, list):
+        raise ValueError(f"Invalid routine JSON: 'routine.exercises' must be a list in {routine_file}")
+
+    exercise_index = _load_exercise_name_index(instructions_path)
+
+    print("| # | source exercise name | Hevy excercise name | Sets x Reps |")
+    print("|---|---|---|---|")
+
+    for index, exercise in enumerate(exercises, start=1):
+        if not isinstance(exercise, dict):
+            continue
+        source_name = _safe_cell(_extract_source_name(exercise, exercise_index))
+        hevy_name = _safe_cell(_extract_hevy_name(exercise, exercise_index))
+        sets_x_reps = _safe_cell(_format_sets_x_reps(exercise))
+        print(f"| {index} | {source_name} | {hevy_name} | {sets_x_reps} |")
+
+    return 0
 
 
 def _measurement_fields_from_args(args: argparse.Namespace) -> dict[str, Any]:
@@ -164,6 +278,17 @@ def build_parser() -> argparse.ArgumentParser:
     list_parser = routines_subparsers.add_parser("list-input", help="List routine JSON files in the input directory")
     list_parser.add_argument("input_dir", nargs="?", default="input", help="Directory to inspect (default: input)")
 
+    summary_table_parser = routines_subparsers.add_parser(
+        "summary-table",
+        help="Print the required 4-column validation table from a routine JSON file",
+    )
+    summary_table_parser.add_argument("routine_file", help="Routine JSON file to summarize")
+    summary_table_parser.add_argument(
+        "--instructions",
+        default="instructions.md",
+        help="Path to instructions.md for exercise name mapping (default: instructions.md)",
+    )
+
     folders_parser = subparsers.add_parser("folders", help="Routine folder utilities")
     folders_subparsers = folders_parser.add_subparsers(dest="command")
 
@@ -229,6 +354,8 @@ def main() -> int:
             return _run_entrypoint(validate_structure.main, ["validate_structure.py", *args.args])
         if args.command == "list-input":
             return _list_input_routines(args.input_dir)
+        if args.command == "summary-table":
+            return _print_routine_summary_table(args.routine_file, args.instructions)
         routines_parser = next(action for action in parser._actions if isinstance(action, argparse._SubParsersAction))
         routines_parser.choices["routines"].print_help()
         return 1

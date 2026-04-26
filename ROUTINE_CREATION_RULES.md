@@ -1,8 +1,54 @@
 # Routine Creation Rules
 
-**Last Updated:** 22 de noviembre de 2025
+**Last Updated:** 26 de abril de 2026
 
 These rules are CRITICAL for routine creation and must be applied to every routine. Reference this file at the start of every chat session.
+
+---
+
+## Rule 0: Routine-Level Notes Field
+
+Every routine **must** include a top-level `"notes"` field in the JSON (sibling to `"title"` and `"exercises"`).
+
+### Format
+```
+[Primary Muscle Groups]. Additional training: [muscle group], cardio and core
+```
+- **Primary Muscle Groups**: derived from the muscles actually trained (e.g., Chest, Triceps / Back, Biceps / Quads, Hamstrings, Glutes)
+- Keep focus wording **short and useful** for Hevy (avoid long anatomy labels unless they add clear value)
+- Prefer plain terms like **Upper chest**, **Rear delts**, **Quads**, **Glutes** over technical terms like "clavicular portion"
+- Include only meaningful secondary muscles; drop minor involvement if it adds noise
+- Omit "cardio and core" or additional muscle if not applicable to that day
+
+### Focus Notes Style (Required)
+- Good: `Upper chest, triceps. Additional training: calves, cardio and core`
+- Too long: `Chest (clavicular/upper pec emphasis), chest adduction fibers...`
+- Rule of thumb: target 2-4 focus items before the period
+
+### Additional Training Schedule (HSF cycle)
+| Day | Primary Focus | Additional Training |
+|-----|---------------|---------------------|
+| Día 1 – Pecho | Chest, Triceps | Calves, cardio and core |
+| Día 2 – Espalda | Back, Biceps | Forearms, cardio and core |
+| Día 3 – Pierna | Quads, Hamstrings, Glutes | Calves |
+| Día 4 – Brazos | Biceps, Triceps | Forearms, cardio and core |
+| Día 5 – Hombros | Shoulders, Rear Delts | Calves, cardio and core |
+| Día 6 – Pierna | Quads, Hamstrings, Glutes | — |
+
+### Example JSON
+```json
+{
+  "routine": {
+    "title": "Day 1 - Chest",
+    "folder_id": 2760878,
+    "notes": "Upper chest, triceps. Additional training: calves, cardio and core",
+    "exercises": [...]
+  }
+}
+```
+
+### ⚠️ Known API Limitation
+The Hevy app allows setting a routine note at creation time, but the `notes` field **cannot be modified via the API after creation**. Set it correctly before the first upload. (PUT `/v1/routines/{id}` silently ignores or may reject `notes` updates.)
 
 ---
 
@@ -100,6 +146,15 @@ Do NOT use any other set types.
 - If exercise description includes **"cluster"** in non-Core routines: use **30** seconds
 - If routine title mixes muscle group + Core (e.g., "Espalda + Core"), do **not** apply Core-routine global overrides
 
+### Cluster System Definition
+
+When an exercise uses the cluster system:
+- **Intent per set**: 8 reps
+- **Minimum sets**: 4
+- **Last set target**: 6 reps (exercise ends when athlete cannot complete 6)
+- **JSON encoding**: create 4 normal sets — the first 3 with `reps: 8`, the last with `reps: 6`
+- `rest_seconds`: 30 (as per the cluster rule above)
+
 ---
 
 ## Rule 7: Other Exercise Notes
@@ -116,12 +171,13 @@ Do NOT use any other set types.
 
 Before uploading any routine, verify:
 
+- [ ] Routine JSON includes top-level `"notes"` field with correct muscle groups + additional training
 - [ ] All rep ranges use the MAXIMUM value for normal sets
 - [ ] Non-Core "Duplicar repeticiones" exercises have doubled warmup reps (24)
 - [ ] All "Duplicar repeticiones" exercises have doubled normal set reps
 - [ ] Only warmup/normal/dropset/failure set types used
 - [ ] Core routines have no warmup sets, use 2 normal series, and `rest_seconds` = 20
-- [ ] Non-Core routines keep `rest_seconds` = 60 unless cluster (30)
+- [ ] Non-Core routines keep `rest_seconds` = 60 unless cluster (30, 4 sets: 3×8 + 1×6)
 - [ ] Exercise IDs validated against instructions.md
 - [ ] Notes field includes any required descriptive text
 
