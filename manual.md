@@ -1,10 +1,10 @@
-# Manual Mode Routine Upload (No Copilot)
+# Manual Hevy Toolkit Workflow (No Copilot)
 
-This file documents how to upload routines yourself from terminal only.
+This file documents how to run the routine-upload workflow yourself from terminal only.
 
 ## 1) Prerequisites
 
-- You are in repo root: `d:/DEV/sandbox/routine-uploader`
+- You are in the project root
 - `.env` contains a valid `HEVY_API_KEY`
 - Python venv exists at `.venv`
 
@@ -88,13 +88,13 @@ python exercise_validator.py --list | grep -i "keyword"
 Because parser output is batch JSON, validate and dry-run with batch uploader:
 
 ```bash
-python batch_routine_uploader.py input/dx_parsed.json --dry-run --folder-title "HSF 15"
+python hevy_cli.py routines batch-upload input/dx_parsed.json --dry-run --folder-title "HSF 15"
 ```
 
 ## 7) Live Upload
 
 ```bash
-python batch_routine_uploader.py input/dx_parsed.json --folder-title "HSF 15"
+python hevy_cli.py routines batch-upload input/dx_parsed.json --folder-title "HSF 15"
 ```
 
 Notes:
@@ -110,7 +110,7 @@ Use routine ID shown in uploader output:
 python -c "from hevy_api_client import HevyAPIClient; rid='PASTE_ROUTINE_ID'; c=HevyAPIClient(); r=c.get_routine(rid).get('routine', {}); print('title:', r.get('title')); print('folder_id:', r.get('folder_id')); print('exercises:', len(r.get('exercises', [])))"
 ```
 
-## 9) Single-Routine Alternative (If You Prefer `routine_uploader.py`)
+## 9) Single-Routine Alternative (If You Prefer the Direct Routine Script)
 
 Extract first routine from parsed batch to a single routine JSON:
 

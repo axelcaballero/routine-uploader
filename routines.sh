@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Routine Uploader Wrapper Script
-# Simplifies validation and uploading of workout routines
+# Legacy routine workflow wrapper
+# Prefer ./hevy.sh for the umbrella Hevy toolkit CLI
 
 set -e
 
@@ -16,20 +16,26 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Activate virtual environment
-if [ -d "venv" ]; then
-    source venv/bin/activate
+# Detect Python command
+if [ -x ".venv/Scripts/python.exe" ]; then
+    PYTHON=".venv/Scripts/python.exe"
+elif [ -x "venv/bin/python3" ]; then
+    PYTHON="venv/bin/python3"
+elif command -v python3 >/dev/null 2>&1; then
+    PYTHON="python3"
 else
-    echo -e "${RED}❌ Virtual environment not found. Run 'python3 -m venv venv' first.${NC}"
-    exit 1
+    PYTHON="python"
 fi
 
 # Display help
 show_help() {
     cat << EOF
-${BLUE}Routine Uploader - Workflow Helper${NC}
+${BLUE}Legacy Routine Workflow Helper${NC}
 
 Usage: ./routines.sh <command> [options]
+
+Recommended umbrella entrypoint:
+    ./hevy.sh routines <command> [options]
 
 Commands:
   ${GREEN}validate <file|dir|pattern>${NC}     Validate exercise IDs in routine JSON file(s)
@@ -75,7 +81,7 @@ cmd_validate() {
     fi
     
     echo -e "${BLUE}🔍 Validating: $target${NC}"
-    python3 exercise_validator.py "$target" -v
+    "$PYTHON" exercise_validator.py "$target" -v
 }
 
 # Interactive validation command
@@ -88,7 +94,7 @@ cmd_interactive() {
     fi
     
     echo -e "${BLUE}🔍 Validating (interactive mode): $target${NC}"
-    python3 exercise_validator.py "$target" -i
+    "$PYTHON" exercise_validator.py "$target" -i
 }
 
 # Upload command
@@ -105,14 +111,14 @@ cmd_upload() {
     # Pre-flight structure check
     echo -e "${BLUE}🔍 Pre-flight structure check...${NC}"
     if [ -f "$target" ]; then
-        python3 validate_structure.py "$target" || {
+        "$PYTHON" validate_structure.py "$target" || {
             echo -e "${RED}❌ Structure validation failed. Review errors above.${NC}"
             exit 1
         }
     fi
     
     echo -e "${BLUE}📤 Uploading: $target${NC}"
-    python3 routine_uploader.py "$target" $extra_args
+    "$PYTHON" routine_uploader.py "$target" $extra_args
 }
 
 # Batch validate command
@@ -130,7 +136,7 @@ cmd_batch_validate() {
         if [ -f "$file" ]; then
             count=$((count + 1))
             echo -e "\n${YELLOW}[$(printf "%02d" $count)]${NC} Validating: $(basename "$file")"
-            python3 exercise_validator.py "$file" -v || echo -e "${RED}  ⚠️  Validation failed${NC}"
+            "$PYTHON" exercise_validator.py "$file" -v || echo -e "${RED}  ⚠️  Validation failed${NC}"
         fi
     done
     
@@ -151,7 +157,7 @@ cmd_batch_upload() {
     fi
     
     echo -e "${BLUE}📤 Batch uploading all routines in: $dir${NC}"
-    python3 routine_uploader.py "$dir" $extra_args
+    "$PYTHON" routine_uploader.py "$dir" $extra_args
 }
 
 # List command
@@ -190,7 +196,7 @@ cmd_check() {
     fi
     
     echo -e "${BLUE}🔍 Checking JSON structure for API errors...${NC}"
-    python3 validate_structure.py "$target"
+    "$PYTHON" validate_structure.py "$target"
 }
 
 # Main command router

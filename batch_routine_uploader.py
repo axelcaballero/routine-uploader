@@ -1,6 +1,6 @@
-#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
+#!/usr/bin/env python3
 """
-Batch Routine Uploader - Safely handles importing multiple routines from external sources.
+Batch routine import workflow for the Hevy Training Toolkit.
 
 Designed to work with routine-extractor project output, with safeguards for bulk operations.
 """
@@ -319,7 +319,7 @@ class BatchRoutineUploader:
 
 
 def main():
-    """Main entry point for batch routine uploader."""
+    """Main entry point for batch routine import."""
     import argparse
     
     parser = argparse.ArgumentParser(

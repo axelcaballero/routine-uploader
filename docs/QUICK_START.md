@@ -1,4 +1,4 @@
-# Routine Creation Quick Start
+# Hevy Toolkit Routine Quick Start
 
 ## The Two Critical Rules (Prevents 90% of API Errors)
 
@@ -30,8 +30,8 @@ cp TEMPLATE_routine.json input/dia_X_name.json
 
 ### 3️⃣ Validate & Upload
 ```bash
-./routines.sh validate input/dia_X_name.json
-./routines.sh upload input/dia_X_name.json
+./hevy.sh routines validate input/dia_X_name.json
+./hevy.sh routines upload input/dia_X_name.json
 ```
 
 ### 📁 Check Your Routine Folders (Optional)

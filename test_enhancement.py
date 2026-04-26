@@ -1,4 +1,4 @@
-#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
+#!/usr/bin/env python3
 """
 Test script to demonstrate the routine enhancement functionality.
 This tests without needing API access.

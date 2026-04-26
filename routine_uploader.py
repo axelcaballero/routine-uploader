@@ -1,6 +1,6 @@
-#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
+#!/usr/bin/env python3
 """
-Script to upload routine JSON files to Hevy API.
+Routine upload workflow for the Hevy Training Toolkit.
 """
 
 import json

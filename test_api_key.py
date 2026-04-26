@@ -1,10 +1,13 @@
-#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
+#!/usr/bin/env python3
 """
 Quick test script to verify your Hevy API credentials
 """
 
-import requests
 import json
+import os
+import sys
+
+import requests
 
 def test_api_key(api_key):
     """Test if the API key works"""
@@ -23,22 +26,31 @@ def test_api_key(api_key):
         print(f"Error: {e}")
         return False
 
-if __name__ == "__main__":
-    import sys
-    
-    if len(sys.argv) < 2:
+
+def main() -> None:
+    """Main entry point for auth verification."""
+    if len(sys.argv) >= 2:
+        api_key = sys.argv[1]
+    else:
+        api_key = os.getenv("HEVY_API_KEY")
+
+    if not api_key:
         print("Usage: python test_api_key.py <api_key>")
         print("\nOr set HEVY_API_KEY environment variable")
-        sys.exit(1)
-    
-    api_key = sys.argv[1]
+        raise SystemExit(1)
+
     print(f"Testing API key: {api_key[:8]}...")
-    
+
     if test_api_key(api_key):
         print("\n✅ API key is valid!")
-    else:
-        print("\n❌ API key is invalid or expired")
-        print("\nTroubleshooting steps:")
-        print("1. Verify your account is Hevy Pro/Premium")
-        print("2. Generate a new API key at: https://hevy.com/settings?developer")
-        print("3. Make sure you copied the key exactly with no spaces")
+        return
+
+    print("\n❌ API key is invalid or expired")
+    print("\nTroubleshooting steps:")
+    print("1. Verify your account is Hevy Pro/Premium")
+    print("2. Generate a new API key at: https://hevy.com/settings?developer")
+    print("3. Make sure you copied the key exactly with no spaces")
+    raise SystemExit(1)
+
+if __name__ == "__main__":
+    main()

@@ -9,8 +9,8 @@ Your Hevy API key is **sensitive and should never be committed to GitHub**. Foll
 1. **Clone the repository**
 
    ```bash
-   git clone <your-repo-url>
-   cd routine-uploader
+   git clone <your-repo-url> hevy-training-toolkit
+   cd hevy-training-toolkit
    ```
 
 2. **Create your local `.env` file**

@@ -1,4 +1,4 @@
-#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
+#!/usr/bin/env python3
 """
 Pre-upload validator for Hevy routine JSON files
 Catches structural errors BEFORE sending to API
@@ -113,7 +113,7 @@ def print_results(file_path, errors, warnings):
     
     if not errors and not warnings:
         print("✅ All checks passed! Structure is valid.")
-        print("   Ready for: ./routines.sh validate <file>")
+        print("   Ready for: ./hevy.sh routines validate <file>")
         print()
         return True
     elif not errors:

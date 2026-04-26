@@ -1,6 +1,6 @@
-#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
+#!/usr/bin/env python3
 """
-Hevy API Client for creating and managing workout routines.
+Hevy API Client for routines, folders, workouts, and future Hevy training data workflows.
 Documentation: https://api.hevy.io/docs
 """
 

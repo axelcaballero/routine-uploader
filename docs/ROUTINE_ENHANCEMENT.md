@@ -19,7 +19,7 @@ The routine enhancement feature automatically populates missing warmup weights f
 
 ## Usage
 
-### With Routine Uploader (Recommended)
+### With the Hevy Toolkit Routine Workflow (Recommended)
 
 When uploading routines, enhancement is enabled by default and validation is automatic:
 

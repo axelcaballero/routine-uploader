@@ -13,8 +13,8 @@ Complete Python client for interacting with the Hevy API with methods for:
 - Updating/deleting routines
 - File I/O operations
 
-### 2. **Routine Uploader** (`src/routine_uploader.py`)
-Command-line tool to upload routines to Hevy with:
+### 2. **Toolkit Entry Points** (`hevy_cli.py`, `hevy.sh`, `routine_uploader.py`)
+Command-line surfaces for Hevy routine workflows with:
 - Single file upload
 - Batch upload from directories
 - Dry-run preview mode
@@ -32,17 +32,17 @@ Your API credentials are stored securely in `.env`
 
 ### Upload a Single Routine
 ```bash
-python src/routine_uploader.py /path/to/routine.json
+python hevy_cli.py routines upload /path/to/routine.json
 ```
 
 ### Upload All Routines from Directory
 ```bash
-python src/routine_uploader.py data/output/
+python hevy_cli.py routines upload data/output/
 ```
 
 ### Preview Before Upload (Dry Run)
 ```bash
-python src/routine_uploader.py routine.json --dry-run
+python hevy_cli.py routines upload routine.json --dry-run
 ```
 
 ## Usage Examples

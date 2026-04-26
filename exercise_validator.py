@@ -1,4 +1,4 @@
-#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
+#!/usr/bin/env python3
 """
 Exercise ID Validator
 Validates exercise template IDs against the authoritative source (instructions.md)
