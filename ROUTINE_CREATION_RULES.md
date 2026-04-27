@@ -20,6 +20,11 @@ Every routine **must** include a top-level `"notes"` field in the JSON (sibling 
 - Include only meaningful secondary muscles; drop minor involvement if it adds noise
 - Omit "cardio and core" or additional muscle if not applicable to that day
 
+### Source of Truth for Additional Training
+- Use `additional-traning.md` as the canonical configuration file for day-level additional training.
+- Notes generation in routine parsing reads this file and applies additional training automatically by day.
+- Cardio minutes in that file are informational; routine note format remains: `Additional training: [muscle group], cardio and core` (if applicable).
+
 ### Focus Notes Style (Required)
 - Good: `Upper chest, triceps. Additional training: calves, cardio and core`
 - Too long: `Chest (clavicular/upper pec emphasis), chest adduction fibers...`
@@ -34,6 +39,8 @@ Every routine **must** include a top-level `"notes"` field in the JSON (sibling 
 | Día 4 – Brazos | Biceps, Triceps | Forearms, cardio and core |
 | Día 5 – Hombros | Shoulders, Rear Delts | Calves, cardio and core |
 | Día 6 – Pierna | Quads, Hamstrings, Glutes | — |
+
+This schedule should mirror `additional-traning.md`.
 
 ### Example JSON
 ```json
@@ -196,6 +203,7 @@ After every successful routine creation/upload, return the validation table in t
 Before uploading any routine, verify:
 
 - [ ] Routine JSON includes top-level `"notes"` field with correct muscle groups + additional training
+- [ ] Additional training in notes matches `additional-traning.md` for that day
 - [ ] All rep ranges use the MAXIMUM value for normal sets
 - [ ] Non-Core "Duplicar repeticiones" exercises have doubled warmup reps (24)
 - [ ] All "Duplicar repeticiones" exercises have doubled normal set reps
