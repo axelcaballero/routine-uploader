@@ -25,9 +25,11 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 
 * Elevaciones laterales de los brazos con mancuernas es Lateral Raise (Dumbbell) | 422B08F1
 * Elevaciones laterales de los brazos en maquina es Lateral Raise (Machine) | D5D0354D
+* Elevación lateral alternas con polea baja es Single Arm Lateral Raise (Cable) | DE68C825 | Duplicar repeticiones.
 * Elevación frontal con mancuerna es Front Raise (Dumbbell) | 8293E554 | Si dice individual, duplicar repeticiones.
 * Elevación frontal con barra es Front Raise (Barbell) | BD86EFD5
 * Press militar en banca con mancuerna es Shoulder Press (Dumbbell) | 878CD1D0
+* Press militar en banca con mancuerna individual es Shoulder Press (Dumbbell) | 878CD1D0 | Duplicar repeticiones.
 * Press hombro en banca con barra es Seated Overhead Press (Barbell) | 91AF29E0
 * Deltoides posterior en maquina especifica es Rear Delt Reverse Fly (Machine) | D8281C62
 * Remo al cuello con barra es Upright Row (Barbell) | 7AB9A362
@@ -40,20 +42,22 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Curl de bíceps boca abajo sobre banco inclinado (con barra) es Spider Curl (Barbell) | 2348AB72
 * Curl de bíceps en polea con cuerda es Hammer Curl (Cable) | 36E8F14E
 * Curl Alternado con mancuerna es Bicep Curl (Dumbbell) | 37FCC2BB | Duplicar repeticiones. Si dice "sentado" incluir en notas.
-* Biceps en banca Scott es Preacher Curl (Machine) | 1E9A6B8E
 * Curl de bíceps con barra olímpica es Bicep Curl (Barbell) | A5AC6449
+* Concentrado con mancuerna es Concentration Curl | 724CDE60 | Duplicar repeticiones.
+* Alternado con mancuernas concentrado es Cross Body Hammer Curl | 32C4D4A2 | Duplicar repeticiones.
+* Martillos dobles es Hammer Curl (Dumbbell) | 7E3BC8B6
+* Biceps en banca Scott es Preacher Curl (Machine) | 1E9A6B8E
 * Predicador banca Scott barra Z es Preacher Curl (Barbell) | 4F942934
 * Predicador banca Scott con mancuerna individual es Preacher Curl (Dumbbell) | FAB6EB2F | Duplicar repeticiones.
-* Concentrado con mancuerna es Concentration Curl | 724CDE60 | Duplicar repeticiones.
-* Martillos dobles es Hammer Curl (Dumbbell) | 7E3BC8B6
 
 ## Triceps
 
 * Fondos en paralela es Triceps Dip (Assisted) | 4B4BF8C2
-* Fondos en máquina es Triceps Pushdown | 93A552C6 | Alternative: a falta de equipo
+* Fondos en máquina es Seated Dip Machine | 5122E7D9
 * Copa doble es Triceps Extension (Dumbbell) | 3765684D
-* Extensión de tríceps en polea alta con cuerda tras nuca es Tricep Rope Extension | 133b1583-9fc5-4dc6-9638-daed1b0525d0
+* Extensión de tríceps en polea alta con cuerda tras nuca es Overhead Triceps Extension (Cable) | B5EFBF9C
 * Extensión de tríceps en polea alta con triángulo es Triceps Pushdown | 93A552C6 | Agregar "con triangulo" en notas
+* Extensión de tríceps en polea alta agarre pronacion es Triceps Pushdown | 93A552C6 | Agregar "con barra, pronado" en notas
 * Extensión en polea alta con cuerda es Triceps Rope Pushdown | 94B7239B
 * Patada de mula individual es Kickback (Dumbbell) | 6127A3AD | Con mancuerna
 * Press francés en banca plana es Skullcrusher (Barbell) | 875F585F
