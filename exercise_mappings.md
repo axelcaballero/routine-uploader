@@ -6,20 +6,20 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 
 ## Pecho
 
-* Press de pecho en banca inclinada es Incline Bench Press (Barbell) | 50DFDFAB
 * Press de pecho en banca plana es Bench Press (Barbell) | 79D0BB3A
+* Press de pecho con mancuernas en banca plana es Bench Press (Dumbbell) | 3601968B
+* Press de pecho en banca inclinada es Incline Bench Press (Barbell) | 50DFDFAB
 * Press de pecho con mancuernas banca inclinada es Incline Bench Press (Dumbbell) | 07B38369
 * Press de pecho en banca declinada es Decline Bench Press (Barbell) | DA0F0470
 * Press de pecho con mancuernas banca declinada es Decline Bench Press (Dumbbell) | 18487FA7
-* Press de pecho con mancuernas en banca plana es Bench Press (Dumbbell) | 3601968B
 * Hammer incline press es Iso-Lateral Chest Press (Machine) | 24706DCD
 * Cristos con mancuerna es Chest Fly (Dumbbell) | 12017185
 * Cristos en maquina es Chest Fly (Machine) | 78683336
-* Curl de pie en polea alta (cables) es Cable Chest Press | b4869050-a3c5-40fa-9666-5f22255174a5
 * Curl de pie en polea baja es Low Cable Fly Crossovers | 293483AD
-* Iso lateral pecho hammer es Iso-Lateral Chest Press (Machine) | 24706DCD
 * Lagartijas es Push up | 392887AA | No warm ups.
 * Pullover con mancuernas es Pullover (Dumbbell) | 67280085
+* Curl de pie en polea alta (cables) es Cable Chest Press | b4869050-a3c5-40fa-9666-5f22255174a5
+* Iso lateral pecho hammer es Iso-Lateral Chest Press (Machine) | 24706DCD
 
 ## Hombro
 
