@@ -18,7 +18,7 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Curl de pie en polea alta (cables) es Cable Chest Press | b4869050-a3c5-40fa-9666-5f22255174a5
 * Curl de pie en polea baja es Low Cable Fly Crossovers | 293483AD
 * Iso lateral pecho hammer es Iso-Lateral Chest Press (Machine) | 24706DCD
-* Lagartijas es Push up | 392887AA
+* Lagartijas es Push up | 392887AA | No warm ups.
 * Pullover con mancuernas es Pullover (Dumbbell) | 67280085
 
 ## Hombro
@@ -52,7 +52,8 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 
 ## Triceps
 
-* Fondos en paralela es Triceps Dip (Assisted) | 4B4BF8C2
+* Fondos en paralela es Triceps Dip | 28BB4A95 | No warm ups.
+* Fondos asistidos es Triceps Dip (Assisted) | 4B4BF8C2
 * Fondos en máquina es Seated Dip Machine | 5122E7D9
 * Copa doble es Triceps Extension (Dumbbell) | 3765684D
 * Extensión de tríceps en polea alta con cuerda tras nuca es Overhead Triceps Extension (Cable) | B5EFBF9C
@@ -65,7 +66,8 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 
 ## Espalda
 
-* Dominadas deben ser dominadas asistidas, es Pull Up (Assisted) | 2C37EC5E
+* Dominadas es Pull Up | 1B2B1E7C | No warm ups.
+* Dominadas asistidas es Pull Up (Assisted) | 2C37EC5E
 * Remo horizontal con barra agarre supinación es Bent Over Row (Barbell) | 55E6546F
 * Remo en polea baja es Seated Cable Row (Bar Grip) | F1D60854
 * Remo con mancuerna en banco inclinado es Chest Supported Incline Row (Dumbbell) | 914F3A96
@@ -99,8 +101,8 @@ Format: `Spanish Name es English Equivalent | ID | NOTES (if applicable)`
 * Desplante fijo con mancuerna individual (hacia atrás, sin alternar pierna) es Reverse Lunge (Dumbbell) | FFDA283B | Duplicar repeticiones. Agregar "fijos" en notas.
 * Curl de bíceps femoral acostado es Lying Leg Curl (Machine) | B8127AD1
 * Curl de piernas sentado en máquina es Seated Leg Curl (Machine) | 11A123F3
-* Aductores sentado en máquina es Hip Adduction (Machine) | 8BEBFED6 | Cierra piernas
-* Abductores sentado en maquina es Hip Abduction (Machine) | F4B4C6EE | Abre piernas
+* Aductores sentado en máquina es Hip Adduction (Machine) | 8BEBFED6 | Agregar "Cierra piernas" en notas.
+* Abductores sentado en maquina es Hip Abduction (Machine) | F4B4C6EE | Agregar "Abre piernas" en notas.
 * Costurera es Seated Calf Raise | 062AB91A
 
 ## Core
