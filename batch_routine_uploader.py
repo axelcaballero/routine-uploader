@@ -8,7 +8,7 @@ Designed to work with routine-extractor project output, with safeguards for bulk
 import json
 import sys
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 from hevy_api_client import HevyAPIClient
 from routine_enhancer import RoutineEnhancer
 from exercise_validator import ExerciseValidator
@@ -17,10 +17,24 @@ from exercise_validator import ExerciseValidator
 class BatchRoutineUploader:
     """Handles bulk routine uploads with validation and safety checks."""
     
-    def __init__(self, api_client=None):
+    def __init__(self, api_client=None, session_folder_title: Optional[str] = None):
         self.client = api_client or HevyAPIClient()
         self.validator = ExerciseValidator()
         self.enhancer = RoutineEnhancer(api_client=self.client)
+        self.session_folder_title = session_folder_title.strip() if session_folder_title else None
+        self.session_folder_id = None
+
+        if self.session_folder_title:
+            self.session_folder_id = self.client.ensure_routine_folder_id(self.session_folder_title)
+            if not self.session_folder_id:
+                raise Exception(f"Session folder '{self.session_folder_title}' has no ID")
+            print(f"📁 Session upload folder verified: {self.session_folder_title} (ID: {self.session_folder_id})")
+
+    def _apply_session_folder(self, routine_data: Dict):
+        """Apply session folder ID to a routine payload when this session configured one."""
+        routine = routine_data.get("routine")
+        if isinstance(routine, dict) and self.session_folder_id is not None:
+            routine["folder_id"] = self.session_folder_id
     
     def _validate_structure(self, routine_data: Dict, errors: List[str]):
         """Inline structure validation."""
@@ -64,8 +78,8 @@ class BatchRoutineUploader:
         Expected format:
         {
           "routines": [
-            { "routine": { "title": "Día 1 – ...", "exercises": [...] } },
-            { "routine": { "title": "Día 2 – ...", "exercises": [...] } }
+                        { "routine": { "title": "Day 1 - ...", "exercises": [...] } },
+                        { "routine": { "title": "Day 2 - ...", "exercises": [...] } }
           ]
         }
         
@@ -103,6 +117,7 @@ class BatchRoutineUploader:
         print(f"{'='*70}\n")
         
         for i, routine_data in enumerate(routines, 1):
+            self._apply_session_folder(routine_data)
             routine_title = routine_data.get('routine', {}).get('title', f'Routine {i}')
             print(f"[{i}/{len(routines)}] {routine_title}")
             
@@ -176,6 +191,10 @@ class BatchRoutineUploader:
             return results
         
         print(f"\n✅ All {len(valid_routines)} routine(s) passed validation!")
+        if self.session_folder_id is not None:
+            print(f"📁 Session folder: {self.session_folder_title} (ID: {self.session_folder_id})")
+        else:
+            print("📁 Session folder: not overridden (using each routine's folder_id)")
         
         # Interactive confirmation
         if interactive and not dry_run:
@@ -200,6 +219,7 @@ class BatchRoutineUploader:
         print(f"{'='*70}\n")
         
         for i, routine_data in enumerate(valid_routines, 1):
+            self._apply_session_folder(routine_data)
             routine_title = routine_data.get('routine', {}).get('title', f'Routine {i}')
             print(f"[{i}/{len(valid_routines)}] {routine_title}")
             
@@ -309,6 +329,9 @@ def main():
 Examples:
   # Validate only (dry run)
   %(prog)s extracted_routines.json --dry-run
+
+    # Validate/upload using a session folder (create if missing)
+    %(prog)s extracted_routines.json --folder-title "HSF 15"
   
   # Upload with confirmation prompt
   %(prog)s extracted_routines.json
@@ -323,13 +346,13 @@ Input format:
   Batch format (multiple routines):
     {
       "routines": [
-        { "routine": { "title": "Día 1 – ...", ... } },
-        { "routine": { "title": "Día 2 – ...", ... } }
+                { "routine": { "title": "Day 1 - ...", ... } },
+                { "routine": { "title": "Day 2 - ...", ... } }
       ]
     }
   
   Single routine format (also accepted):
-    { "routine": { "title": "Día 1 – ...", ... } }
+        { "routine": { "title": "Day 1 - ...", ... } }
         """
     )
     
@@ -340,6 +363,8 @@ Input format:
                        help='Skip warmup weight enhancement')
     parser.add_argument('--no-interactive', action='store_true',
                        help='Skip confirmation prompt (auto-upload)')
+    parser.add_argument('--folder-title', type=str,
+                       help='Session folder title for this run (finds or creates folder and applies to all routines)')
     
     args = parser.parse_args()
     
@@ -351,7 +376,7 @@ Input format:
     
     try:
         # Initialize uploader
-        uploader = BatchRoutineUploader()
+        uploader = BatchRoutineUploader(session_folder_title=args.folder_title)
         
         # Load routines
         print(f"📂 Loading routines from: {args.file}")

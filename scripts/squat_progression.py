@@ -25,7 +25,7 @@ def get_squat_exercise(client: HevyAPIClient) -> Tuple[str, str]:
     Returns:
         Tuple of (template_id, exercise_name)
     """
-    # Using the known Barbell Squat ID from instructions.md
+    # Using the known Barbell Squat ID from exercise_mappings.md
     template_id = "D04AC939"
     exercise_name = "Squat (Barbell)"
     

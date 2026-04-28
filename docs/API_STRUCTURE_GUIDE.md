@@ -10,7 +10,7 @@
 **Wrong:**
 ```json
 {
-  "name": "Día X",
+  "name": "Day X",
   "description": "...",
   "exercises": [...]
 }
@@ -20,7 +20,7 @@
 ```json
 {
   "routine": {
-    "title": "Día X",
+    "title": "Day X - Focus",
     "folder_id": 1812915,
     "exercises": [...]
   }
@@ -54,45 +54,13 @@
 
 ---
 
-### 3. ❌ RPE Field Not Allowed in Routines (Root Cause of Third Failure)
-**Error:** `API Error: 400 - {"error":"\"routine.exercises[0].sets[0].rpe\" is not allowed"}`
-
-**Problem:** The `rpe` field is ONLY valid for workouts, NOT for routine creation. Routines are templates and cannot include RPE values.
-
-**Wrong:**
-```json
-{
-  "type": "normal",
-  "weight_kg": 60,
-  "reps": 6,
-  "rpe": null    // ❌ NOT ALLOWED IN ROUTINES
-}
-```
-
-**Correct:**
-```json
-{
-  "type": "normal",
-  "weight_kg": 60,
-  "reps": 6,
-  "distance_meters": null,
-  "duration_seconds": null
-}
-```
-
-**Key Distinction:**
-- **Routines** = Templates for future workouts (no RPE)
-- **Workouts** = Actual completed sessions (can include RPE)
-
----
-
 ## Required Fields for Each Exercise
 
 ```json
 {
   "exercise_template_id": "91AF29E0",
   "superset_id": null,
-  "rest_seconds": 20,
+  "rest_seconds": 60,
   "notes": "Exercise description and set scheme",
   "sets": [
     {
@@ -100,8 +68,8 @@
       "weight_kg": 40,
       "reps": 12,
       "distance_meters": null,
-      "duration_seconds": null
-      // ⚠️ NO "rpe" field in routines!
+      "duration_seconds": null,
+      "custom_metric": null
     }
   ]
 }
@@ -117,7 +85,7 @@
 | `routine.folder_id` | number | ✅ | Always use: 1812915 |
 | `exercise_template_id` | string | ✅ | 8-char hex OR UUID format |
 | `superset_id` | null | ✅ | Always null (we don't use supersets) |
-| `rest_seconds` | number | ✅ | Usually 15-20 seconds |
+| `rest_seconds` | number | ✅ | Non-Core default 60; Core routines use 20 for all exercises; cluster in non-Core uses 30 |
 | `notes` | string | ✅ | Exercise description with intensity notes |
 | `type` | string | ✅ | **MUST be**: "warmup" or "normal" |
 | `weight_kg` | number | ✅ | 0 for isometric/duration-based exercises |
@@ -139,7 +107,7 @@ Per https://api.hevyapp.com/docs/#/ - only these 4 types are officially supporte
 ```
 
 ### "warmup" Type
-- First set in each exercise (light, prep set)
+- First set in each exercise for non-Core routines (light, prep set)
 - Example: `40kg x 12 reps` (before work sets)
 - Often auto-populated from exercise history
 
@@ -190,13 +158,15 @@ For exercises like "Sentadilla isométrica" (60-second hold):
 ## Quick Checklist Before Upload
 
 - [ ] Routine wrapped in `"routine"` key?
-- [ ] `folder_id` set to correct folder (e.g., HSF 13 = `1986567`)?
+- [ ] `folder_id` set to `1812915`?
 - [ ] All set types are valid per Hevy API: `"warmup"`, `"normal"`, `"dropset"`, or `"failure"`?
-- [ ] **NO `rpe` field in any sets** (RPE only valid for workouts, NOT routines)?
-- [ ] All exercise IDs validated against `instructions.md`?
-- [ ] Warmup sets included for each exercise (usually first set)?
+- [ ] All exercise IDs validated against `exercise_mappings.md`?
+- [ ] Non-Core routine: warmup sets included (usually first set)?
+- [ ] Core routine: no warmup sets included?
 - [ ] Duration-based exercises use `duration_seconds` with `weight_kg: 0, reps: 0`?
 - [ ] `superset_id` is `null` for all exercises?
+- [ ] Core routine: each exercise has 2 normal series and `rest_seconds` = 20?
+- [ ] Non-Core routine: `rest_seconds` follows 60 default (or 30 for cluster)?
 - [ ] Exercise notes include sets/reps/intensity info?
 
 ---
@@ -206,7 +176,7 @@ For exercises like "Sentadilla isométrica" (60-second hold):
 Instead of manually building JSON, copy `/template_routine.json` and modify only:
 1. `routine.title` → Exercise name
 2. Exercise array → Add/remove exercises from the template examples
-3. `exercise_template_id` → Exercise IDs from `instructions.md`
+3. `exercise_template_id` → Exercise IDs from `exercise_mappings.md`
 4. Set weights and reps → Based on your workout plan
 
 This prevents structural errors and ensures compliance with Hevy API constraints.

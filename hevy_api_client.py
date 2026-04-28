@@ -1,23 +1,70 @@
-#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
+#!/usr/bin/env python3
 """
-Hevy API Client for creating and managing workout routines.
+Hevy API Client for routines, folders, workouts, and future Hevy training data workflows.
 Documentation: https://api.hevy.io/docs
 """
 
 import os
 import json
 import requests
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Iterable
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
 
+BODY_MEASUREMENT_FIELDS = (
+    "weight_kg",
+    "lean_mass_kg",
+    "fat_percent",
+    "neck_cm",
+    "shoulder_cm",
+    "chest_cm",
+    "left_bicep_cm",
+    "right_bicep_cm",
+    "left_forearm_cm",
+    "right_forearm_cm",
+    "abdomen",
+    "waist",
+    "hips",
+    "left_thigh",
+    "right_thigh",
+    "left_calf",
+    "right_calf",
+)
+
+
 class HevyAPIClient:
     """Client for interacting with the Hevy API"""
     
     BASE_URL = "https://api.hevyapp.com"
+
+    @staticmethod
+    def _filter_body_measurement_fields(
+        measurement_data: Dict[str, Any],
+        *,
+        include_date: bool = False,
+        include_nulls: bool = True,
+    ) -> Dict[str, Any]:
+        """Return only supported body measurement fields."""
+        allowed_fields = set(BODY_MEASUREMENT_FIELDS)
+        if include_date:
+            allowed_fields.add("date")
+
+        filtered: Dict[str, Any] = {}
+        for field_name, value in measurement_data.items():
+            if field_name not in allowed_fields:
+                continue
+            if value is None and not include_nulls:
+                continue
+            filtered[field_name] = value
+        return filtered
+
+    @staticmethod
+    def body_measurement_fields() -> Iterable[str]:
+        """Return supported body measurement field names."""
+        return BODY_MEASUREMENT_FIELDS
     
     def __init__(self, api_key: Optional[str] = None):
         """
@@ -38,6 +85,7 @@ class HevyAPIClient:
             "api-key": self.api_key,
             "Content-Type": "application/json",
         }
+        self._folder_cache: Dict[str, Dict[str, Any]] = {}
     
     def _make_request(
         self, 
@@ -183,6 +231,92 @@ class HevyAPIClient:
             Folder data
         """
         return self._make_request("GET", f"/v1/routine_folders/{folder_id}")
+
+    def find_routine_folder_by_title(
+        self,
+        folder_title: str,
+        page_size: int = 10
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Find an existing routine folder by title.
+
+        Args:
+            folder_title: Folder title to search for
+            page_size: Number of folders to fetch per page
+
+        Returns:
+            Folder object if found, otherwise None
+        """
+        normalized_title = folder_title.strip().casefold()
+        page_size = min(max(1, page_size), 10)
+        page = 1
+
+        while True:
+            response = self.list_routine_folders(page=page, page_size=page_size)
+            folders = response.get("routine_folders", [])
+
+            for folder in folders:
+                existing_title = str(folder.get("title", "")).strip().casefold()
+                if existing_title == normalized_title:
+                    return folder
+
+            if len(folders) < page_size:
+                break
+
+            page += 1
+
+        return None
+
+    def ensure_routine_folder(self, folder_title: str) -> Dict[str, Any]:
+        """
+        Ensure a routine folder exists, creating it if needed.
+
+        Args:
+            folder_title: Folder title to find or create
+
+        Returns:
+            Folder object
+        """
+        cache_key = folder_title.strip().casefold()
+        cached_folder = self._folder_cache.get(cache_key)
+        if cached_folder:
+            return cached_folder
+
+        existing_folder = self.find_routine_folder_by_title(folder_title)
+        if existing_folder:
+            self._folder_cache[cache_key] = existing_folder
+            return existing_folder
+
+        response = self.create_routine_folder(folder_title)
+        created_folder = response.get("routine_folder")
+
+        if isinstance(created_folder, dict):
+            self._folder_cache[cache_key] = created_folder
+            return created_folder
+
+        if isinstance(created_folder, list) and created_folder:
+            self._folder_cache[cache_key] = created_folder[0]
+            return created_folder[0]
+
+        raise Exception(f"Failed to create routine folder '{folder_title}'")
+
+    def ensure_routine_folder_id(self, folder_title: str) -> Any:
+        """
+        Ensure a routine folder exists and return its ID.
+
+        Args:
+            folder_title: Folder title to find or create
+
+        Returns:
+            Folder ID
+        """
+        folder = self.ensure_routine_folder(folder_title)
+        folder_id = folder.get("id")
+
+        if not folder_id:
+            raise Exception(f"Routine folder '{folder_title}' has no ID")
+
+        return folder_id
     
     def update_routine(self, routine_id: str, routine_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -255,6 +389,73 @@ class HevyAPIClient:
             Detailed workout object with all exercises and sets
         """
         return self._make_request("GET", f"/v1/workouts/{workout_id}")
+
+    def list_body_measurements(self, page: int = 1, page_size: int = 10) -> Dict[str, Any]:
+        """Get a paginated list of body measurements for the authenticated user."""
+        params = {"page": page, "pageSize": page_size}
+        return self._make_request("GET", "/v1/body_measurements", params=params)
+
+    def get_body_measurement(self, date: str) -> Dict[str, Any]:
+        """Get a single body measurement entry by date (YYYY-MM-DD)."""
+        return self._make_request("GET", f"/v1/body_measurements/{date}")
+
+    def create_body_measurement(self, measurement_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create a body measurement entry.
+
+        The request body must include a `date` field and may include any supported
+        body measurement fields documented by Hevy.
+        """
+        payload = self._filter_body_measurement_fields(
+            measurement_data,
+            include_date=True,
+            include_nulls=True,
+        )
+        if not payload.get("date"):
+            raise ValueError("Body measurement creation requires a 'date' field (YYYY-MM-DD).")
+        return self._make_request("POST", "/v1/body_measurements", data=payload)
+
+    def replace_body_measurement(self, date: str, measurement_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Replace a body measurement entry for a given date.
+
+        Hevy overwrites all fields on PUT and sets omitted fields to null.
+        This method sends only the supported measurement fields and leaves that
+        overwrite behavior intact.
+        """
+        payload = self._filter_body_measurement_fields(
+            measurement_data,
+            include_date=False,
+            include_nulls=True,
+        )
+        return self._make_request("PUT", f"/v1/body_measurements/{date}", data=payload)
+
+    def update_body_measurement(
+        self,
+        date: str,
+        measurement_data: Dict[str, Any],
+        *,
+        preserve_existing: bool = True,
+    ) -> Dict[str, Any]:
+        """Update a body measurement entry.
+
+        By default this preserves existing values for omitted fields to protect
+        callers from the API's null-on-omit PUT semantics. Set
+        `preserve_existing=False` to perform a full replacement.
+        """
+        updates = self._filter_body_measurement_fields(
+            measurement_data,
+            include_date=False,
+            include_nulls=True,
+        )
+        if preserve_existing:
+            current = self.get_body_measurement(date)
+            existing = self._filter_body_measurement_fields(
+                current,
+                include_date=False,
+                include_nulls=True,
+            )
+            existing.update(updates)
+            updates = existing
+        return self.replace_body_measurement(date, updates)
     
     def update_workout(self, workout_id: str, description: str) -> Dict[str, Any]:
         """

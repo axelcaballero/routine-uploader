@@ -113,7 +113,7 @@ python scripts/next_workout.py
 2. Extracts the routine ID from that workout
 3. Retrieves routine details to get the folder ID
 4. Fetches all routines and filters by folder ID (ensures correct routine sequence)
-5. Extracts día numbers from routine titles
+5. Extracts day numbers from routine titles
 6. Finds the next routine in numerical sequence (with wraparound)
 
 **Output:**
@@ -124,12 +124,12 @@ python scripts/next_workout.py
 **Example:**
 
 ```text
-Most recent: Día 7 – espalda y hombro (Día 7)
+Most recent: Day 7 - Back and Shoulders (Day 7)
 Folder ID: 1812915
 Found 16 routines in folder
 
 YOUR NEXT WORKOUT
-📅 Routine: Día 8 – Pecho
+📅 Routine: Day 8 - Chest
 💪 Total Exercises: 6
 Exercises:
   1. Bench Press (Dumbbell) (8 reps) (4 sets)
@@ -222,12 +222,43 @@ Identifies:
 # Upload a single routine
 python routine_uploader.py routine.json
 
+# Upload to a specific folder for this session (creates folder if missing)
+python routine_uploader.py routine.json --folder-title "HSF 15"
+
 # Upload all routines from a directory
 python routine_uploader.py ./routines/
 
 # Preview without uploading (dry-run)
 python routine_uploader.py routine.json --dry-run
+
+# Dry-run with session folder verification
+python routine_uploader.py routine.json --dry-run --folder-title "HSF 15"
 ```
+
+`--folder-title` is session-scoped: it only applies to that command run.
+If omitted, uploader uses each routine file's existing `folder_id`.
+
+### Print Required Validation Table Format
+
+Use the umbrella CLI to print the exact 4-column table format required in chat:
+
+```bash
+python hevy_cli.py routines summary-table input/dia_1_pecho_hsf16.json
+```
+
+Output columns are fixed to:
+
+```text
+# | source exercise name | Hevy excercise name | Sets x Reps
+```
+
+The command also appends a footer line:
+
+```text
+Routine note: <routine notes text>
+```
+
+`Sets x Reps` includes warmup + working sets (for example `1x12 + 4x8`).
 
 ### Update Workout Notes
 
@@ -350,6 +381,9 @@ python scripts/advanced_visualizations.py
 
 # Upload a routine
 python routine_uploader.py routine.json
+
+# Upload with per-session folder override
+python routine_uploader.py routine.json --folder-title "HSF 15"
 ```
 
 ---

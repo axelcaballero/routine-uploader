@@ -6,7 +6,7 @@
       {
         "exercise_template_id": "79D0BB3A",
         "superset_id": null,
-        "rest_seconds": 20,
+        "rest_seconds": 60,
         "notes": "Bench Press - Standard warmup + normal sets",
         "sets": [
           {
@@ -38,7 +38,7 @@
       {
         "exercise_template_id": "D04AC939",
         "superset_id": null,
-        "rest_seconds": 20,
+        "rest_seconds": 60,
         "notes": "Squat - With drop set (heavy to light)",
         "sets": [
           {
@@ -89,7 +89,7 @@
       {
         "exercise_template_id": "6A6C31A5",
         "superset_id": null,
-        "rest_seconds": 20,
+        "rest_seconds": 60,
         "notes": "Lat Pulldown - Normal and failure sets",
         "sets": [
           {
@@ -122,7 +122,7 @@
       {
         "exercise_template_id": "878CD1D0",
         "superset_id": null,
-        "rest_seconds": 20,
+        "rest_seconds": 60,
         "notes": "Shoulder Press - Normal sets",
         "sets": [
           {
@@ -154,7 +154,7 @@
       {
         "exercise_template_id": "1DF4A847",
         "superset_id": null,
-        "rest_seconds": 20,
+        "rest_seconds": 60,
         "notes": "Seated Row - Normal sets",
         "sets": [
           {

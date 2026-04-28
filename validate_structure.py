@@ -1,4 +1,4 @@
-#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
+#!/usr/bin/env python3
 """
 Pre-upload validator for Hevy routine JSON files
 Catches structural errors BEFORE sending to API
@@ -34,9 +34,7 @@ def validate_routine_structure(file_path):
         if "title" not in routine:
             errors.append("❌ Missing routine.title")
         if "folder_id" not in routine:
-            errors.append("❌ Missing routine.folder_id (should be 1812915)")
-        elif routine["folder_id"] != 1812915:
-            warnings.append(f"⚠️  Unusual folder_id: {routine['folder_id']} (typically 1812915)")
+            warnings.append("⚠️  Missing routine.folder_id (set one in JSON or use --folder-title for this upload session)")
         
         if "exercises" not in routine:
             errors.append("❌ Missing routine.exercises array")
@@ -115,7 +113,7 @@ def print_results(file_path, errors, warnings):
     
     if not errors and not warnings:
         print("✅ All checks passed! Structure is valid.")
-        print("   Ready for: ./routines.sh validate <file>")
+        print("   Ready for: ./hevy.sh routines validate <file>")
         print()
         return True
     elif not errors:

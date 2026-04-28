@@ -13,8 +13,8 @@ Complete Python client for interacting with the Hevy API with methods for:
 - Updating/deleting routines
 - File I/O operations
 
-### 2. **Routine Uploader** (`src/routine_uploader.py`)
-Command-line tool to upload routines to Hevy with:
+### 2. **Toolkit Entry Points** (`hevy_cli.py`, `hevy.sh`, `routine_uploader.py`)
+Command-line surfaces for Hevy routine workflows with:
 - Single file upload
 - Batch upload from directories
 - Dry-run preview mode
@@ -32,17 +32,17 @@ Your API credentials are stored securely in `.env`
 
 ### Upload a Single Routine
 ```bash
-python src/routine_uploader.py /path/to/routine.json
+python hevy_cli.py routines upload /path/to/routine.json
 ```
 
 ### Upload All Routines from Directory
 ```bash
-python src/routine_uploader.py data/output/
+python hevy_cli.py routines upload data/output/
 ```
 
 ### Preview Before Upload (Dry Run)
 ```bash
-python src/routine_uploader.py routine.json --dry-run
+python hevy_cli.py routines upload routine.json --dry-run
 ```
 
 ## Usage Examples
@@ -143,6 +143,79 @@ for template in templates.get('exercises', []):
   }
 }
 ```
+
+## 📁 Routine Folder Management
+
+### View All Routine Folders
+To quickly see all your routine folders and identify the most recent one:
+
+```bash
+python get_recent_folder.py
+```
+
+**Output shows:**
+- Ranking of all routine folders (most recent first)
+- Folder names and their index position
+- Folder IDs for API operations
+- Highlights the most recent folder
+
+### Using Folders in Routine Uploads
+When uploading routines, specify the folder_id:
+
+```bash
+# Single routine to specific folder
+python routine_uploader.py routine.json --folder-title "HSF 15"
+
+# Batch upload to folder
+python batch_routine_uploader.py extracted_routines.json --folder-title "HSF 15"
+```
+
+### Available Folder Methods
+
+| Method | Purpose |
+|--------|---------|
+| `list_routine_folders(page, page_size)` | Get all folders |
+| `get_routine_folder(folder_id)` | Get specific folder |
+| `find_routine_folder_by_title(title)` | Search for folder by name |
+| `ensure_routine_folder(title)` | Find or create folder |
+| `create_routine_folder(title)` | Create new folder |
+
+### Python Example
+```python
+from hevy_api_client import HevyAPIClient
+
+client = HevyAPIClient()
+
+# List all folders
+folders = client.list_routine_folders()
+for folder in folders.get('routine_folders', []):
+    print(f"{folder['title']} (ID: {folder['id']})")
+
+# Find or create a folder
+folder = client.ensure_routine_folder("HSF 15")
+folder_id = folder['id']
+
+# Upload routine to folder
+routine_data['routine']['folder_id'] = folder_id
+response = client.create_routine(routine_data)
+```
+
+## Known API Limitations
+
+### `folder_id` Not Allowed in Routine Updates
+The Hevy API rejects `folder_id` when updating an existing routine via `PUT /v1/routines/{id}`:
+```
+400 Bad Request: "routine.folder_id" is not allowed
+```
+**Workaround**: Strip `folder_id` from the payload before calling `update_routine()`:
+```python
+import copy
+payload = copy.deepcopy(routine_data)
+payload['routine'].pop('folder_id', None)
+client.update_routine(routine_id, payload)
+```
+
+---
 
 ## Troubleshooting
 

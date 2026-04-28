@@ -8,16 +8,227 @@ Parses text files from routine-extractor into validated JSON for batch upload.
 import json
 import sys
 import re
+from collections import Counter
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 
 
 class RoutineTextParser:
     """Parses plain text routine descriptions into JSON format."""
+    ROUTINE_TITLE_PATTERN = re.compile(r'^(dia|día|day)\s*(\d+)\s*[-–:]?\s*(.*)$', re.IGNORECASE)
     
-    def __init__(self, exercise_mappings_file: str = "instructions.md"):
+    def __init__(
+        self,
+        exercise_mappings_file: str = "exercise_mappings.md",
+        additional_training_file: str = "additional-traning.md"
+    ):
         self.exercise_mappings = self._load_exercise_mappings(exercise_mappings_file)
+        self.exercise_id_to_section = self._load_exercise_sections(exercise_mappings_file)
+        self.additional_training_by_day = self._load_additional_training_schedule(additional_training_file)
         self.folder_id = 1812915
+        self.core_keywords = [
+            'core', 'plancha', 'plank', 'crunch', 'abdominal', 'abs',
+            'oblicuo', 'oblique', 'mountain climber', 'vacio abdominal',
+            'v up', 'v-up', 'toe touch', 'side plank', 'bicycle crunch',
+            'reverse crunch', 'leg raise', 'elbow to knee'
+        ]
+        self.muscle_group_keywords = [
+            'pecho', 'espalda', 'hombro', 'pierna', 'biceps', 'triceps',
+            'chest', 'back', 'shoulder', 'leg', 'arms', 'push', 'pull'
+        ]
+        self.routine_title_keyword_map = {
+            'pecho': 'Chest',
+            'espalda': 'Back',
+            'hombro': 'Shoulders',
+            'hombros': 'Shoulders',
+            'pierna': 'Legs',
+            'piernas': 'Legs',
+            'biceps': 'Biceps',
+            'triceps': 'Triceps',
+            'core': 'Core'
+        }
+
+    def _load_exercise_sections(self, file_path: str) -> Dict[str, str]:
+        """Load exercise template ID to section mapping from exercise_mappings.md headings."""
+        id_to_section: Dict[str, str] = {}
+        current_section = ""
+        section_label_map = {
+            'pecho': 'Chest',
+            'hombro': 'Shoulders',
+            'biceps': 'Biceps',
+            'triceps': 'Triceps',
+            'espalda': 'Back',
+            'pierna': 'Legs',
+            'core': 'Core'
+        }
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                for raw_line in f:
+                    line = raw_line.strip()
+                    if line.startswith('## '):
+                        section_title = line.replace('## ', '').strip()
+                        normalized = self._normalize_text(section_title)
+                        current_section = section_label_map.get(normalized, section_title)
+                        continue
+
+                    match = re.match(r'\* (.+?) es (.+?) \| ([A-Z0-9a-f-]+)', line)
+                    if not match:
+                        continue
+
+                    exercise_id = match.group(3).strip()
+                    if exercise_id and current_section and exercise_id not in id_to_section:
+                        id_to_section[exercise_id] = current_section
+        except FileNotFoundError:
+            print(f"Warning: {file_path} not found. Focus-area derivation will be limited.")
+
+        return id_to_section
+
+    def _load_additional_training_schedule(self, file_path: str) -> Dict[int, str]:
+        """Load per-day additional training config from additional-traning.md."""
+        day_schedule: Dict[int, str] = {}
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                for raw_line in f:
+                    line = raw_line.strip()
+                    match = re.match(r'^\*\s*Day\s+(\d+)\s+[^,]*,\s*(.+?)\.?$', line, flags=re.IGNORECASE)
+                    if not match:
+                        continue
+
+                    day_number = int(match.group(1))
+                    details = match.group(2).strip()
+                    normalized = self._normalize_text(details)
+
+                    has_calves = 'calves' in normalized
+                    has_forearms = 'forearms' in normalized
+                    has_cardio_core = 'cardio and core' in normalized or ('cardio' in normalized and 'core' in normalized)
+
+                    muscle_parts = []
+                    if has_calves:
+                        muscle_parts.append('calves')
+                    if has_forearms:
+                        muscle_parts.append('forearms')
+
+                    if len(muscle_parts) == 2:
+                        muscle_text = f"{muscle_parts[0]} and {muscle_parts[1]}"
+                    elif len(muscle_parts) == 1:
+                        muscle_text = muscle_parts[0]
+                    else:
+                        muscle_text = ""
+
+                    if muscle_text and has_cardio_core:
+                        day_schedule[day_number] = f"{muscle_text}, cardio and core"
+                    elif muscle_text:
+                        day_schedule[day_number] = muscle_text
+                    elif has_cardio_core:
+                        day_schedule[day_number] = "cardio and core"
+        except FileNotFoundError:
+            print(f"Warning: {file_path} not found. Additional training notes will be omitted.")
+
+        return day_schedule
+
+    def _extract_day_number(self, routine_title: str) -> Optional[int]:
+        """Extract day number from normalized routine titles like 'Day 3 - Legs'."""
+        match = re.search(r'\bday\s*(\d+)\b', self._normalize_text(routine_title))
+        if match:
+            return int(match.group(1))
+        return None
+
+    def _derive_primary_focus(self, routine_title: str, exercises: List[Dict]) -> str:
+        """Infer focus muscles from mapped exercises and source names."""
+        focus_counts: Counter[str] = Counter()
+
+        for exercise in exercises:
+            exercise_id = str(exercise.get('exercise_template_id', '')).strip()
+            source_notes = str(exercise.get('notes', '')).strip()
+            source_name = source_notes.split(' - ', 1)[0].strip() if source_notes else ''
+            normalized_name = self._normalize_text(source_name)
+            section = self.exercise_id_to_section.get(exercise_id, '')
+
+            if section == 'Chest':
+                if 'inclinad' in normalized_name:
+                    focus_counts['Upper Chest'] += 2
+                elif 'declinad' in normalized_name:
+                    focus_counts['Lower Chest'] += 2
+                else:
+                    focus_counts['Chest'] += 2
+
+            if section == 'Back':
+                if any(token in normalized_name for token in ['remo', 'row']):
+                    focus_counts['Upper Back'] += 2
+                if any(token in normalized_name for token in ['jalon', 'dominada', 'pulldown', 'pull up', 'lat']):
+                    focus_counts['Lats'] += 2
+                if not any(token in normalized_name for token in ['remo', 'row', 'jalon', 'dominada', 'pulldown', 'pull up', 'lat']):
+                    focus_counts['Back'] += 1
+
+            if section == 'Shoulders':
+                if any(token in normalized_name for token in ['posterior', 'pajaro', 'rear']):
+                    focus_counts['Rear Delts'] += 2
+                if 'lateral' in normalized_name:
+                    focus_counts['Lateral Delts'] += 2
+                if any(token in normalized_name for token in ['frontal', 'front']):
+                    focus_counts['Front Delts'] += 2
+                if any(token in normalized_name for token in ['press', 'militar', 'overhead']):
+                    focus_counts['Shoulders'] += 2
+
+            if section == 'Legs':
+                if any(token in normalized_name for token in ['prensa', 'sentadilla', 'extension de pierna', 'hack']):
+                    focus_counts['Quads'] += 2
+                if any(token in normalized_name for token in ['puente', 'hip thrust', 'desplante', 'lunge']):
+                    focus_counts['Glutes'] += 2
+                if any(token in normalized_name for token in ['femoral', 'peso muerto', 'leg curl', 'curl de piernas']):
+                    focus_counts['Hamstrings'] += 2
+                if 'abduct' in normalized_name:
+                    focus_counts['Hip Abductors'] += 2
+                if 'aduct' in normalized_name:
+                    focus_counts['Hip Adductors'] += 2
+                if 'costurera' in normalized_name or 'calf' in normalized_name:
+                    focus_counts['Calves'] += 2
+                if not any(token in normalized_name for token in ['prensa', 'sentadilla', 'puente', 'desplante', 'lunge', 'femoral', 'peso muerto', 'curl', 'abduct', 'aduct', 'costurera', 'calf']):
+                    focus_counts['Legs'] += 1
+
+            if section == 'Core':
+                if any(token in normalized_name for token in ['plancha', 'plank']):
+                    focus_counts['Core Stability'] += 2
+                if any(token in normalized_name for token in ['lateral', 'alterno', 'oblic', 'codo']):
+                    focus_counts['Obliques'] += 2
+                if any(token in normalized_name for token in ['elevacion de piernas', 'rodillas al pecho', 'reverse', 'toe touch', 'v-up', 'v up']):
+                    focus_counts['Lower Abs'] += 2
+                if 'crunch' in normalized_name:
+                    focus_counts['Abs'] += 2
+
+            if section == 'Biceps':
+                focus_counts['Biceps'] += 2
+
+            if section == 'Triceps':
+                focus_counts['Triceps'] += 2
+
+        if not focus_counts:
+            normalized_title = self._normalize_text(routine_title)
+            fallback_terms = []
+            for keyword, translated in self.routine_title_keyword_map.items():
+                if keyword in normalized_title and translated != 'Core':
+                    fallback_terms.append(translated)
+            if 'core' in normalized_title:
+                fallback_terms.append('Core')
+            if fallback_terms:
+                deduped_terms = list(dict.fromkeys(fallback_terms))
+                return ', '.join(deduped_terms[:4])
+            return 'Primary focus'
+
+        top_terms = [term for term, _ in focus_counts.most_common(4)]
+        return ', '.join(top_terms)
+
+    def _build_routine_note(self, routine_title: str, exercises: List[Dict]) -> str:
+        """Build routine-level note from inferred focus + additional training schedule."""
+        primary_focus = self._derive_primary_focus(routine_title, exercises)
+        day_number = self._extract_day_number(routine_title)
+        additional_training = self.additional_training_by_day.get(day_number, '') if day_number is not None else ''
+
+        if additional_training:
+            return f"{primary_focus}. Additional training: {additional_training}"
+        return f"{primary_focus}."
     
     def _normalize_text(self, text: str) -> str:
         """Normalize text for matching - remove accents and handle variations."""
@@ -32,7 +243,7 @@ class RoutineTextParser:
         return text.lower().strip()
         
     def _load_exercise_mappings(self, file_path: str) -> Dict[str, str]:
-        """Load exercise name to ID mappings from instructions.md"""
+        """Load exercise name to ID mappings from exercise_mappings.md"""
         mappings = {}
         
         try:
@@ -51,6 +262,64 @@ class RoutineTextParser:
             print(f"Warning: {file_path} not found. Exercise ID resolution will be limited.")
         
         return mappings
+
+    def _translate_routine_focus(self, routine_focus: str) -> str:
+        """Translate Spanish muscle-group routine labels to English."""
+        normalized_focus = self._normalize_text(routine_focus)
+        if not normalized_focus:
+            return ""
+
+        translated_focus = normalized_focus
+        separator_map = {
+            r'\s+\+\s+': ' + ',
+            r'\s+y\s+': ' and ',
+            r'\s+e\s+': ' and ',
+            r'\s*/\s*': ' / '
+        }
+        for pattern, replacement in separator_map.items():
+            translated_focus = re.sub(pattern, replacement, translated_focus)
+
+        for spanish_term, english_term in sorted(
+            self.routine_title_keyword_map.items(),
+            key=lambda item: len(item[0]),
+            reverse=True
+        ):
+            translated_focus = re.sub(
+                rf'\b{re.escape(spanish_term)}\b',
+                english_term,
+                translated_focus,
+                flags=re.IGNORECASE
+            )
+
+        translated_focus = re.sub(r'\s+', ' ', translated_focus).strip(' -–:')
+        parts = re.split(r'( \+ | and | / )', translated_focus)
+        formatted_parts = []
+        for part in parts:
+            if part in {' + ', ' and ', ' / '}:
+                formatted_parts.append(part)
+                continue
+
+            mapped_term = self.routine_title_keyword_map.get(part.lower())
+            if mapped_term:
+                formatted_parts.append(mapped_term)
+            else:
+                formatted_parts.append(' '.join(word.capitalize() for word in part.split()))
+
+        translated_focus = ''.join(formatted_parts).strip()
+        return translated_focus or routine_focus.strip()
+
+    def _translate_routine_title(self, routine_title: str) -> str:
+        """Translate incoming Spanish routine titles to English titles for saved routines."""
+        match = self.ROUTINE_TITLE_PATTERN.match(routine_title.strip())
+        if not match:
+            return routine_title.strip()
+
+        day_number = match.group(2)
+        routine_focus = match.group(3).strip()
+        translated_focus = self._translate_routine_focus(routine_focus)
+        if translated_focus:
+            return f"Day {day_number} - {translated_focus}"
+        return f"Day {day_number}"
     
     def _find_exercise_id(self, exercise_name: str) -> Optional[str]:
         """Find exercise ID by name (fuzzy matching)."""
@@ -146,30 +415,82 @@ class RoutineTextParser:
                 result['reps'] = result['reps_max']
             else:
                 result['reps'] = result['reps_min']
+
+        # Cluster fallback from manifesto rule:
+        # "cluster" => 30s rest and minimum 3 sets of 6 reps when not specified
+        if result['sets'] == 0 and 'cluster' in description.lower():
+            result['sets'] = 3
+            result['reps'] = 6
         
         return result
+
+    def _is_mixed_muscle_core_title(self, routine_title: str) -> bool:
+        """Detect titles like 'Espalda + Core' to avoid global Core overrides."""
+        normalized_title = self._normalize_text(routine_title)
+        if 'core' not in normalized_title:
+            return False
+        return any(keyword in normalized_title for keyword in self.muscle_group_keywords)
+
+    def _is_core_routine_title(self, routine_title: str) -> bool:
+        """Detect Core-only routine titles (e.g., 'D1 Core', 'Day 7 - Core')."""
+        normalized_title = self._normalize_text(routine_title)
+        if 'core' not in normalized_title:
+            return False
+        return not any(keyword in normalized_title for keyword in self.muscle_group_keywords)
+
+    def _is_explicit_core_time_exercise(self, exercise_name: str, description_line: str) -> bool:
+        """Return True only when exercise is explicitly Core and explicitly time-based."""
+        normalized_name = self._normalize_text(exercise_name)
+        normalized_description = self._normalize_text(description_line)
+        combined_text = f"{normalized_name} {normalized_description}"
+
+        is_core_exercise = any(keyword in combined_text for keyword in self.core_keywords)
+        has_time_marker = bool(re.search(r'\d+\s*(seg|sec|s|min|mins|minuto|minutos)', combined_text))
+        has_time_word = any(marker in combined_text for marker in ['tiempo', 'duracion', 'duration'])
+
+        return is_core_exercise and (has_time_marker or has_time_word)
+
+    def _determine_rest_seconds(self, routine_title: str, exercise_name: str, description_line: str) -> int:
+        """Apply rest policy with Core routine override (2 series/20s handled elsewhere)."""
+        combined_text = self._normalize_text(f"{exercise_name} {description_line}")
+
+        if self._is_core_routine_title(routine_title):
+            return 20
+
+        if 'cluster' in combined_text:
+            return 30
+
+        if self._is_explicit_core_time_exercise(exercise_name, description_line):
+            return 20
+
+        if self._is_mixed_muscle_core_title(routine_title):
+            return 60
+
+        return 60
     
-    def _create_sets_array(self, sets_info: Dict, exercise_name: str) -> List[Dict]:
-        """Create sets array based on parsed information."""
+    def _create_sets_array(self, sets_info: Dict, exercise_name: str, routine_title: str) -> List[Dict]:
+        """Create sets array based on parsed information and routine-level policies."""
         sets = []
+        is_core_routine = self._is_core_routine_title(routine_title)
         
         # Check if exercise requires doubled reps
         needs_doubling = any(keyword in exercise_name.lower() 
                             for keyword in ['alternado', 'individual', 'desplantes'])
         
-        # Warmup set
-        warmup_reps = 24 if needs_doubling else 12
-        sets.append({
-            "type": "warmup",
-            "weight_kg": 0,
-            "reps": warmup_reps,
-            "distance_meters": None,
-            "duration_seconds": None,
-            "custom_metric": None
-        })
+        # Warmup set (non-Core only)
+        if not is_core_routine:
+            warmup_reps = 24 if needs_doubling else 12
+            sets.append({
+                "type": "warmup",
+                "weight_kg": 0,
+                "reps": warmup_reps,
+                "distance_meters": None,
+                "duration_seconds": None,
+                "custom_metric": None
+            })
         
         # Drop set
-        if sets_info['is_dropset'] and sets_info['dropset_reps']:
+        if (not is_core_routine) and sets_info['is_dropset'] and sets_info['dropset_reps']:
             for reps in sets_info['dropset_reps']:
                 final_reps = reps * 2 if needs_doubling else reps
                 sets.append({
@@ -182,11 +503,19 @@ class RoutineTextParser:
                 })
         else:
             # Normal sets
-            reps = sets_info['reps']
+            if sets_info['reps']:
+                reps = sets_info['reps']
+            elif is_core_routine:
+                reps = 0
+            else:
+                reps = 12
+
             if needs_doubling:
                 reps *= 2
+
+            target_sets = 2 if is_core_routine else sets_info['sets']
             
-            for _ in range(sets_info['sets']):
+            for _ in range(target_sets):
                 sets.append({
                     "type": "normal",
                     "weight_kg": 0,
@@ -198,7 +527,7 @@ class RoutineTextParser:
         
         return sets
     
-    def _parse_exercise_block(self, lines: List[str]) -> Optional[Dict]:
+    def _parse_exercise_block(self, lines: List[str], routine_title: str) -> Optional[Dict]:
         """
         Parse an exercise block.
         
@@ -220,14 +549,15 @@ class RoutineTextParser:
         
         # Find exercise ID
         exercise_id = self._find_exercise_id(exercise_name)
+        rest_seconds = self._determine_rest_seconds(routine_title, exercise_name, description_line)
         
         # Create exercise object
         exercise = {
             "exercise_template_id": exercise_id or "",
             "superset_id": None,
-            "rest_seconds": 20,
+            "rest_seconds": rest_seconds,
             "notes": f"{exercise_name} - {description_line.split('-', 1)[1].strip() if '-' in description_line else description_line}",
-            "sets": self._create_sets_array(sets_info, exercise_name)
+            "sets": self._create_sets_array(sets_info, exercise_name, routine_title)
         }
         
         return exercise
@@ -237,7 +567,7 @@ class RoutineTextParser:
         Parse a text file containing multiple routine descriptions.
         
         Expected format:
-          Día 1 – PECHO Y HOMBRO
+                    Día 1 – PECHO Y HOMBRO
           PECHO 4
           Ejercicio 1 - 4x6-8rep. (85% o más)
           1-Press de pecho en banca plana
@@ -245,8 +575,10 @@ class RoutineTextParser:
           3-Cristo con mancuerna
           ...
           
-          Día 2 – ESPALDA + CORE
+                    Día 2 – ESPALDA + CORE
           ...
+
+                Saved routine titles are translated to English, e.g. "Day 1 - Chest and Shoulders".
         """
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -265,16 +597,20 @@ class RoutineTextParser:
             if not line:
                 continue
             
-            # Check for new routine (starts with "Día")
-            if line.startswith('Día'):
+            # Check for new routine title and save the English title variant
+            if self.ROUTINE_TITLE_PATTERN.match(line):
                 # Save previous routine if exists
                 if current_routine and current_exercises:
                     current_routine['exercises'] = current_exercises
+                    current_routine['notes'] = self._build_routine_note(
+                        current_routine.get('title', ''),
+                        current_exercises
+                    )
                     routines.append({"routine": current_routine})
                 
                 # Start new routine
                 current_routine = {
-                    "title": line,
+                    "title": self._translate_routine_title(line),
                     "folder_id": self.folder_id,
                     "exercises": []
                 }
@@ -290,7 +626,10 @@ class RoutineTextParser:
             if line.startswith('Ejercicio'):
                 # Parse previous exercise if exists
                 if exercise_lines and current_routine:
-                    exercise = self._parse_exercise_block(exercise_lines)
+                    exercise = self._parse_exercise_block(
+                        exercise_lines,
+                        current_routine.get('title', '')
+                    )
                     if exercise:
                         current_exercises.append(exercise)
                 
@@ -302,13 +641,20 @@ class RoutineTextParser:
         
         # Parse last exercise
         if exercise_lines and current_routine:
-            exercise = self._parse_exercise_block(exercise_lines)
+            exercise = self._parse_exercise_block(
+                exercise_lines,
+                current_routine.get('title', '')
+            )
             if exercise:
                 current_exercises.append(exercise)
         
         # Save last routine
         if current_routine and current_exercises:
             current_routine['exercises'] = current_exercises
+            current_routine['notes'] = self._build_routine_note(
+                current_routine.get('title', ''),
+                current_exercises
+            )
             routines.append({"routine": current_routine})
         
         return routines
@@ -354,12 +700,44 @@ class RoutineTextParser:
             print(f"⚠️  WARNING: {len(missing_ids)} exercise(s) missing IDs:")
             for item in missing_ids:
                 print(f"   [{item['routine']}] Exercise {item['exercise_num']}: {item['description']}")
-            print("\n   Review and add missing exercises to instructions.md")
+            print("\n   Review and add missing exercises to exercise_mappings.md")
             print("   Or use: python exercise_validator.py --interactive <output_file>")
         else:
             print("✅ All exercises have IDs!")
         
         print()
+
+    def collect_unmapped_exercises(self, routines: List[Dict]) -> List[Dict[str, str]]:
+        """Collect exercises with missing template IDs across parsed routines."""
+        unmapped: List[Dict[str, str]] = []
+
+        for routine_data in routines:
+            routine = routine_data.get('routine', {})
+            title = routine.get('title', 'Unknown')
+            exercises = routine.get('exercises', [])
+
+            for index, exercise in enumerate(exercises, 1):
+                if exercise.get('exercise_template_id'):
+                    continue
+
+                notes = exercise.get('notes', 'Unknown exercise')
+                source_name = notes.split(' - ', 1)[0].strip() if isinstance(notes, str) else 'Unknown exercise'
+                unmapped.append({
+                    'routine': title,
+                    'exercise_num': str(index),
+                    'source_name': source_name,
+                    'notes': notes,
+                })
+
+        return unmapped
+
+    def print_unmapped_exercises(self, unmapped: List[Dict[str, str]]) -> None:
+        """Print only unmapped exercises and stop guidance."""
+        print("\n❌ Unmapped exercises found. Stopping without saving/uploading.\n")
+        for item in unmapped:
+            print(f"- [{item['routine']}] Exercise {item['exercise_num']}: {item['source_name']}")
+            print(f"  Notes: {item['notes']}")
+        print("\nFix mappings in exercise_mappings.md, then rerun the parser.")
 
 
 def main():
@@ -380,9 +758,9 @@ Examples:
 Expected input format:
   Día 1 – PECHO Y HOMBRO
   PECHO 4
-  Ejercicio 1 - 4x6-8rep. (85% o más)
+    Ejercicio 1 - 4x6-8rep. (85%% o más)
   1-Press de pecho en banca plana
-  Ejercicio 2 - 4x12rep. (moderado peso 80%)
+    Ejercicio 2 - 4x12rep. (moderado peso 80%%)
   3-Cristo con mancuerna
   
   Día 2 – ESPALDA + CORE
@@ -395,8 +773,10 @@ Expected input format:
                        help='Output JSON file (default: extracted_routines.json)')
     parser.add_argument('--dry-run', action='store_true',
                        help='Parse and show summary without saving')
-    parser.add_argument('--mappings', default='instructions.md',
-                       help='Exercise mappings file (default: instructions.md)')
+    parser.add_argument('--mappings', default='exercise_mappings.md',
+                       help='Exercise mappings file (default: exercise_mappings.md)')
+    parser.add_argument('--additional-training', default='additional-traning.md',
+                       help='Additional training schedule file (default: additional-traning.md)')
     
     args = parser.parse_args()
     
@@ -408,8 +788,14 @@ Expected input format:
     try:
         # Parse file
         print(f"📂 Parsing: {args.input_file}\n")
-        parser = RoutineTextParser(args.mappings)
+        parser = RoutineTextParser(args.mappings, args.additional_training)
         routines = parser.parse_text_file(args.input_file)
+
+        # Hard stop policy: never continue with unmapped exercises.
+        unmapped = parser.collect_unmapped_exercises(routines)
+        if unmapped:
+            parser.print_unmapped_exercises(unmapped)
+            sys.exit(1)
         
         # Print summary
         parser.print_summary(routines)

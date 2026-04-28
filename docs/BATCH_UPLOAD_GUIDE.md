@@ -84,15 +84,15 @@ Past uploads violated rules (missing warmup sets, incorrect rest times) because 
   "routines": [
     {
       "routine": {
-        "title": "Día 1 – Pecho y Hombro",
-        "folder_id": 1812915,
+            "title": "Day 1 - Chest and Shoulders",
+            "folder_id": 1234567,
         "exercises": [...]
       }
     },
     {
       "routine": {
-        "title": "Día 2 – Espalda + Core",
-        "folder_id": 1812915,
+            "title": "Day 2 - Back + Core",
+            "folder_id": 1234567,
         "exercises": [...]
       }
     }
@@ -104,12 +104,14 @@ Past uploads violated rules (missing warmup sets, incorrect rest times) because 
 ```json
 {
   "routine": {
-    "title": "Día 1 – Pecho y Hombro",
-    "folder_id": 1812915,
+      "title": "Day 1 - Chest and Shoulders",
+      "folder_id": 1234567,
     "exercises": [...]
   }
 }
 ```
+
+`folder_id` can be overridden per upload session using `--folder-title`.
 
 ---
 
@@ -121,10 +123,13 @@ Past uploads violated rules (missing warmup sets, incorrect rest times) because 
 # 1. Dry run first - validate without uploading
 venv/bin/python batch_routine_uploader.py extracted_routines.json --dry-run
 
-# 2. If validation passes, upload with confirmation
-venv/bin/python batch_routine_uploader.py extracted_routines.json
+# 2. (Optional) Verify/create folder for this session and apply to all routines
+venv/bin/python batch_routine_uploader.py extracted_routines.json --dry-run --folder-title "HSF 15"
 
-# 3. Review summary and verify in Hevy app
+# 3. If validation passes, upload with confirmation
+venv/bin/python batch_routine_uploader.py extracted_routines.json --folder-title "HSF 15"
+
+# 4. Review summary and verify in Hevy app
 ```
 
 ### Command Options
@@ -141,6 +146,9 @@ venv/bin/python batch_routine_uploader.py file.json --no-interactive
 
 # Skip warmup weight enhancement
 venv/bin/python batch_routine_uploader.py file.json --no-enhance
+
+# Apply one folder for this session (finds or creates it)
+venv/bin/python batch_routine_uploader.py file.json --folder-title "HSF 15"
 ```
 
 ---
@@ -161,7 +169,7 @@ venv/bin/python batch_routine_uploader.py file.json --no-enhance
 
 [3/12] Día 3 – Pierna
    ❌ FAILED - 2 error(s)
-      • Exercise: Exercise ID 'INVALID123' not found in instructions.md
+      • Exercise: Exercise ID 'INVALID123' not found in exercise_mappings.md
       • Structure: Invalid set type: drop_set (should be dropset)
 
 ...
@@ -241,7 +249,7 @@ Total routines: 12
    ```bash
    cd ../routine-uploader
    venv/bin/python batch_routine_uploader.py \
-     ../routine-extractor/extracted_routines.json --dry-run
+       ../routine-extractor/extracted_routines.json --dry-run --folder-title "HSF 15"
    ```
 
 3. **Fix any validation errors** in the extracted file
@@ -322,7 +330,7 @@ venv/bin/python batch_routine_uploader.py file.json --dry-run
 4. **Upload when ready**
    ```bash
    venv/bin/python batch_routine_uploader.py \
-     ../routine-extractor/extracted_routines.json
+       ../routine-extractor/extracted_routines.json --folder-title "HSF 15"
    ```
 
 ---
@@ -334,7 +342,7 @@ venv/bin/python batch_routine_uploader.py file.json --dry-run
 | Error | Cause | Solution |
 |-------|-------|----------|
 | `Invalid format` | Wrong JSON structure | Use batch format `{"routines": [...]}` |
-| `Exercise ID not found` | ID missing from instructions.md | Add exercise mapping or use interactive validator |
+| `Exercise ID not found` | ID missing from exercise_mappings.md | Add exercise mapping or use interactive validator |
 | `Structure: Invalid set type` | Wrong set type name | Use `dropset` not `drop_set`, only warmup/normal/dropset/failure |
 | `Missing routine title` | No title field | Add `"title": "Día X – ..."` |
 | `API Error: 400` | Invalid field values | Check API_STRUCTURE_GUIDE.md |
@@ -353,9 +361,9 @@ Before uploading 6-12 routines:
 
 - [ ] Run with `--dry-run` first to validate
 - [ ] Review all validation errors and warnings
-- [ ] Check exercise IDs against `instructions.md`
+- [ ] Check exercise IDs against `exercise_mappings.md`
 - [ ] Verify routine titles follow "Día X – Name" pattern
-- [ ] Confirm folder_id is correct (1812915)
+- [ ] Verify session folder with `--folder-title` (or confirm each routine `folder_id`)
 - [ ] Have backup of extracted file
 - [ ] Start with small batch (1-3 routines) to test
 - [ ] Use interactive mode for first upload

@@ -203,8 +203,8 @@ Round 2: 6rep + 6rep + 8rep + 10rep
 
 All set types pass through:
 - `validate_structure.py` - Checks for valid type
-- `./routines.sh check` - Pre-flight validation
-- `./routines.sh upload` - Auto-runs structure check
+- `./hevy.sh routines check` - Pre-flight validation
+- `./hevy.sh routines upload` - Auto-runs structure check
 
 ---
 

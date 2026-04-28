@@ -1,4 +1,15 @@
-# Naming Strategy for Routine Files
+# Naming Strategy for Hevy Toolkit Files
+
+## Project-Level Naming
+
+Use these names for repo-level surfaces so the project reads as a broader Hevy toolkit rather than a routine-only uploader:
+
+- Umbrella project name: `Hevy Training Toolkit`
+- Generic CLI entrypoint: `hevy_cli.py`
+- Shell wrapper: `hevy.sh`
+- First-class command domains: `routines`, `folders`, `measurements`, `workouts`
+
+Routine-specific scripts can stay routine-specific when they only solve routine workflows. The umbrella naming should appear on repo titles, quick-start docs, and project-level commands.
 
 ## Problem We're Preventing
 
@@ -137,4 +148,4 @@ volume_progression_v2.json
 ## See Also
 - `QUICK_START.md` - Workflow reference
 - `TEMPLATE_routine.json` - Routine structure
-- `instructions.md` - Exercise mappings
+- `exercise_mappings.md` - Exercise mappings

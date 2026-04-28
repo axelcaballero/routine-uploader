@@ -20,7 +20,7 @@ API Error: 400 - {"error":"\"routine\" is required"}
 **Prevention:**
 - ✅ `TEMPLATE_routine.json` includes correct root structure
 - ✅ `validate_structure.py` checks for `"routine"` key
-- ✅ `./routines.sh upload` runs structure check automatically
+- ✅ `./hevy.sh routines upload` runs structure check automatically
 
 **Quick Fix:**
 ```json
@@ -76,16 +76,16 @@ Standalone validator that checks JSON structure for API compliance.
 python3 validate_structure.py input/dia_X.json
 ```
 
-### 5. `./routines.sh check <file>`
+### 5. `./hevy.sh routines check <file>`
 New wrapper command to run structure validation.
 ```bash
-./routines.sh check input/dia_X.json
+./hevy.sh routines check input/dia_X.json
 ```
 
 ### 6. Built-in Pre-flight Check
-`./routines.sh upload` now automatically runs structure validation:
+`./hevy.sh routines upload` now automatically runs structure validation:
 ```bash
-./routines.sh upload input/dia_X.json
+./hevy.sh routines upload input/dia_X.json
 # Runs structure check first, then validation, then upload
 ```
 
@@ -95,15 +95,15 @@ New wrapper command to run structure validation.
 
 ### OLD (Error-Prone)
 1. Manually create JSON
-2. Run validation: `./routines.sh validate input/dia_X.json`
-3. Run upload: `./routines.sh upload input/dia_X.json`
+2. Run validation: `./hevy.sh routines validate input/dia_X.json`
+3. Run upload: `./hevy.sh routines upload input/dia_X.json`
 4. ❌ API error → Back to step 1
 
 ### NEW (Error-Prevention)
 1. Copy template: `cp TEMPLATE_routine.json input/dia_X.json`
 2. Edit: title, exercise_template_id, weights/reps
-3. Check structure: `./routines.sh check input/dia_X.json`
-4. Validate & upload: `./routines.sh upload input/dia_X.json`
+3. Check structure: `./hevy.sh routines check input/dia_X.json`
+4. Validate & upload: `./hevy.sh routines upload input/dia_X.json`
    - Pre-flight check ✅
    - Structure validation ✅
    - Exercise ID validation ✅
@@ -121,8 +121,8 @@ New wrapper command to run structure validation.
 | Starting from scratch | Copy template | `cp TEMPLATE_routine.json input/dia_X.json` |
 | Need API rules reminder | Read quick ref | `cat QUICK_START.md` |
 | Unsure about field constraints | Read detailed guide | `cat API_STRUCTURE_GUIDE.md` |
-| Before uploading | Structure check | `./routines.sh check input/dia_X.json` |
-| Ready to validate & upload | Use wrapper | `./routines.sh upload input/dia_X.json` |
+| Before uploading | Structure check | `./hevy.sh routines check input/dia_X.json` |
+| Ready to validate & upload | Use wrapper | `./hevy.sh routines upload input/dia_X.json` |
 | Got API error | Check guide | `grep "Invalid set type" API_STRUCTURE_GUIDE.md` |
 
 ---
@@ -138,8 +138,8 @@ New wrapper command to run structure validation.
 ✅ Warnings for unusual configurations (e.g., duration + weight/reps)
 
 ### Integration Points:
-1. **Automatic:** `./routines.sh upload` runs validator before upload
-2. **Manual:** `./routines.sh check <file>` for explicit validation
+1. **Automatic:** `./hevy.sh routines upload` runs validator before upload
+2. **Manual:** `./hevy.sh routines check <file>` for explicit validation
 3. **Standalone:** `python3 validate_structure.py <file>` for CI/scripting
 
 ---

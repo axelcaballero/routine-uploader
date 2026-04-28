@@ -13,13 +13,13 @@ The routine enhancement feature automatically populates missing warmup weights f
   - `mode`: Uses the most frequently used warmup weight
 - **Graceful Degradation**: If no warmup history exists for an exercise, the routine is still uploaded with manual entry needed later
 - **Opt-out Option**: Disable auto-enhancement if you prefer manual control
-- **Exercise ID Validation**: All exercise IDs are automatically validated against `instructions.md` (the source of truth) to prevent mismatches
+- **Exercise ID Validation**: All exercise IDs are automatically validated against `exercise_mappings.md` (the source of truth) to prevent mismatches
 - **Validation Enforcement**: Invalid exercise IDs are caught before uploading, with helpful error messages
 - **Validation Bypass**: Optional `--no-validate` flag for advanced users who need to skip validation
 
 ## Usage
 
-### With Routine Uploader (Recommended)
+### With the Hevy Toolkit Routine Workflow (Recommended)
 
 When uploading routines, enhancement is enabled by default and validation is automatic:
 
@@ -51,7 +51,7 @@ python exercise_validator.py input/dia_10_biceps_triceps.json
 # Verbose validation with exercise names
 python exercise_validator.py input/dia_10_biceps_triceps.json -v
 
-# See all available exercises from instructions.md
+# See all available exercises from exercise_mappings.md
 python exercise_validator.py --list
 
 # See exercises in a specific category
@@ -116,8 +116,8 @@ To prevent upload errors and ensure consistency, all exercise IDs are automatica
 
 ### Validation Process
 
-1. **Source of Truth**: `instructions.md` contains the authoritative mapping of exercise names to template IDs
-2. **Automatic Parsing**: The validator uses regex to extract all exercise-to-ID mappings from instructions.md
+1. **Source of Truth**: `exercise_mappings.md` contains the authoritative mapping of exercise names to template IDs
+2. **Automatic Parsing**: The validator uses regex to extract all exercise-to-ID mappings from exercise_mappings.md
 3. **Routine Checking**: Each exercise ID in your routine is checked against this authoritative source
 4. **Early Detection**: Invalid IDs are caught BEFORE upload, preventing failed submissions
 5. **User Guidance**: Helpful error messages show which IDs are invalid and how to find valid ones
@@ -143,8 +143,8 @@ When validating this routine with an invalid ID:
 The validator catches it immediately:
 
 ```text
-❌ Validation failed: 1 exercise(s) not found in instructions.md
-   1. INVALIDID - NOT FOUND IN instructions.md! Notes: This ID doesn't exist
+❌ Validation failed: 1 exercise(s) not found in exercise_mappings.md
+   1. INVALIDID - NOT FOUND IN exercise_mappings.md! Notes: This ID doesn't exist
    Use: python exercise_validator.py --list  to see available exercises
 ```
 
@@ -152,7 +152,7 @@ The validator catches it immediately:
 
 - **Prevents Wasted Uploads**: No more uploading routines only to have them fail in the Hevy app
 - **Data Integrity**: Ensures all routines use correct, verified exercise IDs
-- **Source of Truth**: instructions.md remains the single authoritative source for exercise mappings
+- **Source of Truth**: exercise_mappings.md remains the single authoritative source for exercise mappings
 - **User Confidence**: Know exactly which exercises are supported before uploading
 
 ## Example
@@ -270,9 +270,9 @@ Get a suggested warmup weight for an exercise based on history.
 
 ```bash
 routine_file              Path to routine JSON file to validate (optional)
--i, --instructions FILE   Path to instructions.md (default: instructions.md)
+-i, --instructions FILE   Path to exercise_mappings.md (default: exercise_mappings.md)
 -v, --verbose             Show exercise names and categories for valid IDs
---list                    Show all available exercises from instructions.md
+--list                    Show all available exercises from exercise_mappings.md
 ```
 
 ### routine_enhancer.py
@@ -286,9 +286,9 @@ routine_file              Path to routine JSON file to validate (optional)
 
 ## Troubleshooting
 
-### Validation Error: "NOT FOUND IN instructions.md"
+### Validation Error: "NOT FOUND IN exercise_mappings.md"
 
-This means an exercise ID in your routine doesn't match any ID in `instructions.md`.
+This means an exercise ID in your routine doesn't match any ID in `exercise_mappings.md`.
 
 **Solution:**
 
@@ -300,7 +300,7 @@ This means an exercise ID in your routine doesn't match any ID in `instructions.
 Example: If you see this error for Biceps Curl:
 
 ```text
-⚠ 1. BADID123 - NOT FOUND IN instructions.md! Notes: Biceps Curl
+⚠ 1. BADID123 - NOT FOUND IN exercise_mappings.md! Notes: Biceps Curl
 ```
 
 Run `--list` to find the correct ID:
