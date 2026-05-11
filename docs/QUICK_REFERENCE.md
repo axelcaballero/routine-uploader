@@ -16,6 +16,24 @@ python scripts/shoulder_press_progression.py
 python scripts/analyze_squat_lowpoints.py
 ```
 
+## Latest Workout RPE (Fast Command)
+
+```bash
+# Default: overall RPE excluding warmups (recommended)
+python hevy_cli.py workouts latest-rpe
+
+# Optional: overall RPE including warmups
+python hevy_cli.py workouts latest-rpe --include-warmups
+```
+
+Applied filters for this command:
+- Only workouts titled Day/Dia 1 to Day/Dia 6
+- Excludes core workouts
+- Excludes focused forearms workouts
+- Excludes focused calves workouts
+
+The command fetches workouts directly from the live Hevy API.
+
 ## 📂 Where to Find Files
 
 | What | Location |

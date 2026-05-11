@@ -384,6 +384,12 @@ python routine_uploader.py routine.json
 
 # Upload with per-session folder override
 python routine_uploader.py routine.json --folder-title "HSF 15"
+
+# Latest qualifying workout overall RPE (Day 1-6 only, excludes core/forearms/calves)
+python hevy_cli.py workouts latest-rpe
+
+# Same query but select overall RPE including warmups
+python hevy_cli.py workouts latest-rpe --include-warmups
 ```
 
 ---

@@ -7,8 +7,10 @@ import argparse
 import json
 import re
 import sys
+import unicodedata
 from contextlib import contextmanager
 from pathlib import Path
+from statistics import mean
 from typing import Any, Callable, Iterator, Sequence
 
 import batch_routine_uploader
@@ -249,6 +251,128 @@ def _handle_measurements_command(args: argparse.Namespace) -> int:
     raise ValueError(f"Unsupported measurements command: {args.command}")
 
 
+def _normalize_workout_title(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value.casefold())
+    ascii_text = normalized.encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"\s+", " ", ascii_text).strip()
+
+
+def _is_allowed_main_workout_title(title: str) -> bool:
+    normalized = _normalize_workout_title(title)
+
+    # Only include planned main split workouts labeled Day/Dia 1-6.
+    day_match = re.search(r"\b(?:day|dia)\s*([1-6])\b", normalized)
+    if not day_match:
+        return False
+
+    excluded_tokens = (
+        "core",
+        "abs",
+        "abdominal",
+        "forearm",
+        "forearms",
+        "antebrazo",
+        "antebrazos",
+        "calf",
+        "calves",
+        "pantorrilla",
+        "pantorrillas",
+        "gemelo",
+        "gemelos",
+    )
+    return not any(token in normalized for token in excluded_tokens)
+
+
+def _extract_workout_rpes(workout: dict[str, Any], include_warmups: bool) -> list[float]:
+    values: list[float] = []
+    exercises = workout.get("exercises", [])
+    if not isinstance(exercises, list):
+        return values
+
+    for exercise in exercises:
+        if not isinstance(exercise, dict):
+            continue
+        sets = exercise.get("sets", [])
+        if not isinstance(sets, list):
+            continue
+
+        for set_data in sets:
+            if not isinstance(set_data, dict):
+                continue
+            if not include_warmups and str(set_data.get("type", "")).casefold() == "warmup":
+                continue
+            rpe_value = set_data.get("rpe")
+            if isinstance(rpe_value, (int, float)):
+                values.append(float(rpe_value))
+
+    return values
+
+
+def _find_latest_allowed_workout(client: HevyAPIClient, page_size: int = 10, max_pages: int = 30) -> dict[str, Any] | None:
+    for page in range(1, max_pages + 1):
+        payload = client.list_workouts(page=page, page_size=page_size)
+        workouts = payload.get("workouts", [])
+        if not isinstance(workouts, list) or not workouts:
+            return None
+
+        for workout in workouts:
+            if not isinstance(workout, dict):
+                continue
+            title = str(workout.get("title", ""))
+            if _is_allowed_main_workout_title(title):
+                return workout
+
+        if len(workouts) < page_size:
+            return None
+
+    return None
+
+
+def _handle_workouts_command(args: argparse.Namespace) -> int:
+    client = HevyAPIClient()
+
+    if args.command == "latest-rpe":
+        workout = _find_latest_allowed_workout(client)
+        if not workout:
+            print("No qualifying workout found with title Day/Dia 1-6 excluding core/forearms/calves.")
+            return 1
+
+        if not workout.get("exercises"):
+            workout_id = str(workout.get("id", ""))
+            if workout_id:
+                workout = client.get_workout(workout_id)
+
+        all_set_rpes = _extract_workout_rpes(workout, include_warmups=True)
+        work_set_rpes = _extract_workout_rpes(workout, include_warmups=False)
+
+        if args.include_warmups:
+            selected_rpes = all_set_rpes
+            selected_label = "including warmups"
+        else:
+            selected_rpes = work_set_rpes
+            selected_label = "excluding warmups"
+
+        result = {
+            "workout_id": workout.get("id"),
+            "title": workout.get("title"),
+            "start_time": workout.get("start_time"),
+            "end_time": workout.get("end_time"),
+            "filters": {
+                "title_day_range": "Day/Dia 1-6",
+                "excluded_keywords": ["core", "forearms", "calves"],
+            },
+            "set_count_with_rpe_all": len(all_set_rpes),
+            "set_count_with_rpe_working": len(work_set_rpes),
+            "overall_rpe_including_warmups": round(mean(all_set_rpes), 2) if all_set_rpes else None,
+            "overall_rpe_excluding_warmups": round(mean(work_set_rpes), 2) if work_set_rpes else None,
+            "overall_rpe_selected": round(mean(selected_rpes), 2) if selected_rpes else None,
+            "selected_mode": selected_label,
+        }
+        return _print_json(result)
+
+    raise ValueError(f"Unsupported workouts command: {args.command}")
+
+
 def _list_input_routines(input_dir: str = "input") -> int:
     input_path = Path(input_dir)
     if not input_path.exists():
@@ -274,7 +398,8 @@ def build_parser() -> argparse.ArgumentParser:
             "  python hevy_cli.py routines upload input/dia_1_pecho_hsf16.json --dry-run\n"
             "  python hevy_cli.py routines batch-upload extracted_routines.json --folder-title \"HSF 16\"\n"
             "  python hevy_cli.py folders recent\n"
-            "  python hevy_cli.py folders create-next"
+            "  python hevy_cli.py folders create-next\n"
+            "  python hevy_cli.py workouts latest-rpe"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -354,7 +479,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_measurement_field_arguments(measurements_update_parser)
 
-    subparsers.add_parser("workouts", help="Reserved umbrella namespace for workout history and analysis")
+    workouts_parser = subparsers.add_parser("workouts", help="Workout history and analysis")
+    workouts_subparsers = workouts_parser.add_subparsers(dest="command")
+
+    latest_rpe_parser = workouts_subparsers.add_parser(
+        "latest-rpe",
+        help="Get overall RPE from latest qualifying Day/Dia 1-6 workout (excluding core/forearms/calves)",
+    )
+    latest_rpe_parser.add_argument(
+        "--include-warmups",
+        action="store_true",
+        help="Select overall_rpe_selected using all sets (default selects working sets only)",
+    )
+
     auth_parser = subparsers.add_parser("auth", help="Verify Hevy API authentication")
     auth_parser.add_argument("api_key", nargs="?", help="Optional API key override")
 
@@ -408,7 +545,11 @@ def main() -> int:
         return _handle_measurements_command(args)
 
     if args.domain == "workouts":
-        return _print_planned_capability("Workout")
+        if not args.command:
+            workouts_parser = next(action for action in parser._actions if isinstance(action, argparse._SubParsersAction))
+            workouts_parser.choices["workouts"].print_help()
+            return 1
+        return _handle_workouts_command(args)
 
     if args.domain == "auth":
         auth_argv = ["test_api_key.py"]
