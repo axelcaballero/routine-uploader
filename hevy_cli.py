@@ -283,6 +283,16 @@ def _is_allowed_main_workout_title(title: str) -> bool:
     return not any(token in normalized for token in excluded_tokens)
 
 
+def _round_to_half(value: float) -> float:
+    """Round value to nearest 0.5 increment (e.g., 7.5, 8, 8.5, 9, 9.5, 10)."""
+    return round(value * 2) / 2
+
+
+def _round_to_half(value: float) -> float:
+    """Round value to nearest 0.5 increment (e.g., 7.5, 8, 8.5, 9, 9.5, 10)."""
+    return round(value * 2) / 2
+
+
 def _extract_workout_rpes(workout: dict[str, Any], include_warmups: bool) -> list[float]:
     values: list[float] = []
     exercises = workout.get("exercises", [])
@@ -308,35 +318,45 @@ def _extract_workout_rpes(workout: dict[str, Any], include_warmups: bool) -> lis
     return values
 
 
-def _find_latest_allowed_workout(client: HevyAPIClient, page_size: int = 10, max_pages: int = 30) -> dict[str, Any] | None:
+def _find_latest_allowed_workouts(client: HevyAPIClient, max_count: int = 5, page_size: int = 10, max_pages: int = 30) -> list[dict[str, Any]]:
+    """Find up to max_count latest allowed workouts."""
+    results: list[dict[str, Any]] = []
     for page in range(1, max_pages + 1):
         payload = client.list_workouts(page=page, page_size=page_size)
         workouts = payload.get("workouts", [])
         if not isinstance(workouts, list) or not workouts:
-            return None
+            break
 
         for workout in workouts:
             if not isinstance(workout, dict):
                 continue
             title = str(workout.get("title", ""))
             if _is_allowed_main_workout_title(title):
-                return workout
+                results.append(workout)
+                if len(results) >= max_count:
+                    return results
 
         if len(workouts) < page_size:
-            return None
+            break
 
-    return None
+    return results
 
 
 def _handle_workouts_command(args: argparse.Namespace) -> int:
     client = HevyAPIClient()
 
     if args.command == "latest-rpe":
-        workout = _find_latest_allowed_workout(client)
-        if not workout:
+        workouts_list = _find_latest_allowed_workouts(client, max_count=5)
+        if not workouts_list:
             print("No qualifying workout found with title Day/Dia 1-6 excluding core/forearms/calves.")
             return 1
 
+        nth = args.nth - 1  # Convert to 0-indexed
+        if nth >= len(workouts_list):
+            print(f"Only {len(workouts_list)} qualifying workouts available (requested nth={args.nth})")
+            return 1
+
+        workout = workouts_list[nth]
         if not workout.get("exercises"):
             workout_id = str(workout.get("id", ""))
             if workout_id:
@@ -345,30 +365,45 @@ def _handle_workouts_command(args: argparse.Namespace) -> int:
         all_set_rpes = _extract_workout_rpes(workout, include_warmups=True)
         work_set_rpes = _extract_workout_rpes(workout, include_warmups=False)
 
-        if args.include_warmups:
-            selected_rpes = all_set_rpes
-            selected_label = "including warmups"
-        else:
-            selected_rpes = work_set_rpes
-            selected_label = "excluding warmups"
-
         result = {
             "workout_id": workout.get("id"),
             "title": workout.get("title"),
             "start_time": workout.get("start_time"),
             "end_time": workout.get("end_time"),
+            "nth_latest": args.nth,
             "filters": {
                 "title_day_range": "Day/Dia 1-6",
                 "excluded_keywords": ["core", "forearms", "calves"],
             },
             "set_count_with_rpe_all": len(all_set_rpes),
             "set_count_with_rpe_working": len(work_set_rpes),
-            "overall_rpe_including_warmups": round(mean(all_set_rpes), 2) if all_set_rpes else None,
-            "overall_rpe_excluding_warmups": round(mean(work_set_rpes), 2) if work_set_rpes else None,
-            "overall_rpe_selected": round(mean(selected_rpes), 2) if selected_rpes else None,
-            "selected_mode": selected_label,
+            "overall_rpe": _round_to_half(mean(work_set_rpes)) if work_set_rpes else None,
         }
         return _print_json(result)
+
+    if args.command == "last-rpes":
+        workouts_list = _find_latest_allowed_workouts(client, max_count=5)
+        if not workouts_list:
+            print("No qualifying workouts found with title Day/Dia 1-6 excluding core/forearms/calves.")
+            return 1
+
+        results = []
+        for idx, workout in enumerate(workouts_list):
+            if not workout.get("exercises"):
+                workout_id = str(workout.get("id", ""))
+                if workout_id:
+                    workout = client.get_workout(workout_id)
+
+            work_set_rpes = _extract_workout_rpes(workout, include_warmups=False)
+            result = {
+                "nth_latest": idx + 1,
+                "title": workout.get("title"),
+                "start_time": workout.get("start_time"),
+                "overall_rpe": _round_to_half(mean(work_set_rpes)) if work_set_rpes else None,
+            }
+            results.append(result)
+
+        return _print_json(results)
 
     raise ValueError(f"Unsupported workouts command: {args.command}")
 
@@ -487,9 +522,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Get overall RPE from latest qualifying Day/Dia 1-6 workout (excluding core/forearms/calves)",
     )
     latest_rpe_parser.add_argument(
-        "--include-warmups",
-        action="store_true",
-        help="Select overall_rpe_selected using all sets (default selects working sets only)",
+        "--nth",
+        type=int,
+        default=1,
+        choices=[1, 2, 3, 4, 5],
+        help="Select which of the latest 5 qualifying workouts to retrieve (1=latest, 5=oldest) (default: 1)",
+    )
+
+    last_rpes_parser = workouts_subparsers.add_parser(
+        "last-rpes",
+        help="Get overall RPE for the last 5 qualifying Day/Dia 1-6 workouts (excluding core/forearms/calves)",
     )
 
     auth_parser = subparsers.add_parser("auth", help="Verify Hevy API authentication")

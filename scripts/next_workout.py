@@ -16,6 +16,7 @@ import sys
 import os
 import json
 import re
+import unicodedata
 from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -23,15 +24,49 @@ from hevy_api_client import HevyAPIClient
 from typing import Optional, Dict, Any, List
 
 
+def _normalize_workout_title(value: str) -> str:
+    """Normalize title for comparison."""
+    normalized = unicodedata.normalize("NFKD", value.casefold())
+    ascii_text = normalized.encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"\s+", " ", ascii_text).strip()
+
+
+def _is_allowed_main_workout_title(title: str) -> bool:
+    """Check if title is a main muscle group workout (Day 1-6, excluding core/forearms/calves)."""
+    normalized = _normalize_workout_title(title)
+    
+    # Only include Day/Dia 1-6
+    day_match = re.search(r"\b(?:day|dia)\s*([1-6])\b", normalized)
+    if not day_match:
+        return False
+    
+    # Exclude core, forearms, calves
+    excluded_tokens = (
+        "core", "abs", "abdominal", "forearm", "forearms",
+        "antebrazo", "antebrazos", "calf", "calves",
+        "pantorrilla", "pantorrillas", "gemelo", "gemelos",
+    )
+    return not any(token in normalized for token in excluded_tokens)
+
+
 def get_most_recent_workout(client: HevyAPIClient) -> Optional[Dict[str, Any]]:
-    """Get the most recent completed workout from /v1/workouts."""
-    workouts = client.list_workouts(page=1, page_size=1)
-    workouts_list = workouts.get('workouts', [])
-    
-    if not workouts_list:
-        return None
-    
-    return workouts_list[0]
+    """Get the most recent qualifying (Day 1-6) completed workout from /v1/workouts."""
+    page = 1
+    while True:
+        workouts = client.list_workouts(page=page, page_size=10)
+        workouts_list = workouts.get('workouts', [])
+        
+        if not workouts_list:
+            return None
+        
+        for workout in workouts_list:
+            title = str(workout.get('title', ''))
+            if _is_allowed_main_workout_title(title):
+                return workout
+        
+        if len(workouts_list) < 10:
+            return None
+        page += 1
 
 
 def extract_day_number(routine_title: str) -> Optional[int]:
@@ -43,7 +78,7 @@ def extract_day_number(routine_title: str) -> Optional[int]:
 
 
 def get_routines_in_folder(client: HevyAPIClient, folder_id: int) -> List[Dict[str, Any]]:
-    """Fetch all routines and filter by folder_id."""
+    """Fetch all routines and filter by folder_id and allowed main workouts only."""
     all_routines = []
     page = 1
     
@@ -56,14 +91,16 @@ def get_routines_in_folder(client: HevyAPIClient, folder_id: int) -> List[Dict[s
             break
         page += 1
     
-    # Filter by folder_id and extract day numbers
+    # Filter by folder_id, allowed titles (Day 1-6, no core/forearms/calves), and extract day numbers
     folder_routines = []
     for routine in all_routines:
         if routine.get('folder_id') == folder_id:
-            day_number = extract_day_number(routine.get('title', ''))
-            if day_number:
-                routine['day_number'] = day_number
-                folder_routines.append(routine)
+            title = str(routine.get('title', ''))
+            if _is_allowed_main_workout_title(title):
+                day_number = extract_day_number(title)
+                if day_number:
+                    routine['day_number'] = day_number
+                    folder_routines.append(routine)
     
     return folder_routines
 
@@ -193,15 +230,18 @@ def main():
     client = HevyAPIClient()
     
     try:
-        # Step 1: Get latest workout
+        # Step 1: Get latest qualifying (Day 1-6) workout
         latest_workout = get_most_recent_workout(client)
         if not latest_workout:
-            print("No workouts found")
+            print("No qualifying workouts found (Day 1-6 main muscle groups)")
             return
         
         latest_title = latest_workout.get('title')
         latest_routine_id = latest_workout.get('routine_id')
         current_day = extract_day_number(latest_title)
+        if not current_day:
+            print(f"Could not extract day number from: {latest_title}")
+            return
         
         # Step 2-3: Get routine details to extract folder_id
         current_routine = client.get_routine(latest_routine_id)

@@ -101,7 +101,7 @@ Before creating routines, read [`ROUTINE_CREATION_RULES.md`](ROUTINE_CREATION_RU
 
 ### 🎯 What's Your Next Workout?
 
-Automatically determines your next workout based on your routine sequence:
+Automatically determines your next workout based on your routine sequence (Day 1-6 main muscle groups only):
 
 ```bash
 python scripts/next_workout.py
@@ -388,8 +388,11 @@ python routine_uploader.py routine.json --folder-title "HSF 15"
 # Latest qualifying workout overall RPE (Day 1-6 only, excludes core/forearms/calves)
 python hevy_cli.py workouts latest-rpe
 
-# Same query but select overall RPE including warmups
-python hevy_cli.py workouts latest-rpe --include-warmups
+# Get 2nd or 3rd latest qualifying workout (--nth 1-5)
+python hevy_cli.py workouts latest-rpe --nth 2
+
+# Get all last 5 qualifying workouts at once
+python hevy_cli.py workouts last-rpes
 ```
 
 ---
