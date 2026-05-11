@@ -1,5 +1,24 @@
 # Quick Reference - Progression Tracker Commands
 
+## 🗂 Command Summary
+
+| Command | Description |
+|---------|-------------|
+| `python hevy_cli.py workouts latest-rpe` | RPE from latest qualifying workout |
+| `python hevy_cli.py workouts latest-rpe --nth N` | RPE from Nth latest workout (N = 1–6) |
+| `python hevy_cli.py workouts latest-rpe --show-prs` | RPE + personal records from latest workout |
+| `python hevy_cli.py workouts last-rpes` | RPE from all 6 workouts in last full round |
+| `python hevy_cli.py workouts last-rpes --show-prs` | RPE + PRs for each of the last 6 sessions |
+| `python hevy_cli.py workouts personal-records` | All-time volume PRs for every exercise in current roster |
+| `python scripts/pr_tracker.py` | Detect PRs in latest qualifying workout |
+| `python scripts/pr_tracker.py --nth N` | Detect PRs in Nth latest workout (N = 1–6) |
+| `python scripts/pr_tracker.py --all` | Detect PRs across all 6 workouts in last round |
+| `python scripts/pr_tracker.py --workout-id <id>` | Detect PRs in a specific workout by ID |
+
+Filters applied to all workout commands: **Day/Dia 1–6 only**, excludes core, forearms, and calves workouts.
+
+---
+
 ## Run Scripts to Generate Data & Charts
 
 ```bash
@@ -27,14 +46,21 @@ python hevy_cli.py workouts latest-rpe
 # Get 2nd latest qualifying workout
 python hevy_cli.py workouts latest-rpe --nth 2
 
-# Get up to 5th latest (--nth 1-5, default is 1)
-python hevy_cli.py workouts latest-rpe --nth 5
+# Get up to 6th latest (--nth 1-6, default is 1)
+python hevy_cli.py workouts latest-rpe --nth 6
+
+# Also show personal records from that session
+python hevy_cli.py workouts latest-rpe --show-prs
 ```
 
-### Get all last 5 workouts at once
+### Get complete round of last 6 workouts at once
 
 ```bash
+# Track RPE from a complete round of main muscle training (Day 1-6)
 python hevy_cli.py workouts last-rpes
+
+# Include PR detection for each session
+python hevy_cli.py workouts last-rpes --show-prs
 ```
 
 Applied filters for these commands:
@@ -45,6 +71,33 @@ Applied filters for these commands:
 - Excludes focused calves workouts
 
 Returns overall RPE calculated from working sets (warmups excluded). Fetches workouts directly from the live Hevy API.
+
+## 🏆 Personal Records
+
+### All-time PRs for current exercise roster (Day 1-6)
+
+```bash
+# Show best volume set ever per exercise (across all history)
+python hevy_cli.py workouts personal-records
+```
+
+### Detect PRs in recent workouts (standalone script)
+
+```bash
+# Latest qualifying workout
+python scripts/pr_tracker.py
+
+# Specific nth workout
+python scripts/pr_tracker.py --nth 3
+
+# Full round of last 6 workouts
+python scripts/pr_tracker.py --all
+
+# Specific workout by ID
+python scripts/pr_tracker.py --workout-id <id>
+```
+
+PR detection is volume-based (weight × reps). Within-session records are collapsed to one per exercise.
 
 ## 📂 Where to Find Files
 

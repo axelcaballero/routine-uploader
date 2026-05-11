@@ -388,10 +388,10 @@ python routine_uploader.py routine.json --folder-title "HSF 15"
 # Latest qualifying workout overall RPE (Day 1-6 only, excludes core/forearms/calves)
 python hevy_cli.py workouts latest-rpe
 
-# Get 2nd or 3rd latest qualifying workout (--nth 1-5)
+# Get 2nd or 3rd latest qualifying workout (--nth 1-6)
 python hevy_cli.py workouts latest-rpe --nth 2
 
-# Get all last 5 qualifying workouts at once
+# Get complete round of last 6 main muscle workouts (Day 1-6)
 python hevy_cli.py workouts last-rpes
 ```
 
