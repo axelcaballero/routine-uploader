@@ -115,6 +115,26 @@ Exercises:
   [...]
 ```
 
+### 📈 Compare Same Routine Day
+
+Compare your latest qualifying workout against the previous workout with the same Day/Dia number.
+
+```bash
+# Show only set-level increases in weight or reps
+python hevy_cli.py workouts compare-same-day
+
+# Show all changed sets, including decreases
+python hevy_cli.py workouts compare-same-day --show-all
+```
+
+The command returns a JSON report with:
+
+- Latest workout metadata
+- Previous same-day workout metadata
+- Set-by-set comparison rows
+- Weight, reps, and volume deltas
+- Flags for whether weight or reps increased
+
 ---
 
 ## 📝 Routine Management
@@ -269,6 +289,10 @@ python test_api_key.py
 python scripts/next_workout.py
 python routine_uploader.py routine.json
 python routine_uploader.py routine.json --folder-title "HSF 15"
+
+# Workout comparison
+python hevy_cli.py workouts compare-same-day
+python hevy_cli.py workouts compare-same-day --show-all
 ```
 
 ---

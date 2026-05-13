@@ -12,6 +12,10 @@ python test_api_key.py
 python scripts/next_workout.py
 python routine_uploader.py routine.json
 python routine_uploader.py routine.json --folder-title "HSF 15"
+
+# Workout comparison
+python hevy_cli.py workouts compare-same-day
+python hevy_cli.py workouts compare-same-day --show-all
 ```
 
 ### Optional Utilities Usage
@@ -56,6 +60,27 @@ python routine_uploader.py routine.json --folder-title "HSF 15"
 ```
 
 Use this when organizing routines by block/session name without editing the JSON file.
+
+#### 5) Compare latest workout to previous same routine day
+
+Compares your latest qualifying Day/Dia workout against the previous workout with the same Day/Dia number.
+
+```bash
+python hevy_cli.py workouts compare-same-day
+```
+
+Use `--show-all` if you want every changed set, including decreases.
+
+```bash
+python hevy_cli.py workouts compare-same-day --show-all
+```
+
+The JSON output includes:
+
+- Latest workout metadata
+- Previous same-day workout metadata
+- Set-level weight, reps, and volume deltas
+- Increase flags for weight and reps
 
 ## 📂 Where to Find Files
 
