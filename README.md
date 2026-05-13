@@ -1,6 +1,6 @@
-# 🏋️ Hevy Routine Uploader & Progression Tracker
+# 🏋️ Hevy Routine Uploader Toolkit
 
-> Comprehensive Python toolkit for managing Hevy workout routines and tracking strength progression with beautiful visualizations.
+> Comprehensive Python toolkit for managing Hevy workout routines and core workout workflows.
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Hevy API](https://img.shields.io/badge/Hevy-API-orange.svg)](https://api.hevyapp.com/docs/)
@@ -12,39 +12,17 @@
 
 | Feature | Description |
 |---------|-------------|
-| 📊 **Progression Tracking** | Track bench press, squat, and shoulder press with 1RM estimation (Epley formula) |
-| 📈 **Multiple Visualizations** | 5+ chart styles: minimal, gradient, area, dashboard, and comparison |
 | 🎯 **Next Workout Predictor** | Smart algorithm determines your next workout based on routine sequence |
 | 📝 **Routine Management** | Upload, list, and manage workout routines via Hevy API |
 | 🔧 **API Client Library** | Full-featured Python client for seamless Hevy API interactions |
-| 🔍 **Data Analysis** | Squat low-point analysis, deload detection, and trend analytics |
 
----
-
-## 📸 Visualization Examples
-
-The project generates beautiful, professional-grade charts to track your progress:
-
-### Progression Tracking
-
-- **Standard Progression**: Line charts showing weight and estimated 1RM over time
-- **Minimal Style**: Clean, dark-themed visualizations
-- **Gradient Style**: Colorful progression using viridis colormap
-- **Area Charts**: Stacked visualization of weight and 1RM
-
-### Comprehensive Dashboard
-
-- **6-Panel Dashboard**: All exercises (bench press, squat, shoulder press) with dual metrics
-- **Comparison Charts**: Normalized view of all exercises on the same scale
-
-*Sample visualizations are automatically saved to the `visualizations/` directory.*
 
 ---
 
 ## 📚 Table of Contents
 
 - [Quick Start](#-quick-start)
-- [Progression Tracking](#-progression-tracking--analysis)
+- [Workout Utilities](#-workout-utilities)
 - [Routine Management](#-routine-management)
 - [API Client Usage](#-api-client-usage)
 - [Documentation](#-documentation)
@@ -97,7 +75,7 @@ Before creating routines, read [`ROUTINE_CREATION_RULES.md`](ROUTINE_CREATION_RU
 
 ---
 
-## 📊 Progression Tracking & Analysis
+## 📊 Workout Utilities
 
 ### 🎯 What's Your Next Workout?
 
@@ -136,81 +114,6 @@ Exercises:
   2. Incline Bench Press (Dumbbell) (8 reps) (4 sets)
   [...]
 ```
-
-### 💪 Track Your Strength Progression
-
-Track your gains with automatic 1RM estimation using the Epley formula.
-
-#### Barbell Bench Press
-
-```bash
-python scripts/bench_press_progression.py
-```
-
-- **Data:** 160 sets from 2025
-- **Max Weight:** 61.2 kg
-- **Estimated 1RM:** 81.6 kg
-- **Output:** Visualization with weight vs. 1RM trends + JSON data
-
-#### Barbell Squat
-
-```bash
-python scripts/squat_progression.py
-```
-
-#### Barbell Squat
-
-```bash
-python scripts/squat_progression.py
-```
-
-- **Data:** 101 sets from 2025
-- **Max Weight:** 70.0 kg
-- **Estimated 1RM:** 88.7 kg
-- **Output:** Visualization with low-point markers + JSON data
-
-#### Dumbbell Shoulder Press
-
-```bash
-python scripts/shoulder_press_progression.py
-```
-
-- **Data:** 183 sets from 2025
-- **Max Weight:** 40.8 kg per dumbbell
-- **Estimated 1RM:** 50.3 kg
-- **Output:** Visualization + JSON data
-
-### 🎨 Advanced Visualizations
-
-Generate multiple stylized visualization types for all exercises:
-
-```bash
-python scripts/advanced_visualizations.py
-```
-
-Creates 5 visualization styles:
-
-- **Minimal**: Dark theme, clean lines
-- **Gradient**: Colorful progression (viridis colormap)
-- **Area**: Weight + 1RM stacked visualization
-- **Dashboard**: 6-panel comprehensive view (all 3 lifts × 2 metrics)
-- **Comparison**: Normalized all exercises on same scale
-
-Output files saved to `visualizations/` directory.
-
-### 🔍 Analyze Squat Low-Point Analysis
-
-Identify sessions significantly below your rolling average:
-
-```bash
-python scripts/analyze_squat_lowpoints.py
-```
-
-Identifies:
-
-- Sessions >5kg below 7-day rolling average
-- Chronological low points with context
-- Summary statistics and trends
 
 ---
 
@@ -349,8 +252,7 @@ templates = client.get_exercise_templates()
 | File | Description |
 |------|-------------|
 | [`README.md`](README.md) | Complete overview and architecture (this file) |
-| [`QUICK_REFERENCE.md`](docs/QUICK_REFERENCE.md) | Quick lookup of commands and exercise IDs |
-| [`PROGRESSION_TRACKER_README.md`](docs/PROGRESSION_TRACKER_README.md) | Detailed progression tracking guide |
+| [`QUICK_REFERENCE.md`](docs/QUICK_REFERENCE.md) | Quick lookup of active commands and workflows |
 | [`SECURITY_SETUP.md`](docs/SECURITY_SETUP.md) | Safe API key configuration |
 | [`HEVY_API_COMPLETE.md`](docs/HEVY_API_COMPLETE.md) | Complete Hevy API reference |
 | [`ROUTINE_CREATION_RULES.md`](ROUTINE_CREATION_RULES.md) | Critical rules for routine creation |
@@ -358,31 +260,14 @@ templates = client.get_exercise_templates()
 ### Quick Commands Reference
 
 ```bash
-# Test API connection
+# Setup (one-time)
+pip install -r requirements.txt
+export HEVY_API_KEY=<your-api-key>
+
+# Optional utilities
 python test_api_key.py
-
-# What's my next workout?
 python scripts/next_workout.py
-
-# Track barbell bench press progression
-python scripts/bench_press_progression.py
-
-# Track barbell squat progression  
-python scripts/squat_progression.py
-
-# Track dumbbell shoulder press progression
-python scripts/shoulder_press_progression.py
-
-# Analyze squat low points (deloads/plateaus)
-python scripts/analyze_squat_lowpoints.py
-
-# Generate all visualization styles
-python scripts/advanced_visualizations.py
-
-# Upload a routine
 python routine_uploader.py routine.json
-
-# Upload with per-session folder override
 python routine_uploader.py routine.json --folder-title "HSF 15"
 ```
 
@@ -399,26 +284,11 @@ routine-uploader/
 │
 ├── 📂 scripts/
 │   ├── next_workout.py             # 🎯 What's my next workout?
-│   ├── bench_press_progression.py  # Bench press tracking
-│   ├── squat_progression.py        # Squat tracking
-│   ├── shoulder_press_progression.py # Shoulder press tracking
-│   ├── analyze_squat_lowpoints.py  # Low-point detection
-│   └── advanced_visualizations.py  # Multi-style charts
+│   └── workout_duration.py         # Workout duration utility
 │
 ├── 📂 data/
 │   ├── next_workout.json           # Cached next workout
-│   ├── bench_press_data_2025.json
-│   ├── squat_data_2025.json
-│   └── shoulder_press_data_2025.json
 │
-├── 📂 visualizations/              # Generated PNG charts
-│   ├── bench_press_progression_2025.png
-│   ├── squat_progression_2025.png
-│   ├── *_minimal_2025.png
-│   ├── *_gradient_2025.png
-│   ├── *_area_2025.png
-│   ├── dashboard_2025.png
-│   └── comparison_2025.png
 │
 ├── 📂 input/                       # Sample routine JSON files
 ├── 📂 templates/                   # JSON templates
@@ -428,23 +298,8 @@ routine-uploader/
 └── 📂 docs/                        # Documentation
     ├── QUICK_START.md
     ├── QUICK_REFERENCE.md
-    ├── PROGRESSION_TRACKER_README.md
     └── SECURITY_SETUP.md
 ```
-
----
-
-## 🔬 Technical Details
-
-### 1RM Calculation Method
-
-The Epley formula is used across all progression trackers:
-
-```text
-1RM = weight × (1 + reps ÷ 30)
-```
-
-This provides reasonable estimates for strength progression visualization without requiring actual max attempts.
 
 ### Exercise Template IDs
 
@@ -485,7 +340,6 @@ python -c "from hevy_api_client import HevyAPIClient; client = HevyAPIClient(); 
 | Issue | Solution |
 |-------|----------|
 | `ModuleNotFoundError` | Run `pip install -r requirements.txt` |
-| No visualizations generated | Check `visualizations/` directory exists |
 | Empty data files | Ensure you have workout history in Hevy |
 
 ---

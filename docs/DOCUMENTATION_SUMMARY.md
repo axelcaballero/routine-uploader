@@ -7,19 +7,15 @@ This document outlines what's been documented for future reference and new chat 
 ### README.md (Updated)
 **Complete overview of the entire system**, including:
 
-- **Features**: Progression tracking, visualizations, next workout prediction, routine management
+- **Features**: Next workout prediction, routine management, API utilities
 - **Quick Start**: Setup instructions and security warnings
-- **Progression Tracking & Analysis**: Full guide to all tracking scripts
+- **Workout Utilities**: Next workout workflow and support commands
   - What's Your Next Workout (6-step process explained)
-  - Track Progression (bench press, squat, shoulder press)
-  - Advanced Visualizations (5 styles)
-  - Analysis Tools (squat low-point detection)
 - **Available Methods**: Complete HevyAPIClient API reference with pagination support
 - **API Architecture**: Detailed explanation of 6-step next workout process with data flow
 - **Key Data Structures**: JSON response formats
 - **Exercise Template IDs**: Reference IDs for major exercises
 - **Directory Structure**: Complete project layout
-- **1RM Calculation Method**: Epley formula explanation
 - **Key Components**: Description of core files and their purposes
 - **Quick Commands Reference**: Fast lookup of all commands
 - **Documentation Files**: Guide to other documentation
@@ -35,9 +31,6 @@ This document outlines what's been documented for future reference and new chat 
 - **"What's my next workout?"** → Run `python scripts/next_workout.py`
   - See README section: "What's Your Next Workout?"
   - For technical details: See "API Architecture" section in README.md
-  
-- **"How do I track my progress?"** → See "Progression Tracking & Analysis" in README.md
-  - Run specific tracker: `scripts/bench_press_progression.py`, `scripts/squat_progression.py`, etc.
 
 - **"What's the API structure?"** → See "Available Methods" and "API Architecture" in README.md
 
@@ -59,9 +52,6 @@ Why folder_id matters: Users may have multiple training programs. Filtering by f
 
 ### Data Saved for Future Use
 - `data/next_workout.json` - Cached next workout (routine_id, title, day_number, folder_id)
-- `data/bench_press_data_2025.json` - 160 sets with metrics
-- `data/squat_data_2025.json` - 101 sets with metrics
-- `data/shoulder_press_data_2025.json` - 183 sets with metrics
 
 ### Important Exercise Template IDs
 ```
@@ -74,14 +64,14 @@ Shoulder Press (Dumbbell):       878CD1D0
 
 1. **hevy_api_client.py** - Updated with pagination support in `list_routines(page, page_size)`
 2. **scripts/next_workout.py** - Complete 6-step implementation
-3. **README.md** - Comprehensive documentation (461 lines)
+3. **README.md** - Comprehensive documentation
 4. **DOCUMENTATION_SUMMARY.md** - This file
 
 ## For Developers/New Contributors
 
 When onboarding:
 1. Read this file first (DOCUMENTATION_SUMMARY.md)
-2. Read README.md sections in order: Features → Quick Start → Progression Tracking → API Architecture
+2. Read README.md sections in order: Features → Quick Start → Workout Utilities → API Architecture
 3. Review scripts/next_workout.py for example of 6-step process
 4. Review hevy_api_client.py for API implementation
 5. Run `python test_api_key.py` to verify setup

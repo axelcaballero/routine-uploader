@@ -1,58 +1,72 @@
-# Quick Reference - Progression Tracker Commands
+# Quick Reference - Core Workflow Commands
 
-## Run Scripts to Generate Data & Charts
+## ⚡ Quick Commands
 
 ```bash
-# Bench Press Progression (160 sets tracked)
-python scripts/bench_press_progression.py
+# Setup (one-time)
+pip install -r requirements.txt
+export HEVY_API_KEY=<your-api-key>
 
-# Squat Progression (101 sets tracked)
-python scripts/squat_progression.py
-
-# Shoulder Press Progression (183 sets tracked)
-python scripts/shoulder_press_progression.py
-
-# Analyze Squat Low Points
-python scripts/analyze_squat_lowpoints.py
+# Optional utilities
+python test_api_key.py
+python scripts/next_workout.py
+python routine_uploader.py routine.json
+python routine_uploader.py routine.json --folder-title "HSF 15"
 ```
+
+### Optional Utilities Usage
+
+#### 1) Test API connection
+
+Use this to quickly verify your API key and connectivity before running other tools.
+
+```bash
+python test_api_key.py
+```
+
+Expected result: success confirmation if credentials are valid.
+
+#### 2) Get next workout in your sequence
+
+Fetches your latest completed workout, finds the related folder/routine sequence,
+and calculates the next workout day automatically.
+
+```bash
+python scripts/next_workout.py
+```
+
+Also writes output to `data/next_workout.json`.
+
+#### 3) Upload a routine JSON
+
+Uploads a single routine file directly to Hevy.
+
+```bash
+python routine_uploader.py routine.json
+```
+
+Use this when the routine already contains the correct folder metadata.
+
+#### 4) Upload with per-session folder override
+
+Forces the upload target folder for that command run only.
+
+```bash
+python routine_uploader.py routine.json --folder-title "HSF 15"
+```
+
+Use this when organizing routines by block/session name without editing the JSON file.
 
 ## 📂 Where to Find Files
 
 | What | Location |
 |------|----------|
 | Scripts | `scripts/` |
-| Chart Images | `visualizations/` |
 | Raw Data (JSON) | `data/` |
-| Documentation | `PROGRESSION_TRACKER_README.md` |
-
-## 📊 Exercise IDs (from Hevy API)
-
-- Bench Press Barbell: `79D0BB3A`
-- Squat Barbell: `D04AC939`
-- Shoulder Press Dumbbell: `878CD1D0`
-
-## 📈 2025 Progress Summary
-
-| Exercise | Sets | Max | 1RM Est. | Period |
-|----------|------|-----|----------|--------|
-| Bench Press | 160 | 61.2 kg | 81.6 kg | Jan-Nov |
-| Squat | 101 | 70.0 kg | 88.7 kg | Jan-Nov |
-| Shoulder Press | 183 | 40.8 kg | 50.3 kg | Jan-Nov |
-
-## 🛠 Setup (One-time)
-
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Set API key (already configured)
-export HEVY_API_KEY=<your-api-key>
-```
+| Documentation | `docs/` |
 
 ## 💡 Tips
 
 - All scripts pull live data from Hevy API
-- Run scripts anytime to refresh visualizations and data
+- Run scripts anytime to refresh live outputs and JSON data
 - JSON files auto-save in `data/` folder
-- PNG charts auto-save in `visualizations/` folder
-- Check `analyze_squat_lowpoints.py` for detailed strength analytics
