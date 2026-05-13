@@ -260,7 +260,6 @@ def _normalize_workout_title(value: str) -> str:
 def _is_allowed_main_workout_title(title: str) -> bool:
     normalized = _normalize_workout_title(title)
 
-    # Only include planned main split workouts labeled Day/Dia 1-6.
     day_match = re.search(r"\b(?:day|dia)\s*([1-6])\b", normalized)
     if not day_match:
         return False
@@ -292,12 +291,6 @@ def _extract_workout_day_number(title: str) -> int | None:
 
 
 def _round_to_half(value: float) -> float:
-    """Round value to nearest 0.5 increment (e.g., 7.5, 8, 8.5, 9, 9.5, 10)."""
-    return round(value * 2) / 2
-
-
-def _round_to_half(value: float) -> float:
-    """Round value to nearest 0.5 increment (e.g., 7.5, 8, 8.5, 9, 9.5, 10)."""
     return round(value * 2) / 2
 
 
@@ -324,6 +317,76 @@ def _extract_workout_rpes(workout: dict[str, Any], include_warmups: bool) -> lis
                 values.append(float(rpe_value))
 
     return values
+
+
+def _detect_workout_prs(client: HevyAPIClient, workout: dict[str, Any]) -> list[dict[str, Any]]:
+    workout_date = str(workout.get("start_time", ""))[:10]
+    results: list[dict[str, Any]] = []
+
+    for ex in workout.get("exercises", []):
+        ex_id = str(ex.get("exercise_template_id", ""))
+        ex_title = str(ex.get("title", ""))
+
+        working_sets = [
+            (float(s.get("weight_kg") or 0), int(s.get("reps") or 0))
+            for s in ex.get("sets", [])
+            if s.get("type") != "warmup"
+        ]
+        if not working_sets:
+            continue
+
+        history = client.get_exercise_history(ex_id)
+        prior_sets = [
+            s for s in history.get("exercise_history", [])
+            if not str(s.get("workout_start_time", "")).startswith(workout_date)
+            and s.get("set_type") != "warmup"
+        ]
+
+        prior_max_vol = max(
+            (float(s.get("weight_kg") or 0) * int(s.get("reps") or 0) for s in prior_sets),
+            default=0.0,
+        )
+
+        best_pr: dict[str, Any] | None = None
+        for w, r in working_sets:
+            vol = w * r
+            if vol > prior_max_vol:
+                best_pr = {
+                    "exercise": ex_title,
+                    "weight_kg": round(w, 2),
+                    "reps": r,
+                    "volume": round(vol, 1),
+                    "prev_best_volume": round(prior_max_vol, 1),
+                }
+                prior_max_vol = vol
+
+        if best_pr:
+            results.append(best_pr)
+
+    return results
+
+
+def _find_latest_allowed_workouts(client: HevyAPIClient, max_count: int = 6, page_size: int = 10, max_pages: int = 30) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
+    for page in range(1, max_pages + 1):
+        payload = client.list_workouts(page=page, page_size=page_size)
+        workouts = payload.get("workouts", [])
+        if not isinstance(workouts, list) or not workouts:
+            break
+
+        for workout in workouts:
+            if not isinstance(workout, dict):
+                continue
+            title = str(workout.get("title", ""))
+            if _is_allowed_main_workout_title(title):
+                results.append(workout)
+                if len(results) >= max_count:
+                    return results
+
+        if len(workouts) < page_size:
+            break
+
+    return results
 
 
 def _extract_working_sets_by_exercise(workout: dict[str, Any]) -> dict[str, list[tuple[float, int]]]:
@@ -459,82 +522,6 @@ def _compare_workouts_by_exercise(
     return comparison_rows, compared_set_count
 
 
-def _detect_workout_prs(client: HevyAPIClient, workout: dict[str, Any]) -> list[dict[str, Any]]:
-    """Detect volume personal records in a workout by comparing against all prior exercise history.
-
-    Returns one entry per exercise where at least one working set beat the previous volume PR.
-    Within-session PRs (set A then set B both beating prior best) are collapsed to the best set.
-    """
-    workout_date = str(workout.get("start_time", ""))[:10]
-    results: list[dict[str, Any]] = []
-
-    for ex in workout.get("exercises", []):
-        ex_id = str(ex.get("exercise_template_id", ""))
-        ex_title = str(ex.get("title", ""))
-
-        working_sets = [
-            (float(s.get("weight_kg") or 0), int(s.get("reps") or 0))
-            for s in ex.get("sets", [])
-            if s.get("type") != "warmup"
-        ]
-        if not working_sets:
-            continue
-
-        history = client.get_exercise_history(ex_id)
-        prior_sets = [
-            s for s in history.get("exercise_history", [])
-            if not str(s.get("workout_start_time", "")).startswith(workout_date)
-            and s.get("set_type") != "warmup"
-        ]
-
-        prior_max_vol = max(
-            (float(s.get("weight_kg") or 0) * int(s.get("reps") or 0) for s in prior_sets),
-            default=0.0,
-        )
-
-        best_pr: dict[str, Any] | None = None
-        for w, r in working_sets:
-            vol = w * r
-            if vol > prior_max_vol:
-                best_pr = {
-                    "exercise": ex_title,
-                    "weight_kg": round(w, 2),
-                    "reps": r,
-                    "volume": round(vol, 1),
-                    "prev_best_volume": round(prior_max_vol, 1),
-                }
-                prior_max_vol = vol
-
-        if best_pr:
-            results.append(best_pr)
-
-    return results
-
-
-def _find_latest_allowed_workouts(client: HevyAPIClient, max_count: int = 5, page_size: int = 10, max_pages: int = 30) -> list[dict[str, Any]]:
-    """Find up to max_count latest allowed workouts."""
-    results: list[dict[str, Any]] = []
-    for page in range(1, max_pages + 1):
-        payload = client.list_workouts(page=page, page_size=page_size)
-        workouts = payload.get("workouts", [])
-        if not isinstance(workouts, list) or not workouts:
-            break
-
-        for workout in workouts:
-            if not isinstance(workout, dict):
-                continue
-            title = str(workout.get("title", ""))
-            if _is_allowed_main_workout_title(title):
-                results.append(workout)
-                if len(results) >= max_count:
-                    return results
-
-        if len(workouts) < page_size:
-            break
-
-    return results
-
-
 def _handle_workouts_command(args: argparse.Namespace) -> int:
     client = HevyAPIClient()
 
@@ -544,7 +531,7 @@ def _handle_workouts_command(args: argparse.Namespace) -> int:
             print("No qualifying workout found with title Day/Dia 1-6 excluding core/forearms/calves.")
             return 1
 
-        nth = args.nth - 1  # Convert to 0-indexed
+        nth = args.nth - 1
         if nth >= len(workouts_list):
             print(f"Only {len(workouts_list)} qualifying workouts available (requested nth={args.nth})")
             return 1
@@ -612,8 +599,7 @@ def _handle_workouts_command(args: argparse.Namespace) -> int:
             print("No qualifying workouts found with title Day/Dia 1-6 excluding core/forearms/calves.")
             return 1
 
-        # Collect unique exercises from one full round of Day 1-6 workouts
-        exercise_meta: dict[str, str] = {}  # ex_id -> title
+        exercise_meta: dict[str, str] = {}
         for w_meta in workouts_list:
             full = client.get_workout(str(w_meta.get("id", "")))
             for ex in full.get("exercises", []):
@@ -718,7 +704,7 @@ def build_parser() -> argparse.ArgumentParser:
             "  python hevy_cli.py routines batch-upload extracted_routines.json --folder-title \"HSF 16\"\n"
             "  python hevy_cli.py folders recent\n"
             "  python hevy_cli.py folders create-next\n"
-            "  python hevy_cli.py workouts latest-rpe"
+            "  python hevy_cli.py workouts compare-same-day"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
