@@ -283,6 +283,14 @@ def _is_allowed_main_workout_title(title: str) -> bool:
     return not any(token in normalized for token in excluded_tokens)
 
 
+def _extract_workout_day_number(title: str) -> int | None:
+    normalized = _normalize_workout_title(title)
+    match = re.search(r"\b(?:day|dia)\s*([1-6])\b", normalized)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
 def _round_to_half(value: float) -> float:
     """Round value to nearest 0.5 increment (e.g., 7.5, 8, 8.5, 9, 9.5, 10)."""
     return round(value * 2) / 2
@@ -316,6 +324,139 @@ def _extract_workout_rpes(workout: dict[str, Any], include_warmups: bool) -> lis
                 values.append(float(rpe_value))
 
     return values
+
+
+def _extract_working_sets_by_exercise(workout: dict[str, Any]) -> dict[str, list[tuple[float, int]]]:
+    by_exercise: dict[str, list[tuple[float, int]]] = {}
+    exercises = workout.get("exercises", [])
+    if not isinstance(exercises, list):
+        return by_exercise
+
+    for exercise in exercises:
+        if not isinstance(exercise, dict):
+            continue
+
+        title = str(exercise.get("title", "Unknown"))
+        sets = exercise.get("sets", [])
+        if not isinstance(sets, list):
+            continue
+
+        working_sets: list[tuple[float, int]] = []
+        for set_data in sets:
+            if not isinstance(set_data, dict):
+                continue
+            if str(set_data.get("type", "")).casefold() == "warmup":
+                continue
+
+            weight = set_data.get("weight_kg")
+            reps = set_data.get("reps")
+            if isinstance(weight, (int, float)) and isinstance(reps, int):
+                working_sets.append((float(weight), int(reps)))
+
+        if working_sets:
+            by_exercise[title] = working_sets
+
+    return by_exercise
+
+
+def _find_latest_and_previous_same_day_workouts(client: HevyAPIClient) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    latest: dict[str, Any] | None = None
+    latest_day: int | None = None
+
+    for page in range(1, 31):
+        payload = client.list_workouts(page=page, page_size=10)
+        workouts = payload.get("workouts", [])
+        if not isinstance(workouts, list) or not workouts:
+            break
+
+        for workout in workouts:
+            if not isinstance(workout, dict):
+                continue
+
+            title = str(workout.get("title", ""))
+            if not _is_allowed_main_workout_title(title):
+                continue
+
+            day_number = _extract_workout_day_number(title)
+            if day_number is None:
+                continue
+
+            if latest is None:
+                latest = workout
+                latest_day = day_number
+                continue
+
+            if latest_day == day_number:
+                return latest, workout
+
+        if len(workouts) < 10:
+            break
+
+    return latest, None
+
+
+def _compare_workouts_by_exercise(
+    latest_workout: dict[str, Any],
+    previous_workout: dict[str, Any],
+    *,
+    show_all: bool,
+) -> tuple[list[dict[str, Any]], int]:
+    latest_by_exercise = _extract_working_sets_by_exercise(latest_workout)
+    previous_by_exercise = _extract_working_sets_by_exercise(previous_workout)
+
+    comparison_rows: list[dict[str, Any]] = []
+    compared_set_count = 0
+
+    for exercise_name, latest_sets in latest_by_exercise.items():
+        previous_sets = previous_by_exercise.get(exercise_name)
+        if not previous_sets:
+            continue
+
+        common_set_count = min(len(latest_sets), len(previous_sets))
+        for idx in range(common_set_count):
+            latest_weight, latest_reps = latest_sets[idx]
+            previous_weight, previous_reps = previous_sets[idx]
+
+            delta_weight = round(latest_weight - previous_weight, 2)
+            delta_reps = latest_reps - previous_reps
+            latest_volume = round(latest_weight * latest_reps, 1)
+            previous_volume = round(previous_weight * previous_reps, 1)
+            delta_volume = round(latest_volume - previous_volume, 1)
+
+            increased_weight = latest_weight > previous_weight
+            increased_reps = latest_reps > previous_reps
+            has_change = delta_weight != 0 or delta_reps != 0
+            has_increase = increased_weight or increased_reps
+
+            if not show_all and not has_increase:
+                continue
+            if show_all and not has_change:
+                continue
+
+            compared_set_count += 1
+            comparison_rows.append({
+                "exercise": exercise_name,
+                "set": idx + 1,
+                "previous": {
+                    "weight_kg": round(previous_weight, 2),
+                    "reps": previous_reps,
+                    "volume": previous_volume,
+                },
+                "latest": {
+                    "weight_kg": round(latest_weight, 2),
+                    "reps": latest_reps,
+                    "volume": latest_volume,
+                },
+                "delta": {
+                    "weight_kg": delta_weight,
+                    "reps": delta_reps,
+                    "volume": delta_volume,
+                },
+                "increased_weight": increased_weight,
+                "increased_reps": increased_reps,
+            })
+
+    return comparison_rows, compared_set_count
 
 
 def _detect_workout_prs(client: HevyAPIClient, workout: dict[str, Any]) -> list[dict[str, Any]]:
@@ -506,6 +647,48 @@ def _handle_workouts_command(args: argparse.Namespace) -> int:
         records.sort(key=lambda x: x["exercise"])
         return _print_json(records)
 
+    if args.command == "compare-same-day":
+        latest_workout_meta, previous_workout_meta = _find_latest_and_previous_same_day_workouts(client)
+        if latest_workout_meta is None:
+            print("No qualifying Day/Dia 1-6 workout found for comparison.")
+            return 1
+        if previous_workout_meta is None:
+            print("No previous qualifying workout found with the same Day/Dia number.")
+            return 1
+
+        latest_workout = client.get_workout(str(latest_workout_meta.get("id", "")))
+        previous_workout = client.get_workout(str(previous_workout_meta.get("id", "")))
+
+        comparison_rows, row_count = _compare_workouts_by_exercise(
+            latest_workout,
+            previous_workout,
+            show_all=getattr(args, "show_all", False),
+        )
+
+        result = {
+            "comparison": "latest qualifying workout vs previous workout with same Day/Dia number",
+            "latest": {
+                "workout_id": latest_workout.get("id"),
+                "title": latest_workout.get("title"),
+                "start_time": latest_workout.get("start_time"),
+                "day_number": _extract_workout_day_number(str(latest_workout.get("title", ""))),
+            },
+            "previous_same_day": {
+                "workout_id": previous_workout.get("id"),
+                "title": previous_workout.get("title"),
+                "start_time": previous_workout.get("start_time"),
+                "day_number": _extract_workout_day_number(str(previous_workout.get("title", ""))),
+            },
+            "filters": {
+                "title_day_range": "Day/Dia 1-6",
+                "excluded_keywords": ["core", "forearms", "calves"],
+            },
+            "mode": "all_changes" if getattr(args, "show_all", False) else "increases_only",
+            "comparison_count": row_count,
+            "comparisons": comparison_rows,
+        }
+        return _print_json(result)
+
     raise ValueError(f"Unsupported workouts command: {args.command}")
 
 
@@ -648,6 +831,16 @@ def build_parser() -> argparse.ArgumentParser:
     workouts_subparsers.add_parser(
         "personal-records",
         help="Show all-time volume PRs for every exercise in the last full round of Day 1-6 workouts",
+    )
+
+    compare_same_day_parser = workouts_subparsers.add_parser(
+        "compare-same-day",
+        help="Compare latest qualifying workout with previous workout of the same Day/Dia number",
+    )
+    compare_same_day_parser.add_argument(
+        "--show-all",
+        action="store_true",
+        help="Show all changed sets (increases and decreases). Default shows only increases.",
     )
 
     auth_parser = subparsers.add_parser("auth", help="Verify Hevy API authentication")

@@ -391,6 +391,12 @@ python hevy_cli.py workouts latest-rpe
 # Get 2nd or 3rd latest qualifying workout (--nth 1-6)
 python hevy_cli.py workouts latest-rpe --nth 2
 
+# Compare latest workout to previous workout of the same Day/Dia number (increases only)
+python hevy_cli.py workouts compare-same-day
+
+# Show all changed sets (increases and decreases)
+python hevy_cli.py workouts compare-same-day --show-all
+
 # Get complete round of last 6 main muscle workouts (Day 1-6)
 python hevy_cli.py workouts last-rpes
 ```

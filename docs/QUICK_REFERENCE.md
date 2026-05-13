@@ -7,6 +7,8 @@
 | `python hevy_cli.py workouts latest-rpe` | RPE from latest qualifying workout |
 | `python hevy_cli.py workouts latest-rpe --nth N` | RPE from Nth latest workout (N = 1–6) |
 | `python hevy_cli.py workouts latest-rpe --show-prs` | RPE + personal records from latest workout |
+| `python hevy_cli.py workouts compare-same-day` | Latest workout vs previous same Day/Dia (increases only) |
+| `python hevy_cli.py workouts compare-same-day --show-all` | Latest workout vs previous same Day/Dia (all changed sets) |
 | `python hevy_cli.py workouts last-rpes` | RPE from all 6 workouts in last full round |
 | `python hevy_cli.py workouts last-rpes --show-prs` | RPE + PRs for each of the last 6 sessions |
 | `python hevy_cli.py workouts personal-records` | All-time volume PRs for every exercise in current roster |
@@ -61,6 +63,17 @@ python hevy_cli.py workouts last-rpes
 
 # Include PR detection for each session
 python hevy_cli.py workouts last-rpes --show-prs
+```
+
+### Compare latest workout to previous same routine day
+
+```bash
+# Show set-level progression from latest workout vs prior session with same Day/Dia number
+# Default output includes only sets where weight OR reps increased
+python hevy_cli.py workouts compare-same-day
+
+# Show every changed set (both increases and decreases)
+python hevy_cli.py workouts compare-same-day --show-all
 ```
 
 Applied filters for these commands:
