@@ -13,5 +13,11 @@
     "total_minutes": 60,
     "notes": "forearms + 30 minutes cardio and core"
   },
-  "combined_training_minutes": 128
+  "combined_training_minutes": 128,
+  "gym_suggestion": {
+    "gyms": [
+      "Golden Gym"
+    ],
+    "extra_discs": false
+  }
 }

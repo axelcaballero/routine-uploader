@@ -24,6 +24,89 @@ from hevy_api_client import HevyAPIClient
 from typing import Optional, Dict, Any, List
 
 
+def _extract_gym_name_from_line(content: str) -> str:
+    """Extract a clean gym name from a line in the gym preferences file."""
+    content = content.strip().rstrip('.').strip()
+
+    # Remove parentheses and trailing reason segments
+    content = re.sub(r'\(.*?\)', '', content).strip()
+
+    # Prefer gym name after 'en ' or before ' por '
+    if ' en ' in content:
+        candidate = content.split(' en ')[-1].strip()
+        if candidate:
+            return candidate
+    if ' por ' in content:
+        candidate = content.split(' por ')[0].strip()
+        if candidate:
+            return candidate
+
+    # If there is a comma, take the first segment
+    if ',' in content:
+        candidate = content.split(',')[0].strip()
+        if candidate:
+            return candidate
+
+    return content
+
+
+def _parse_gym_preferences(file_path: str) -> Dict[str, Dict[str, Any]]:
+    """Load gym preferences from docs/plan-gym-preferences.md."""
+    preferences: Dict[str, Dict[str, Any]] = {}
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            current_section = ""
+            for raw_line in f:
+                line = raw_line.strip()
+                if line.startswith('## '):
+                    section_title = line.replace('## ', '').strip()
+                    normalized = _normalize_workout_title(section_title)
+                    current_section = normalized
+                    preferences[current_section] = {'gyms': [], 'extra_discs': False}
+                    continue
+                
+                if current_section and (line.startswith('- ') or line.startswith('1. ') or line.startswith('2. ')):
+                    content = line.lstrip('- 123.').strip()
+                    gym_name = _extract_gym_name_from_line(content)
+                    if gym_name:
+                        preferences[current_section]['gyms'].append(gym_name)
+                    
+                    normalized_content = _normalize_workout_title(content)
+                    if 'discos extras' in normalized_content or 'extra discs' in normalized_content:
+                        preferences[current_section]['extra_discs'] = True
+    except FileNotFoundError:
+        print(f"Warning: {file_path} not found. Gym preferences will be omitted.")
+    
+    return preferences
+
+
+def _get_gym_suggestion(routine_title: str) -> Optional[Dict[str, Any]]:
+    """Get gym suggestion and extra discs info for the routine."""
+    gym_prefs_file = os.path.join(os.path.dirname(__file__), '..', 'docs', 'plan-gym-preferences.md')
+    preferences = _parse_gym_preferences(gym_prefs_file)
+    
+    normalized_title = _normalize_workout_title(routine_title)
+    
+    # Map routine titles to preference keys
+    if 'pecho' in normalized_title or 'chest' in normalized_title:
+        key = 'pecho'
+    elif 'espalda' in normalized_title or 'back' in normalized_title:
+        key = 'espalda'
+    elif 'pierna' in normalized_title or 'legs' in normalized_title:
+        # For legs, check if it's Day 3 or Day 6, but since we have day_number, perhaps use that
+        # For now, default to quads focus, but we can enhance later
+        key = 'pierna (enfoque cuadriceps)' if 'day 3' in normalized_title else 'pierna (enfoque gluteo)' if 'day 6' in normalized_title else 'pierna (enfoque cuadriceps)'
+    elif 'biceps' in normalized_title or 'triceps' in normalized_title or 'arms' in normalized_title:
+        key = 'biceps y triceps'
+    elif 'hombro' in normalized_title or 'shoulders' in normalized_title:
+        key = 'hombros'
+    else:
+        return None
+    
+    return preferences.get(key)
+
+
 def _normalize_workout_title(value: str) -> str:
     """Normalize title for comparison."""
     normalized = unicodedata.normalize("NFKD", value.casefold())
@@ -32,7 +115,7 @@ def _normalize_workout_title(value: str) -> str:
 
 
 def _parse_additional_training_schedule(file_path: str) -> Dict[int, Dict[str, Any]]:
-    """Load additional training configuration from docs/additional-traning.md."""
+    """Load additional training configuration from docs/plan-additional-training.md."""
     schedule: Dict[int, Dict[str, Any]] = {}
 
     try:
@@ -79,7 +162,7 @@ def _build_additional_training_summary(day_number: Optional[int]) -> Optional[Di
     if day_number is None:
         return None
 
-    schedule_file = os.path.join(os.path.dirname(__file__), '..', 'docs', 'additional-traning.md')
+    schedule_file = os.path.join(os.path.dirname(__file__), '..', 'docs', 'plan-additional-training.md')
     schedule = _parse_additional_training_schedule(schedule_file)
     info = schedule.get(day_number)
     if not info:
@@ -271,6 +354,13 @@ def display_next_workout(client: HevyAPIClient, routine: Dict[str, Any]) -> None
     combined_minutes = (estimated_main_minutes or 0) + (additional_info['total_minutes'] if additional_info else 0)
     print(f"\n🔗 Combined training time: {_format_duration_minutes(combined_minutes)}")
 
+    # Gym suggestion
+    gym_info = _get_gym_suggestion(routine_data.get('title', ''))
+    if gym_info and gym_info['gyms']:
+        print(f"\n🏋️  Suggested gyms: {', '.join(gym_info['gyms'])}")
+        if gym_info['extra_discs']:
+            print("  • Bring extra 1.5 lbs discs for hypertrophy")
+
     print("\nExercises:")
     for idx, exercise in enumerate(routine_data.get('exercises', []), 1):
         title = exercise.get('title', 'Unknown')
@@ -310,6 +400,7 @@ def save_next_workout_info(client: HevyAPIClient, next_routine: Dict[str, Any]) 
     additional_info = _build_additional_training_summary(day_number)
     estimated_main_minutes = get_estimated_duration(client, next_routine.get('id'))
     combined_minutes = (estimated_main_minutes or 0) + (additional_info['total_minutes'] if additional_info else 0)
+    gym_info = _get_gym_suggestion(next_routine.get('title', ''))
     
     next_workout_info = {
         'routine_id': next_routine.get('id'),
@@ -319,6 +410,7 @@ def save_next_workout_info(client: HevyAPIClient, next_routine: Dict[str, Any]) 
         'estimated_main_minutes': estimated_main_minutes,
         'additional_training': additional_info,
         'combined_training_minutes': combined_minutes,
+        'gym_suggestion': gym_info,
     }
     
     output_file = os.path.join(output_dir, 'next_workout.json')

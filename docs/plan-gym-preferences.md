@@ -2,7 +2,7 @@
 
 ## Pecho
 
-- Hardcore Gym, por equipo, ambiente y vestimenta
+- Hardcore Gym, por equipo, ambiente y vestimenta.
 
 ## Espalda
 
@@ -10,13 +10,13 @@
 
 ## Pierna (enfoque cuadriceps)
 
-1. Hardcore Gym por equipo
-2. Smart Fit Israel Cavazos por equipo
+1. Hardcore Gym por equipo.
+2. Smart Fit Israel Cavazos por equipo.
 
 ## Biceps y Triceps
 
 - Rutina se puede hacer sin problema en Golden Gym.
-- Hardcore Gym por equipo (tiene maquina de fondos para triceps)
+- Hardcore Gym por equipo (tiene maquina de fondos para triceps).
 - Es conveniente llevar los discos extras de 1.5 lbs para hipertrofia.
 
 ## Hombros
@@ -26,4 +26,4 @@
 
 ## Pierna (enfoque gluteo)
 
-- Smart Fit Israel Cavazos por equipo
+- Smart Fit Israel Cavazos por equipo.
