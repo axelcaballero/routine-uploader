@@ -60,12 +60,12 @@ cp .env.example .env
 
 ```bash
 # Verify API connection
-python test_api_key.py
+python scripts/test_api_key.py
 ```
 
 ### 📋 Routine Creation Rules
 
-Before creating routines, read [`ROUTINE_CREATION_RULES.md`](ROUTINE_CREATION_RULES.md) for critical guidelines:
+Before creating routines, read [`ROUTINE_CREATION_RULES.md`](docs/ROUTINE_CREATION_RULES.md) for critical guidelines:
 
 - Rep range interpretation (always use maximum value)
 - "Duplicar repeticiones" handling (double reps per set)
@@ -285,7 +285,7 @@ pip install -r requirements.txt
 export HEVY_API_KEY=<your-api-key>
 
 # Optional utilities
-python test_api_key.py
+python scripts/test_api_key.py
 python scripts/next_workout.py
 python routine_uploader.py routine.json
 python routine_uploader.py routine.json --folder-title "HSF 15"
@@ -303,12 +303,25 @@ python hevy_cli.py workouts compare-same-day --show-all
 routine-uploader/
 ├── 📄 hevy_api_client.py           # Main API client
 ├── 📄 routine_uploader.py          # Routine upload tool
-├── 📄 test_api_key.py              # API connection test
+├── 📄 scripts/test_api_key.py      # API connection test
 ├── 📄 requirements.txt             # Python dependencies
 │
 ├── 📂 scripts/
-│   ├── next_workout.py             # 🎯 What's my next workout?
-│   └── workout_duration.py         # Workout duration utility
+│   ├── next_workout.py              # 🎯 What's my next workout?
+│   ├── pr_tracker.py                # Workout PR/RPE utility
+│   ├── workout_duration.py          # Workout duration utility
+│   ├── test_api_key.py              # API connection test
+│   ├── folder_manager.py            # Folder utilities
+│   ├── get_recent_folder.py         # Recent folder lookup
+│   ├── create_new_folder.py         # Next folder helper
+│   ├── batch_routine_uploader.py    # Batch upload workflow
+│   ├── exercise_validator.py        # Exercise ID validation
+│   ├── validate_structure.py        # Routine structure validator
+│   ├── validate_rules_compliance.py # Routine rules validator
+│   ├── add_warmup_sets.py           # Warmup set helper
+│   ├── fix_rest_times.py            # Rest-time fixer
+│   ├── fix_local_rest_times.py      # Local rest-time fixer
+│   └── test_enhancement.py          # Enhancement test helper
 │
 ├── 📂 data/
 │   ├── next_workout.json           # Cached next workout

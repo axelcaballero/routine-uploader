@@ -12,6 +12,11 @@ Rules (from manifesto.md and ROUTINE_CREATION_RULES.md):
 - Core routines: 20 seconds
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import json
 import time
 from hevy_api_client import HevyAPIClient

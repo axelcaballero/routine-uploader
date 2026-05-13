@@ -5,6 +5,10 @@ Get the most recent routine folder created.
 
 import sys
 import os
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from hevy_api_client import HevyAPIClient
 
 def main():

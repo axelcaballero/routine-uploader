@@ -35,7 +35,7 @@ def main() -> None:
         api_key = os.getenv("HEVY_API_KEY")
 
     if not api_key:
-        print("Usage: python test_api_key.py <api_key>")
+        print("Usage: python scripts/test_api_key.py <api_key>")
         print("\nOr set HEVY_API_KEY environment variable")
         raise SystemExit(1)
 

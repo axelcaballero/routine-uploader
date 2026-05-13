@@ -8,7 +8,7 @@ pip install -r requirements.txt
 export HEVY_API_KEY=<your-api-key>
 
 # Optional utilities
-python test_api_key.py
+python scripts/test_api_key.py
 python scripts/next_workout.py
 python routine_uploader.py routine.json
 python routine_uploader.py routine.json --folder-title "HSF 15"
@@ -25,7 +25,7 @@ python hevy_cli.py workouts compare-same-day --show-all
 Use this to quickly verify your API key and connectivity before running other tools.
 
 ```bash
-python test_api_key.py
+python scripts/test_api_key.py
 ```
 
 Expected result: success confirmation if credentials are valid.

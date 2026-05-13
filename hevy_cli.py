@@ -13,14 +13,14 @@ from pathlib import Path
 from statistics import mean
 from typing import Any, Callable, Iterator, Sequence
 
-import batch_routine_uploader
-import create_new_folder
-import exercise_validator
-import folder_manager
-import get_recent_folder
+from scripts import batch_routine_uploader
+from scripts import create_new_folder
+from scripts import exercise_validator
+from scripts import folder_manager
+from scripts import get_recent_folder
 import routine_uploader
-import test_api_key
-import validate_structure
+from scripts import test_api_key
+from scripts import validate_structure
 from hevy_api_client import HevyAPIClient
 
 

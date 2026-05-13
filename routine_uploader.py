@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Optional
 from hevy_api_client import HevyAPIClient
 from routine_enhancer import RoutineEnhancer
-from exercise_validator import ExerciseValidator
+from scripts.exercise_validator import ExerciseValidator
 
 
 def upload_routine_from_file(

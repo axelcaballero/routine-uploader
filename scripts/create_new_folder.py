@@ -7,6 +7,10 @@ Intelligently determines the next folder name (e.g., HSF 15 → HSF 16).
 import sys
 import os
 import re
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from hevy_api_client import HevyAPIClient
 
 def extract_number(folder_name: str) -> int:

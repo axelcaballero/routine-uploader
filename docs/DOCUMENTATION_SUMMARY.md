@@ -74,7 +74,7 @@ When onboarding:
 2. Read README.md sections in order: Features → Quick Start → Workout Utilities → API Architecture
 3. Review scripts/next_workout.py for example of 6-step process
 4. Review hevy_api_client.py for API implementation
-5. Run `python test_api_key.py` to verify setup
+5. Run `python scripts/test_api_key.py` to verify setup
 
 ## Why This Matters
 
