@@ -202,7 +202,7 @@ Round 2: 6rep + 6rep + 8rep + 10rep
 ❌ **NOT allowed:** "set", "amrap", "rpe", or any other string
 
 All set types pass through:
-- `validate_structure.py` - Checks for valid type
+- `scripts/validate_structure.py` - Checks for valid type
 - `./hevy.sh routines check` - Pre-flight validation
 - `./hevy.sh routines upload` - Auto-runs structure check
 
@@ -214,5 +214,5 @@ See `EXAMPLE_all_set_types.json` for a working routine using all 6 set types.
 
 Validate it:
 ```bash
-python3 validate_structure.py EXAMPLE_all_set_types.json
+python3 scripts/validate_structure.py EXAMPLE_all_set_types.json
 ```

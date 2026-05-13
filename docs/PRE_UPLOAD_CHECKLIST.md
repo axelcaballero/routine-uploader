@@ -73,13 +73,13 @@ This checklist MUST be reviewed before uploading ANY routine to Hevy API. It pre
 Before creating ANY routine, read the complete rules file (lines 1-205)
 
 ### Step 2: Validate Structure
-Run `validate_structure.py` to check JSON format
+Run `scripts/validate_structure.py` to check JSON format
 
 ### Step 3: Validate Exercise IDs
 Verify all exercise_template_id values exist in instructions.md
 
 ### Step 4: Validate Rules Compliance
-Run the new `validate_rules_compliance.py` script:
+Run the new `scripts/validate_rules_compliance.py` script:
 - ✅ Rep ranges use max value
 - ✅ Doubling rules applied correctly
 - ✅ Warmup sets present (12 or 24 reps)
@@ -117,10 +117,10 @@ Only after ALL checks pass, upload to production folder
 If routines are already uploaded with violations:
 
 ### Fix Missing Warmup Sets
-Use `add_warmup_sets.py` to retrofit warmup sets via API
+Use `scripts/add_warmup_sets.py` to retrofit warmup sets via API
 
 ### Fix Wrong Rest Times
-Use `fix_rest_times.py` to update rest_seconds via API
+Use `scripts/fix_rest_times.py` to update rest_seconds via API
 
 ### Fix Wrong Reps
 Must update routine via API PUT endpoint with corrected sets

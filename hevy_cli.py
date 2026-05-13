@@ -7,18 +7,20 @@ import argparse
 import json
 import re
 import sys
+import unicodedata
 from contextlib import contextmanager
 from pathlib import Path
+from statistics import mean
 from typing import Any, Callable, Iterator, Sequence
 
-import batch_routine_uploader
-import create_new_folder
-import exercise_validator
-import folder_manager
-import get_recent_folder
+from scripts import batch_routine_uploader
+from scripts import create_new_folder
+from scripts import exercise_validator
+from scripts import folder_manager
+from scripts import get_recent_folder
 import routine_uploader
-import test_api_key
-import validate_structure
+from scripts import test_api_key
+from scripts import validate_structure
 from hevy_api_client import HevyAPIClient
 
 
@@ -249,6 +251,433 @@ def _handle_measurements_command(args: argparse.Namespace) -> int:
     raise ValueError(f"Unsupported measurements command: {args.command}")
 
 
+def _normalize_workout_title(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value.casefold())
+    ascii_text = normalized.encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"\s+", " ", ascii_text).strip()
+
+
+def _is_allowed_main_workout_title(title: str) -> bool:
+    normalized = _normalize_workout_title(title)
+
+    day_match = re.search(r"\b(?:day|dia)\s*([1-6])\b", normalized)
+    if not day_match:
+        return False
+
+    excluded_tokens = (
+        "core",
+        "abs",
+        "abdominal",
+        "forearm",
+        "forearms",
+        "antebrazo",
+        "antebrazos",
+        "calf",
+        "calves",
+        "pantorrilla",
+        "pantorrillas",
+        "gemelo",
+        "gemelos",
+    )
+    return not any(token in normalized for token in excluded_tokens)
+
+
+def _extract_workout_day_number(title: str) -> int | None:
+    normalized = _normalize_workout_title(title)
+    match = re.search(r"\b(?:day|dia)\s*([1-6])\b", normalized)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def _round_to_half(value: float) -> float:
+    return round(value * 2) / 2
+
+
+def _extract_workout_rpes(workout: dict[str, Any], include_warmups: bool) -> list[float]:
+    values: list[float] = []
+    exercises = workout.get("exercises", [])
+    if not isinstance(exercises, list):
+        return values
+
+    for exercise in exercises:
+        if not isinstance(exercise, dict):
+            continue
+        sets = exercise.get("sets", [])
+        if not isinstance(sets, list):
+            continue
+
+        for set_data in sets:
+            if not isinstance(set_data, dict):
+                continue
+            if not include_warmups and str(set_data.get("type", "")).casefold() == "warmup":
+                continue
+            rpe_value = set_data.get("rpe")
+            if isinstance(rpe_value, (int, float)):
+                values.append(float(rpe_value))
+
+    return values
+
+
+def _detect_workout_prs(client: HevyAPIClient, workout: dict[str, Any]) -> list[dict[str, Any]]:
+    workout_date = str(workout.get("start_time", ""))[:10]
+    results: list[dict[str, Any]] = []
+
+    for ex in workout.get("exercises", []):
+        ex_id = str(ex.get("exercise_template_id", ""))
+        ex_title = str(ex.get("title", ""))
+
+        working_sets = [
+            (float(s.get("weight_kg") or 0), int(s.get("reps") or 0))
+            for s in ex.get("sets", [])
+            if s.get("type") != "warmup"
+        ]
+        if not working_sets:
+            continue
+
+        history = client.get_exercise_history(ex_id)
+        prior_sets = [
+            s for s in history.get("exercise_history", [])
+            if not str(s.get("workout_start_time", "")).startswith(workout_date)
+            and s.get("set_type") != "warmup"
+        ]
+
+        prior_max_vol = max(
+            (float(s.get("weight_kg") or 0) * int(s.get("reps") or 0) for s in prior_sets),
+            default=0.0,
+        )
+
+        best_pr: dict[str, Any] | None = None
+        for w, r in working_sets:
+            vol = w * r
+            if vol > prior_max_vol:
+                best_pr = {
+                    "exercise": ex_title,
+                    "weight_kg": round(w, 2),
+                    "reps": r,
+                    "volume": round(vol, 1),
+                    "prev_best_volume": round(prior_max_vol, 1),
+                }
+                prior_max_vol = vol
+
+        if best_pr:
+            results.append(best_pr)
+
+    return results
+
+
+def _find_latest_allowed_workouts(client: HevyAPIClient, max_count: int = 6, page_size: int = 10, max_pages: int = 30) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
+    for page in range(1, max_pages + 1):
+        payload = client.list_workouts(page=page, page_size=page_size)
+        workouts = payload.get("workouts", [])
+        if not isinstance(workouts, list) or not workouts:
+            break
+
+        for workout in workouts:
+            if not isinstance(workout, dict):
+                continue
+            title = str(workout.get("title", ""))
+            if _is_allowed_main_workout_title(title):
+                results.append(workout)
+                if len(results) >= max_count:
+                    return results
+
+        if len(workouts) < page_size:
+            break
+
+    return results
+
+
+def _extract_working_sets_by_exercise(workout: dict[str, Any]) -> dict[str, list[tuple[float, int]]]:
+    by_exercise: dict[str, list[tuple[float, int]]] = {}
+    exercises = workout.get("exercises", [])
+    if not isinstance(exercises, list):
+        return by_exercise
+
+    for exercise in exercises:
+        if not isinstance(exercise, dict):
+            continue
+
+        title = str(exercise.get("title", "Unknown"))
+        sets = exercise.get("sets", [])
+        if not isinstance(sets, list):
+            continue
+
+        working_sets: list[tuple[float, int]] = []
+        for set_data in sets:
+            if not isinstance(set_data, dict):
+                continue
+            if str(set_data.get("type", "")).casefold() == "warmup":
+                continue
+
+            weight = set_data.get("weight_kg")
+            reps = set_data.get("reps")
+            if isinstance(weight, (int, float)) and isinstance(reps, int):
+                working_sets.append((float(weight), int(reps)))
+
+        if working_sets:
+            by_exercise[title] = working_sets
+
+    return by_exercise
+
+
+def _find_latest_and_previous_same_day_workouts(client: HevyAPIClient) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    latest: dict[str, Any] | None = None
+    latest_day: int | None = None
+
+    for page in range(1, 31):
+        payload = client.list_workouts(page=page, page_size=10)
+        workouts = payload.get("workouts", [])
+        if not isinstance(workouts, list) or not workouts:
+            break
+
+        for workout in workouts:
+            if not isinstance(workout, dict):
+                continue
+
+            title = str(workout.get("title", ""))
+            if not _is_allowed_main_workout_title(title):
+                continue
+
+            day_number = _extract_workout_day_number(title)
+            if day_number is None:
+                continue
+
+            if latest is None:
+                latest = workout
+                latest_day = day_number
+                continue
+
+            if latest_day == day_number:
+                return latest, workout
+
+        if len(workouts) < 10:
+            break
+
+    return latest, None
+
+
+def _compare_workouts_by_exercise(
+    latest_workout: dict[str, Any],
+    previous_workout: dict[str, Any],
+    *,
+    show_all: bool,
+) -> tuple[list[dict[str, Any]], int]:
+    latest_by_exercise = _extract_working_sets_by_exercise(latest_workout)
+    previous_by_exercise = _extract_working_sets_by_exercise(previous_workout)
+
+    comparison_rows: list[dict[str, Any]] = []
+    compared_set_count = 0
+
+    for exercise_name, latest_sets in latest_by_exercise.items():
+        previous_sets = previous_by_exercise.get(exercise_name)
+        if not previous_sets:
+            continue
+
+        common_set_count = min(len(latest_sets), len(previous_sets))
+        for idx in range(common_set_count):
+            latest_weight, latest_reps = latest_sets[idx]
+            previous_weight, previous_reps = previous_sets[idx]
+
+            delta_weight = round(latest_weight - previous_weight, 2)
+            delta_reps = latest_reps - previous_reps
+            latest_volume = round(latest_weight * latest_reps, 1)
+            previous_volume = round(previous_weight * previous_reps, 1)
+            delta_volume = round(latest_volume - previous_volume, 1)
+
+            increased_weight = latest_weight > previous_weight
+            increased_reps = latest_reps > previous_reps
+            has_change = delta_weight != 0 or delta_reps != 0
+            has_increase = increased_weight or increased_reps
+
+            if not show_all and not has_increase:
+                continue
+            if show_all and not has_change:
+                continue
+
+            compared_set_count += 1
+            comparison_rows.append({
+                "exercise": exercise_name,
+                "set": idx + 1,
+                "previous": {
+                    "weight_kg": round(previous_weight, 2),
+                    "reps": previous_reps,
+                    "volume": previous_volume,
+                },
+                "latest": {
+                    "weight_kg": round(latest_weight, 2),
+                    "reps": latest_reps,
+                    "volume": latest_volume,
+                },
+                "delta": {
+                    "weight_kg": delta_weight,
+                    "reps": delta_reps,
+                    "volume": delta_volume,
+                },
+                "increased_weight": increased_weight,
+                "increased_reps": increased_reps,
+            })
+
+    return comparison_rows, compared_set_count
+
+
+def _handle_workouts_command(args: argparse.Namespace) -> int:
+    client = HevyAPIClient()
+
+    if args.command == "latest-rpe":
+        workouts_list = _find_latest_allowed_workouts(client, max_count=6)
+        if not workouts_list:
+            print("No qualifying workout found with title Day/Dia 1-6 excluding core/forearms/calves.")
+            return 1
+
+        nth = args.nth - 1
+        if nth >= len(workouts_list):
+            print(f"Only {len(workouts_list)} qualifying workouts available (requested nth={args.nth})")
+            return 1
+
+        workout = workouts_list[nth]
+        if not workout.get("exercises"):
+            workout_id = str(workout.get("id", ""))
+            if workout_id:
+                workout = client.get_workout(workout_id)
+
+        all_set_rpes = _extract_workout_rpes(workout, include_warmups=True)
+        work_set_rpes = _extract_workout_rpes(workout, include_warmups=False)
+
+        result: dict[str, Any] = {
+            "workout_id": workout.get("id"),
+            "title": workout.get("title"),
+            "start_time": workout.get("start_time"),
+            "end_time": workout.get("end_time"),
+            "nth_latest": args.nth,
+            "filters": {
+                "title_day_range": "Day/Dia 1-6",
+                "excluded_keywords": ["core", "forearms", "calves"],
+            },
+            "set_count_with_rpe_all": len(all_set_rpes),
+            "set_count_with_rpe_working": len(work_set_rpes),
+            "overall_rpe": _round_to_half(mean(work_set_rpes)) if work_set_rpes else None,
+        }
+        if getattr(args, "show_prs", False):
+            prs = _detect_workout_prs(client, workout)
+            result["pr_count"] = len(prs)
+            result["personal_records"] = prs
+        return _print_json(result)
+
+    if args.command == "last-rpes":
+        workouts_list = _find_latest_allowed_workouts(client, max_count=6)
+        if not workouts_list:
+            print("No qualifying workouts found with title Day/Dia 1-6 excluding core/forearms/calves.")
+            return 1
+
+        results = []
+        for idx, workout in enumerate(workouts_list):
+            if not workout.get("exercises"):
+                workout_id = str(workout.get("id", ""))
+                if workout_id:
+                    workout = client.get_workout(workout_id)
+
+            work_set_rpes = _extract_workout_rpes(workout, include_warmups=False)
+            entry: dict[str, Any] = {
+                "nth_latest": idx + 1,
+                "title": workout.get("title"),
+                "start_time": workout.get("start_time"),
+                "overall_rpe": _round_to_half(mean(work_set_rpes)) if work_set_rpes else None,
+            }
+            if getattr(args, "show_prs", False):
+                prs = _detect_workout_prs(client, workout)
+                entry["pr_count"] = len(prs)
+                entry["personal_records"] = prs
+            results.append(entry)
+
+        return _print_json(results)
+
+    if args.command == "personal-records":
+        workouts_list = _find_latest_allowed_workouts(client, max_count=6)
+        if not workouts_list:
+            print("No qualifying workouts found with title Day/Dia 1-6 excluding core/forearms/calves.")
+            return 1
+
+        exercise_meta: dict[str, str] = {}
+        for w_meta in workouts_list:
+            full = client.get_workout(str(w_meta.get("id", "")))
+            for ex in full.get("exercises", []):
+                ex_id = str(ex.get("exercise_template_id", ""))
+                if ex_id and ex_id not in exercise_meta:
+                    exercise_meta[ex_id] = str(ex.get("title", ""))
+
+        records: list[dict[str, Any]] = []
+        for ex_id, ex_title in exercise_meta.items():
+            history = client.get_exercise_history(ex_id)
+            working_sets = [
+                s for s in history.get("exercise_history", [])
+                if s.get("set_type") != "warmup"
+            ]
+            if not working_sets:
+                continue
+
+            best = max(
+                working_sets,
+                key=lambda s: float(s.get("weight_kg") or 0) * int(s.get("reps") or 0),
+            )
+            best_vol = float(best.get("weight_kg") or 0) * int(best.get("reps") or 0)
+            records.append({
+                "exercise": ex_title,
+                "best_weight_kg": round(float(best.get("weight_kg") or 0), 2),
+                "best_reps": int(best.get("reps") or 0),
+                "best_volume": round(best_vol, 1),
+                "achieved_on": str(best.get("workout_start_time", ""))[:10],
+            })
+
+        records.sort(key=lambda x: x["exercise"])
+        return _print_json(records)
+
+    if args.command == "compare-same-day":
+        latest_workout_meta, previous_workout_meta = _find_latest_and_previous_same_day_workouts(client)
+        if latest_workout_meta is None:
+            print("No qualifying Day/Dia 1-6 workout found for comparison.")
+            return 1
+        if previous_workout_meta is None:
+            print("No previous qualifying workout found with the same Day/Dia number.")
+            return 1
+
+        latest_workout = client.get_workout(str(latest_workout_meta.get("id", "")))
+        previous_workout = client.get_workout(str(previous_workout_meta.get("id", "")))
+
+        comparison_rows, row_count = _compare_workouts_by_exercise(
+            latest_workout,
+            previous_workout,
+            show_all=getattr(args, "show_all", False),
+        )
+
+        result = {
+            "comparison": "latest qualifying workout vs previous workout with same Day/Dia number",
+            "latest": {
+                "workout_id": latest_workout.get("id"),
+                "title": latest_workout.get("title"),
+                "start_time": latest_workout.get("start_time"),
+                "day_number": _extract_workout_day_number(str(latest_workout.get("title", ""))),
+            },
+            "previous_same_day": {
+                "workout_id": previous_workout.get("id"),
+                "title": previous_workout.get("title"),
+                "start_time": previous_workout.get("start_time"),
+                "day_number": _extract_workout_day_number(str(previous_workout.get("title", ""))),
+            },
+            "filters": {
+                "title_day_range": "Day/Dia 1-6",
+                "excluded_keywords": ["core", "forearms", "calves"],
+            },
+            "mode": "all_changes" if getattr(args, "show_all", False) else "increases_only",
+            "comparison_count": row_count,
+            "comparisons": comparison_rows,
+        }
+        return _print_json(result)
+
+    raise ValueError(f"Unsupported workouts command: {args.command}")
+
+
 def _list_input_routines(input_dir: str = "input") -> int:
     input_path = Path(input_dir)
     if not input_path.exists():
@@ -274,7 +703,8 @@ def build_parser() -> argparse.ArgumentParser:
             "  python hevy_cli.py routines upload input/dia_1_pecho_hsf16.json --dry-run\n"
             "  python hevy_cli.py routines batch-upload extracted_routines.json --folder-title \"HSF 16\"\n"
             "  python hevy_cli.py folders recent\n"
-            "  python hevy_cli.py folders create-next"
+            "  python hevy_cli.py folders create-next\n"
+            "  python hevy_cli.py workouts compare-same-day"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -354,7 +784,51 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_measurement_field_arguments(measurements_update_parser)
 
-    subparsers.add_parser("workouts", help="Reserved umbrella namespace for workout history and analysis")
+    workouts_parser = subparsers.add_parser("workouts", help="Workout history and analysis")
+    workouts_subparsers = workouts_parser.add_subparsers(dest="command")
+
+    latest_rpe_parser = workouts_subparsers.add_parser(
+        "latest-rpe",
+        help="Get overall RPE from latest qualifying Day/Dia 1-6 workout (excluding core/forearms/calves)",
+    )
+    latest_rpe_parser.add_argument(
+        "--nth",
+        type=int,
+        default=1,
+        choices=[1, 2, 3, 4, 5, 6],
+        help="Select which of the latest 6 qualifying workouts to retrieve (1=latest, 6=oldest) (default: 1)",
+    )
+    latest_rpe_parser.add_argument(
+        "--show-prs",
+        action="store_true",
+        help="Also detect and show personal records achieved in the workout",
+    )
+
+    last_rpes_parser = workouts_subparsers.add_parser(
+        "last-rpes",
+        help="Get overall RPE for the last 6 qualifying Day/Dia 1-6 workouts (excluding core/forearms/calves)",
+    )
+    last_rpes_parser.add_argument(
+        "--show-prs",
+        action="store_true",
+        help="Also detect and show personal records achieved in each workout",
+    )
+
+    workouts_subparsers.add_parser(
+        "personal-records",
+        help="Show all-time volume PRs for every exercise in the last full round of Day 1-6 workouts",
+    )
+
+    compare_same_day_parser = workouts_subparsers.add_parser(
+        "compare-same-day",
+        help="Compare latest qualifying workout with previous workout of the same Day/Dia number",
+    )
+    compare_same_day_parser.add_argument(
+        "--show-all",
+        action="store_true",
+        help="Show all changed sets (increases and decreases). Default shows only increases.",
+    )
+
     auth_parser = subparsers.add_parser("auth", help="Verify Hevy API authentication")
     auth_parser.add_argument("api_key", nargs="?", help="Optional API key override")
 
@@ -408,7 +882,11 @@ def main() -> int:
         return _handle_measurements_command(args)
 
     if args.domain == "workouts":
-        return _print_planned_capability("Workout")
+        if not args.command:
+            workouts_parser = next(action for action in parser._actions if isinstance(action, argparse._SubParsersAction))
+            workouts_parser.choices["workouts"].print_help()
+            return 1
+        return _handle_workouts_command(args)
 
     if args.domain == "auth":
         auth_argv = ["test_api_key.py"]

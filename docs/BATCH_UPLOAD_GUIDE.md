@@ -4,7 +4,7 @@
 
 The `batch_routine_uploader.py` tool safely handles importing multiple routines from the routine-extractor project, with built-in validation and safety checks for bulk operations.
 
-⚠️ **IMPORTANT:** Always validate routines against [ROUTINE_CREATION_RULES.md](../ROUTINE_CREATION_RULES.md) BEFORE uploading. See [Pre-Upload Validation](#pre-upload-validation) section below.
+⚠️ **IMPORTANT:** Always validate routines against [ROUTINE_CREATION_RULES.md](ROUTINE_CREATION_RULES.md) BEFORE uploading. See [Pre-Upload Validation](#pre-upload-validation) section below.
 
 ---
 
@@ -25,7 +25,7 @@ Past uploads violated rules (missing warmup sets, incorrect rest times) because 
 
 2. **Run Rules Compliance Validator**
    ```bash
-   python validate_rules_compliance.py input/dia_*.json
+   python scripts/validate_rules_compliance.py input/dia_*.json
    ```
    
    This checks:
@@ -44,7 +44,7 @@ Past uploads violated rules (missing warmup sets, incorrect rest times) because 
 
 4. **Only After All Checks Pass**
    ```bash
-   python batch_routine_uploader.py --batch-file input/routines.json
+   python scripts/batch_routine_uploader.py --batch-file input/routines.json
    ```
 
 ---
@@ -121,13 +121,13 @@ Past uploads violated rules (missing warmup sets, incorrect rest times) because 
 
 ```bash
 # 1. Dry run first - validate without uploading
-venv/bin/python batch_routine_uploader.py extracted_routines.json --dry-run
+venv/bin/python scripts/batch_routine_uploader.py extracted_routines.json --dry-run
 
 # 2. (Optional) Verify/create folder for this session and apply to all routines
-venv/bin/python batch_routine_uploader.py extracted_routines.json --dry-run --folder-title "HSF 15"
+venv/bin/python scripts/batch_routine_uploader.py extracted_routines.json --dry-run --folder-title "HSF 15"
 
 # 3. If validation passes, upload with confirmation
-venv/bin/python batch_routine_uploader.py extracted_routines.json --folder-title "HSF 15"
+venv/bin/python scripts/batch_routine_uploader.py extracted_routines.json --folder-title "HSF 15"
 
 # 4. Review summary and verify in Hevy app
 ```
@@ -136,19 +136,19 @@ venv/bin/python batch_routine_uploader.py extracted_routines.json --folder-title
 
 ```bash
 # Validate only (no upload)
-venv/bin/python batch_routine_uploader.py file.json --dry-run
+venv/bin/python scripts/batch_routine_uploader.py file.json --dry-run
 
 # Upload with confirmation prompt (default, safest)
-venv/bin/python batch_routine_uploader.py file.json
+venv/bin/python scripts/batch_routine_uploader.py file.json
 
 # Upload without confirmation (use with caution!)
-venv/bin/python batch_routine_uploader.py file.json --no-interactive
+venv/bin/python scripts/batch_routine_uploader.py file.json --no-interactive
 
 # Skip warmup weight enhancement
-venv/bin/python batch_routine_uploader.py file.json --no-enhance
+venv/bin/python scripts/batch_routine_uploader.py file.json --no-enhance
 
 # Apply one folder for this session (finds or creates it)
-venv/bin/python batch_routine_uploader.py file.json --folder-title "HSF 15"
+venv/bin/python scripts/batch_routine_uploader.py file.json --folder-title "HSF 15"
 ```
 
 ---
@@ -396,7 +396,7 @@ venv/bin/python batch_routine_uploader.py test_batch.json
 ### Programmatic Usage
 
 ```python
-from batch_routine_uploader import BatchRoutineUploader
+from scripts.batch_routine_uploader import BatchRoutineUploader
 
 uploader = BatchRoutineUploader()
 

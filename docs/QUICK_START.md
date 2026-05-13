@@ -3,12 +3,14 @@
 ## The Two Critical Rules (Prevents 90% of API Errors)
 
 ### Rule #1: Structure
+
 ```
 Root must be: { "routine": { ... } }
 NOT: { "name": "...", "exercises": [...] }
 ```
 
 ### Rule #2: Set Types
+
 ```
 "type": "warmup", "normal", "dropset", or "failure"
 NEVER: "type": "set", "amrap", "rpe", or any other value
@@ -19,22 +21,26 @@ NEVER: "type": "set", "amrap", "rpe", or any other value
 ## 3-Step Workflow
 
 ### 1️⃣ Copy Template
+
 ```bash
 cp TEMPLATE_routine.json input/dia_X_name.json
 ```
 
 ### 2️⃣ Edit These 3 Things
+
 - `title`: "Día X – [Your Workout]"
 - `exercise_template_id`: From `exercise_mappings.md`
 - `weight_kg` and `reps`: Your actual workout numbers
 
 ### 3️⃣ Validate & Upload
+
 ```bash
 ./hevy.sh routines validate input/dia_X_name.json
 ./hevy.sh routines upload input/dia_X_name.json
 ```
 
 ### 📁 Check Your Routine Folders (Optional)
+
 ```bash
 # See all your routine folders and which one is most recent
 python get_recent_folder.py

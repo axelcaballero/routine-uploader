@@ -5,6 +5,10 @@ Utility script for managing Hevy routine folders.
 
 import json
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from hevy_api_client import HevyAPIClient
 
 

@@ -1,17 +1,20 @@
-#!/Users/axelcaballero/projects/hevy/routine-uploader/venv/bin/python
+#!/usr/bin/env python3
 """
 Batch Routine Uploader - Safely handles importing multiple routines from external sources.
 
 Designed to work with routine-extractor project output, with safeguards for bulk operations.
 """
 
-import json
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+import json
 from typing import List, Dict, Tuple, Optional
 from hevy_api_client import HevyAPIClient
 from routine_enhancer import RoutineEnhancer
-from exercise_validator import ExerciseValidator
+from scripts.exercise_validator import ExerciseValidator
 
 
 class BatchRoutineUploader:

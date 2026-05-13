@@ -16,6 +16,7 @@ import sys
 import os
 import json
 import re
+import unicodedata
 from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -23,15 +24,212 @@ from hevy_api_client import HevyAPIClient
 from typing import Optional, Dict, Any, List
 
 
-def get_most_recent_workout(client: HevyAPIClient) -> Optional[Dict[str, Any]]:
-    """Get the most recent completed workout from /v1/workouts."""
-    workouts = client.list_workouts(page=1, page_size=1)
-    workouts_list = workouts.get('workouts', [])
+def _extract_gym_name_from_line(content: str) -> str:
+    """Extract a clean gym name from a line in the gym preferences file."""
+    content = content.strip().rstrip('.').strip()
+
+    # Remove parentheses and trailing reason segments
+    content = re.sub(r'\(.*?\)', '', content).strip()
+
+    # Prefer gym name after 'en ' or before ' por '
+    if ' en ' in content:
+        candidate = content.split(' en ')[-1].strip()
+        if candidate:
+            return candidate
+    if ' por ' in content:
+        candidate = content.split(' por ')[0].strip()
+        if candidate:
+            return candidate
+
+    # If there is a comma, take the first segment
+    if ',' in content:
+        candidate = content.split(',')[0].strip()
+        if candidate:
+            return candidate
+
+    return content
+
+
+def _parse_gym_preferences(file_path: str) -> Dict[str, Dict[str, Any]]:
+    """Load gym preferences from docs/plan-gym-preferences.md."""
+    preferences: Dict[str, Dict[str, Any]] = {}
     
-    if not workouts_list:
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            current_section = ""
+            for raw_line in f:
+                line = raw_line.strip()
+                if line.startswith('## '):
+                    section_title = line.replace('## ', '').strip()
+                    normalized = _normalize_workout_title(section_title)
+                    current_section = normalized
+                    preferences[current_section] = {'gyms': [], 'extra_discs': False}
+                    continue
+                
+                if current_section and (line.startswith('- ') or line.startswith('1. ') or line.startswith('2. ')):
+                    content = line.lstrip('- 123.').strip()
+                    gym_name = _extract_gym_name_from_line(content)
+                    if gym_name:
+                        preferences[current_section]['gyms'].append(gym_name)
+                    
+                    normalized_content = _normalize_workout_title(content)
+                    if 'discos extras' in normalized_content or 'extra discs' in normalized_content:
+                        preferences[current_section]['extra_discs'] = True
+    except FileNotFoundError:
+        print(f"Warning: {file_path} not found. Gym preferences will be omitted.")
+    
+    return preferences
+
+
+def _get_gym_suggestion(routine_title: str) -> Optional[Dict[str, Any]]:
+    """Get gym suggestion and extra discs info for the routine."""
+    gym_prefs_file = os.path.join(os.path.dirname(__file__), '..', 'docs', 'plan-gym-preferences.md')
+    preferences = _parse_gym_preferences(gym_prefs_file)
+    
+    normalized_title = _normalize_workout_title(routine_title)
+    
+    # Map routine titles to preference keys
+    if 'pecho' in normalized_title or 'chest' in normalized_title:
+        key = 'pecho'
+    elif 'espalda' in normalized_title or 'back' in normalized_title:
+        key = 'espalda'
+    elif 'pierna' in normalized_title or 'legs' in normalized_title:
+        # For legs, check if it's Day 3 or Day 6, but since we have day_number, perhaps use that
+        # For now, default to quads focus, but we can enhance later
+        key = 'pierna (enfoque cuadriceps)' if 'day 3' in normalized_title else 'pierna (enfoque gluteo)' if 'day 6' in normalized_title else 'pierna (enfoque cuadriceps)'
+    elif 'biceps' in normalized_title or 'triceps' in normalized_title or 'arms' in normalized_title:
+        key = 'biceps y triceps'
+    elif 'hombro' in normalized_title or 'shoulders' in normalized_title:
+        key = 'hombros'
+    else:
         return None
     
-    return workouts_list[0]
+    return preferences.get(key)
+
+
+def _normalize_workout_title(value: str) -> str:
+    """Normalize title for comparison."""
+    normalized = unicodedata.normalize("NFKD", value.casefold())
+    ascii_text = normalized.encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"\s+", " ", ascii_text).strip()
+
+
+def _parse_additional_training_schedule(file_path: str) -> Dict[int, Dict[str, Any]]:
+    """Load additional training configuration from docs/plan-additional-training.md."""
+    schedule: Dict[int, Dict[str, Any]] = {}
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for raw_line in f:
+                line = raw_line.strip()
+                match = re.match(r'^\*\s*Day\s+(\d+)\s+[^,]+(?:,\s*(.+?))?\.?$', line, flags=re.IGNORECASE)
+                if not match:
+                    continue
+
+                day_number = int(match.group(1))
+                details = (match.group(2) or '').strip()
+                normalized = _normalize_workout_title(details)
+
+                cardio_minutes: Optional[int] = None
+                cardio_match = re.search(r'(\d+)\s*minutes?\s*cardio', normalized)
+                if cardio_match:
+                    cardio_minutes = int(cardio_match.group(1))
+
+                schedule[day_number] = {
+                    'calves': 'calves' in normalized,
+                    'forearms': 'forearms' in normalized,
+                    'core': 'core' in normalized,
+                    'cardio_minutes': cardio_minutes,
+                    'notes': details,
+                }
+    except FileNotFoundError:
+        print(f"Warning: {file_path} not found. Additional training notes will be omitted.")
+
+    return schedule
+
+
+def _format_duration_minutes(total_minutes: int) -> str:
+    """Convert minutes into hours/minutes string."""
+    hours = total_minutes // 60
+    minutes = total_minutes % 60
+    if hours:
+        return f"{hours}h {minutes}m" if minutes else f"{hours}h"
+    return f"{minutes}m"
+
+
+def _build_additional_training_summary(day_number: Optional[int]) -> Optional[Dict[str, Any]]:
+    """Build additional training details for the given routine day."""
+    if day_number is None:
+        return None
+
+    schedule_file = os.path.join(os.path.dirname(__file__), '..', 'docs', 'plan-additional-training.md')
+    schedule = _parse_additional_training_schedule(schedule_file)
+    info = schedule.get(day_number)
+    if not info:
+        return None
+
+    targeted: List[str] = []
+    extra_minutes = 0
+    if info.get('calves'):
+        targeted.append('calves')
+        extra_minutes += 15
+    if info.get('forearms'):
+        targeted.append('forearms')
+        extra_minutes += 15
+    if info.get('core'):
+        extra_minutes += 15
+
+    cardio_minutes = info.get('cardio_minutes') or 0
+    extra_minutes += cardio_minutes
+
+    if not targeted and not info.get('core') and cardio_minutes == 0:
+        return None
+
+    return {
+        'targeted': targeted,
+        'core': info.get('core', False),
+        'cardio_minutes': cardio_minutes,
+        'total_minutes': extra_minutes,
+        'notes': info.get('notes', ''),
+    }
+
+
+def _is_allowed_main_workout_title(title: str) -> bool:
+    """Check if title is a main muscle group workout (Day 1-6, excluding core/forearms/calves)."""
+    normalized = _normalize_workout_title(title)
+    
+    # Only include Day/Dia 1-6
+    day_match = re.search(r"\b(?:day|dia)\s*([1-6])\b", normalized)
+    if not day_match:
+        return False
+    
+    # Exclude core, forearms, calves
+    excluded_tokens = (
+        "core", "abs", "abdominal", "forearm", "forearms",
+        "antebrazo", "antebrazos", "calf", "calves",
+        "pantorrilla", "pantorrillas", "gemelo", "gemelos",
+    )
+    return not any(token in normalized for token in excluded_tokens)
+
+
+def get_most_recent_workout(client: HevyAPIClient) -> Optional[Dict[str, Any]]:
+    """Get the most recent qualifying (Day 1-6) completed workout from /v1/workouts."""
+    page = 1
+    while True:
+        workouts = client.list_workouts(page=page, page_size=10)
+        workouts_list = workouts.get('workouts', [])
+        
+        if not workouts_list:
+            return None
+        
+        for workout in workouts_list:
+            title = str(workout.get('title', ''))
+            if _is_allowed_main_workout_title(title):
+                return workout
+        
+        if len(workouts_list) < 10:
+            return None
+        page += 1
 
 
 def extract_day_number(routine_title: str) -> Optional[int]:
@@ -43,7 +241,7 @@ def extract_day_number(routine_title: str) -> Optional[int]:
 
 
 def get_routines_in_folder(client: HevyAPIClient, folder_id: int) -> List[Dict[str, Any]]:
-    """Fetch all routines and filter by folder_id."""
+    """Fetch all routines and filter by folder_id and allowed main workouts only."""
     all_routines = []
     page = 1
     
@@ -56,14 +254,16 @@ def get_routines_in_folder(client: HevyAPIClient, folder_id: int) -> List[Dict[s
             break
         page += 1
     
-    # Filter by folder_id and extract day numbers
+    # Filter by folder_id, allowed titles (Day 1-6, no core/forearms/calves), and extract day numbers
     folder_routines = []
     for routine in all_routines:
         if routine.get('folder_id') == folder_id:
-            day_number = extract_day_number(routine.get('title', ''))
-            if day_number:
-                routine['day_number'] = day_number
-                folder_routines.append(routine)
+            title = str(routine.get('title', ''))
+            if _is_allowed_main_workout_title(title):
+                day_number = extract_day_number(title)
+                if day_number:
+                    routine['day_number'] = day_number
+                    folder_routines.append(routine)
     
     return folder_routines
 
@@ -83,8 +283,8 @@ def get_next_routine(folder_routines: List[Dict[str, Any]], current_day: int) ->
         return sorted_routines[0] if sorted_routines else None
 
 
-def get_estimated_duration(client: HevyAPIClient, routine_id: str) -> Optional[str]:
-    """Get estimated workout duration based on historical data for the same routine."""
+def get_estimated_duration(client: HevyAPIClient, routine_id: str) -> Optional[int]:
+    """Get estimated workout duration in minutes based on historical data for the same routine."""
     try:
         all_workouts = []
         page = 1
@@ -114,11 +314,8 @@ def get_estimated_duration(client: HevyAPIClient, routine_id: str) -> Optional[s
                     durations.append(int(dur.total_seconds()))
         
         if durations:
-            # Calculate average
             avg_seconds = sum(durations) // len(durations)
-            mins = avg_seconds // 60
-            secs = avg_seconds % 60
-            return f"{mins}m {secs}s"
+            return avg_seconds // 60
     
     except Exception:
         pass
@@ -131,15 +328,39 @@ def display_next_workout(client: HevyAPIClient, routine: Dict[str, Any]) -> None
     routine_id = routine.get('id')
     full_routine = client.get_routine(routine_id)
     routine_data = full_routine.get('routine', {})
+    day_number = extract_day_number(routine_data.get('title', ''))
+    additional_info = _build_additional_training_summary(day_number)
     
     print(f"\n📅 Routine: {routine_data.get('title')}")
     print(f"💪 Total Exercises: {len(routine_data.get('exercises', []))}")
     
-    # Get estimated duration if available (from same routine_id)
-    estimated_duration = get_estimated_duration(client, routine_id)
-    if estimated_duration:
-        print(f"⏱️  Estimated Duration: {estimated_duration}")
-    
+    estimated_main_minutes = get_estimated_duration(client, routine_id)
+    if estimated_main_minutes is not None:
+        print(f"⏱️  Main workout duration: {_format_duration_minutes(estimated_main_minutes)}")
+    else:
+        print("⏱️  Main workout duration: unavailable")
+
+    if additional_info:
+        print("\n🧩 Additional training:")
+        if additional_info['targeted']:
+            targeted_text = ', '.join([f"{muscle} (15m)" for muscle in additional_info['targeted']])
+            print(f"  • Targeted: {targeted_text}")
+        if additional_info['core']:
+            print("  • Core: 15m")
+        if additional_info['cardio_minutes']:
+            print(f"  • Cardio: {_format_duration_minutes(additional_info['cardio_minutes'])}")
+        print(f"  • Additional training time: {_format_duration_minutes(additional_info['total_minutes'])}")
+
+    combined_minutes = (estimated_main_minutes or 0) + (additional_info['total_minutes'] if additional_info else 0)
+    print(f"\n🔗 Combined training time: {_format_duration_minutes(combined_minutes)}")
+
+    # Gym suggestion
+    gym_info = _get_gym_suggestion(routine_data.get('title', ''))
+    if gym_info and gym_info['gyms']:
+        print(f"\n🏋️  Suggested gyms: {', '.join(gym_info['gyms'])}")
+        if gym_info['extra_discs']:
+            print("  • Bring extra 1.5 lbs discs for hypertrophy")
+
     print("\nExercises:")
     for idx, exercise in enumerate(routine_data.get('exercises', []), 1):
         title = exercise.get('title', 'Unknown')
@@ -170,20 +391,29 @@ def display_next_workout(client: HevyAPIClient, routine: Dict[str, Any]) -> None
                 print(f"     Notes: {filtered_notes}")
 
 
-def save_next_workout_info(next_routine: Dict[str, Any]) -> None:
+def save_next_workout_info(client: HevyAPIClient, next_routine: Dict[str, Any]) -> None:
     """Save next workout information for future reference."""
     output_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
     os.makedirs(output_dir, exist_ok=True)
     
-    output_file = os.path.join(output_dir, 'next_workout.json')
+    day_number = next_routine.get('day_number')
+    additional_info = _build_additional_training_summary(day_number)
+    estimated_main_minutes = get_estimated_duration(client, next_routine.get('id'))
+    combined_minutes = (estimated_main_minutes or 0) + (additional_info['total_minutes'] if additional_info else 0)
+    gym_info = _get_gym_suggestion(next_routine.get('title', ''))
     
     next_workout_info = {
         'routine_id': next_routine.get('id'),
         'title': next_routine.get('title'),
-        'day_number': next_routine.get('day_number'),
-        'folder_id': next_routine.get('folder_id')
+        'day_number': day_number,
+        'folder_id': next_routine.get('folder_id'),
+        'estimated_main_minutes': estimated_main_minutes,
+        'additional_training': additional_info,
+        'combined_training_minutes': combined_minutes,
+        'gym_suggestion': gym_info,
     }
     
+    output_file = os.path.join(output_dir, 'next_workout.json')
     with open(output_file, 'w') as f:
         json.dump(next_workout_info, f, indent=2)
 
@@ -193,15 +423,18 @@ def main():
     client = HevyAPIClient()
     
     try:
-        # Step 1: Get latest workout
+        # Step 1: Get latest qualifying (Day 1-6) workout
         latest_workout = get_most_recent_workout(client)
         if not latest_workout:
-            print("No workouts found")
+            print("No qualifying workouts found (Day 1-6 main muscle groups)")
             return
         
         latest_title = latest_workout.get('title')
         latest_routine_id = latest_workout.get('routine_id')
         current_day = extract_day_number(latest_title)
+        if not current_day:
+            print(f"Could not extract day number from: {latest_title}")
+            return
         
         # Step 2-3: Get routine details to extract folder_id
         current_routine = client.get_routine(latest_routine_id)
@@ -219,7 +452,7 @@ def main():
         
         if next_routine:
             display_next_workout(client, next_routine)
-            save_next_workout_info(next_routine)
+            save_next_workout_info(client, next_routine)
         else:
             print("Could not find next routine in sequence")
             

@@ -1,6 +1,23 @@
 {
-  "routine_id": "c7f0eb49-f1ad-4085-86ef-c02af9c206d2",
-  "title": "Day 10 - Biceps and Triceps",
-  "day_number": 10,
-  "folder_id": 1858633
+  "routine_id": "185c065c-aa54-4e05-91ec-a799d0d86a97",
+  "title": "Day 2 - Back",
+  "day_number": 2,
+  "folder_id": 2760878,
+  "estimated_main_minutes": 68,
+  "additional_training": {
+    "targeted": [
+      "forearms"
+    ],
+    "core": true,
+    "cardio_minutes": 30,
+    "total_minutes": 60,
+    "notes": "forearms + 30 minutes cardio and core"
+  },
+  "combined_training_minutes": 128,
+  "gym_suggestion": {
+    "gyms": [
+      "Golden Gym"
+    ],
+    "extra_discs": false
+  }
 }

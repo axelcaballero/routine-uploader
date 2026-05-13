@@ -20,7 +20,7 @@ class RoutineTextParser:
     def __init__(
         self,
         exercise_mappings_file: str = "exercise_mappings.md",
-        additional_training_file: str = "additional-traning.md"
+        additional_training_file: str = "plan-additional-training.md"
     ):
         self.exercise_mappings = self._load_exercise_mappings(exercise_mappings_file)
         self.exercise_id_to_section = self._load_exercise_sections(exercise_mappings_file)

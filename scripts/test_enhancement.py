@@ -4,6 +4,11 @@ Test script to demonstrate the routine enhancement functionality.
 This tests without needing API access.
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import json
 from routine_enhancer import RoutineEnhancer
 from hevy_api_client import HevyAPIClient

@@ -1,22 +1,22 @@
 # Routine Folder Management Guide
 
-## 🚀 Quick Commands
+## Quick Commands
 
 ### View All Folders & Most Recent
 ```bash
-python get_recent_folder.py
+python scripts/get_recent_folder.py
 ```
 
 ### Create New Folder (Auto-Incremented)
 ```bash
 # Automatically determines next folder name and asks for confirmation
-# E.g., HSF 15 → HSF 16
-python create_new_folder.py
+# E.g., HSF 15 -> HSF 16
+python scripts/create_new_folder.py
 ```
 
 ### Create Folder with Custom Name
 ```bash
-python folder_manager.py create "Custom Folder Name"
+python scripts/folder_manager.py create "Custom Folder Name"
 ```
 
 ### Upload to Specific Folder
@@ -25,20 +25,18 @@ python folder_manager.py create "Custom Folder Name"
 python routine_uploader.py input/dia_7_espalda.json --folder-title "HSF 15"
 
 # Batch upload
-python batch_routine_uploader.py extracted_routines.json --folder-title "HSF 15"
+python scripts/batch_routine_uploader.py extracted_routines.json --folder-title "HSF 15"
 ```
 
 ### Create New Folder
 ```bash
-python folder_manager.py create "HSF 16"
+python scripts/folder_manager.py create "HSF 16"
 ```
 
----
-
-## 📋 Current Routine Folders (As of April 25, 2026)
+## Current Routine Folders
 
 | Rank | Name | ID | Purpose |
-|------|------|----|---------| 
+|------|------|----|---------|
 | 1 | **HSF 15** | 2482205 | Current (most recent) |
 | 2 | HSF 14 | 2262799 | Previous cycle |
 | 3 | HSF 13 | 1986567 | Archive |
@@ -46,83 +44,57 @@ python folder_manager.py create "HSF 16"
 | 5 | HSF 11 | 1665240 | Archive |
 | 6-10 | HSF 10-6 | Various | Older cycles |
 
----
-
-## 🔍 Understanding Folder Structure
+## Understanding Folder Structure
 
 ### Folder Index
 - **Index 0**: Most recent folder (appears first in API responses)
 - **Index 1-9**: Older folders in reverse chronological order
-- Displayed in the `get_recent_folder.py` output
+- Displayed in the `scripts/get_recent_folder.py` output
 
 ### When to Update
-- When uploading new routine: Use current folder (HSF 15)
-- When creating new cycle: Create new folder with next number (HSF 16)
+- When uploading a new routine: Use the current folder (HSF 15)
+- When creating a new cycle: Create a new folder with the next number (HSF 16)
 - When organizing old routines: Use archive folders for reference
 
----
+## Available Scripts & Commands
 
-## 🛠 Available Scripts & Commands
+### `scripts/get_recent_folder.py`
+**Purpose:** Display all folders ranked by recency
+**Usage:** `python scripts/get_recent_folder.py`
 
-### `get_recent_folder.py`
-**Purpose:** Display all folders ranked by recency  
-**Usage:** `python get_recent_folder.py`  
-**Output:** List with most recent highlighted
-
-### `folder_manager.py`
-**Purpose:** Manage folders via CLI  
+### `scripts/folder_manager.py`
+**Purpose:** Manage folders via CLI
 **Commands:**
 ```bash
 # List all folders
-python folder_manager.py list
+python scripts/folder_manager.py list
 
 # Create new folder
-python folder_manager.py create "Folder Name"
+python scripts/folder_manager.py create "Folder Name"
 ```
 
 ### `routine_uploader.py`
-**Purpose:** Upload single routine to specific folder  
+**Purpose:** Upload a single routine to a specific folder
 **Usage:** `python routine_uploader.py file.json --folder-title "HSF 15"`
 
-### `batch_routine_uploader.py`
-**Purpose:** Batch upload multiple routines to folder  
-**Usage:** `python batch_routine_uploader.py file.json --folder-title "HSF 15"`
+### `scripts/batch_routine_uploader.py`
+**Purpose:** Batch upload multiple routines to a folder
+**Usage:** `python scripts/batch_routine_uploader.py file.json --folder-title "HSF 15"`
 
-### `create_new_folder.py`
-**Purpose:** Create new folder with auto-incremented naming  
-**Usage:** `python create_new_folder.py`  
-**Output:** Proposes next folder name (e.g., HSF 15 → HSF 16), asks for confirmation, then creates
+### `scripts/create_new_folder.py`
+**Purpose:** Create a new folder with auto-incremented naming
+**Usage:** `python scripts/create_new_folder.py`
 
----
-
-## 🎯 Workflow: When You Receive a New Routine
+## Workflow: When You Receive a New Routine
 
 ### Step 1: Check Current Folders
 ```bash
-python get_recent_folder.py
+python scripts/get_recent_folder.py
 ```
-Shows all folders with most recent highlighted
 
 ### Step 2: Create New Folder
 ```bash
-python create_new_folder.py
-```
-**What it does:**
-- Automatically determines next folder name (e.g., HSF 15 → HSF 16)
-- Shows you the proposed name
-- Asks for confirmation (y/n)
-- Creates the folder when confirmed
-
-**Example:**
-```
-📋 Current Setup:
-   Next folder name: HSF 16
-
-❓ Create new folder 'HSF 16'? (y/n): y
-
-✅ Folder created successfully!
-   Folder Name: HSF 16
-   Folder ID:   2500123
+python scripts/create_new_folder.py
 ```
 
 ### Step 3: Upload Routines to New Folder
@@ -131,50 +103,36 @@ python create_new_folder.py
 python routine_uploader.py new_routine.json --folder-title "HSF 16"
 
 # Batch upload
-python batch_routine_uploader.py extracted_routines.json --folder-title "HSF 16"
+python scripts/batch_routine_uploader.py extracted_routines.json --folder-title "HSF 16"
 ```
 
 ### Step 4: Verify in Hevy App
-- Open Hevy app
+- Open the Hevy app
 - Verify routines appear in the new folder
 - Check all exercises and sets are correct
 
----
+## Best Practices
 
-## 💡 Best Practices
-
-### 1. Always Verify Folder First
+### Always Verify Folder First
 ```bash
-# Check current folder before uploading
-python get_recent_folder.py
+python scripts/get_recent_folder.py
 ```
 
-### 1.5 Post-Creation Validation Output (Required)
-After creating any routine, always return a summary table in chat using this exact format:
-
-| # | source exercise name | Hevy excercise name | Sets x Reps |
-| - | -------------------- | ------------------- | ----------- |
-
-Include one row per exercise and keep the values aligned with the routine that was uploaded.
-This table is used as the final user validation checkpoint after each routine creation.
-
-### 2. Consistent Naming
+### Consistent Naming
 - Use format: `HSF N` (where N is incremented)
 - Keep historical folders for reference
 
-### 3. Batch Operations
-- Group related routines in same folder
-- Use `--folder-title` flag consistently
+### Batch Operations
+- Group related routines in the same folder
+- Use `--folder-title` consistently
 - Dry-run before actual upload: `--dry-run`
 
-### 4. Archive Strategy
+### Archive Strategy
 - Keep previous cycles (HSF 14, 13, etc.) for history
 - Reference old routines when creating new ones
-- Never delete folders - just stop using them
+- Never delete folders; just stop using them
 
----
-
-## 🔗 API Methods Reference
+## API Methods Reference
 
 ### In Python Code
 ```python
@@ -185,48 +143,44 @@ client = HevyAPIClient()
 # List folders
 folders = client.list_routine_folders(page=1, page_size=10)
 
-# Find specific folder
+# Find a specific folder
 folder = client.find_routine_folder_by_title("HSF 15")
 
 # Ensure folder exists (create if needed)
 folder = client.ensure_routine_folder("HSF 15")
 folder_id = folder['id']
 
-# Create new folder
+# Create a new folder
 response = client.create_routine_folder("HSF 16")
 ```
 
----
-
-## ⚠️ Common Issues & Solutions
+## Common Issues & Solutions
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
-| Folder not found | May not have synced | Run `get_recent_folder.py` to verify |
+| Folder not found | May not have synced | Run `python scripts/get_recent_folder.py` to verify |
 | Upload to wrong folder | Folder ID mismatch | Check `--folder-title` matches exactly |
-| API error 400 | Page size > 10 | Use default page_size (10 max) |
-| Can't create folder | Duplicate name | Use unique folder name with number |
+| API error 400 | Page size > 10 | Use default `page_size=10` |
+| Can't create folder | Duplicate name | Use a unique folder name with a number |
 
----
+## When You Receive New Routines
 
-## 📝 When You Receive New Routines
-
-1. **Check current folder:**
+1. Check the current folder:
    ```bash
-   python get_recent_folder.py
+   python scripts/get_recent_folder.py
    ```
 
-2. **Verify you're using correct folder** (usually HSF 15):
+2. Verify you're using the correct folder, usually HSF 15:
    ```bash
    python routine_uploader.py new_routine.json --folder-title "HSF 15"
    ```
 
-3. **Or if creating new cycle:**
+3. If creating a new cycle:
    ```bash
-   python folder_manager.py create "HSF 16"
-   python batch_routine_uploader.py routines.json --folder-title "HSF 16"
+   python scripts/create_new_folder.py
    ```
 
-4. **Verify in app:**
-   - Open Hevy app
-   - Check routines appear in correct folder
+4. Upload to the new folder:
+   ```bash
+   python scripts/batch_routine_uploader.py extracted_routines.json --folder-title "HSF 16"
+   ```
