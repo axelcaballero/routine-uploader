@@ -31,6 +31,86 @@ def _normalize_workout_title(value: str) -> str:
     return re.sub(r"\s+", " ", ascii_text).strip()
 
 
+def _parse_additional_training_schedule(file_path: str) -> Dict[int, Dict[str, Any]]:
+    """Load additional training configuration from docs/additional-traning.md."""
+    schedule: Dict[int, Dict[str, Any]] = {}
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for raw_line in f:
+                line = raw_line.strip()
+                match = re.match(r'^\*\s*Day\s+(\d+)\s+[^,]+(?:,\s*(.+?))?\.?$', line, flags=re.IGNORECASE)
+                if not match:
+                    continue
+
+                day_number = int(match.group(1))
+                details = (match.group(2) or '').strip()
+                normalized = _normalize_workout_title(details)
+
+                cardio_minutes: Optional[int] = None
+                cardio_match = re.search(r'(\d+)\s*minutes?\s*cardio', normalized)
+                if cardio_match:
+                    cardio_minutes = int(cardio_match.group(1))
+
+                schedule[day_number] = {
+                    'calves': 'calves' in normalized,
+                    'forearms': 'forearms' in normalized,
+                    'core': 'core' in normalized,
+                    'cardio_minutes': cardio_minutes,
+                    'notes': details,
+                }
+    except FileNotFoundError:
+        print(f"Warning: {file_path} not found. Additional training notes will be omitted.")
+
+    return schedule
+
+
+def _format_duration_minutes(total_minutes: int) -> str:
+    """Convert minutes into hours/minutes string."""
+    hours = total_minutes // 60
+    minutes = total_minutes % 60
+    if hours:
+        return f"{hours}h {minutes}m" if minutes else f"{hours}h"
+    return f"{minutes}m"
+
+
+def _build_additional_training_summary(day_number: Optional[int]) -> Optional[Dict[str, Any]]:
+    """Build additional training details for the given routine day."""
+    if day_number is None:
+        return None
+
+    schedule_file = os.path.join(os.path.dirname(__file__), '..', 'docs', 'additional-traning.md')
+    schedule = _parse_additional_training_schedule(schedule_file)
+    info = schedule.get(day_number)
+    if not info:
+        return None
+
+    targeted: List[str] = []
+    extra_minutes = 0
+    if info.get('calves'):
+        targeted.append('calves')
+        extra_minutes += 15
+    if info.get('forearms'):
+        targeted.append('forearms')
+        extra_minutes += 15
+    if info.get('core'):
+        extra_minutes += 15
+
+    cardio_minutes = info.get('cardio_minutes') or 0
+    extra_minutes += cardio_minutes
+
+    if not targeted and not info.get('core') and cardio_minutes == 0:
+        return None
+
+    return {
+        'targeted': targeted,
+        'core': info.get('core', False),
+        'cardio_minutes': cardio_minutes,
+        'total_minutes': extra_minutes,
+        'notes': info.get('notes', ''),
+    }
+
+
 def _is_allowed_main_workout_title(title: str) -> bool:
     """Check if title is a main muscle group workout (Day 1-6, excluding core/forearms/calves)."""
     normalized = _normalize_workout_title(title)
@@ -120,8 +200,8 @@ def get_next_routine(folder_routines: List[Dict[str, Any]], current_day: int) ->
         return sorted_routines[0] if sorted_routines else None
 
 
-def get_estimated_duration(client: HevyAPIClient, routine_id: str) -> Optional[str]:
-    """Get estimated workout duration based on historical data for the same routine."""
+def get_estimated_duration(client: HevyAPIClient, routine_id: str) -> Optional[int]:
+    """Get estimated workout duration in minutes based on historical data for the same routine."""
     try:
         all_workouts = []
         page = 1
@@ -151,11 +231,8 @@ def get_estimated_duration(client: HevyAPIClient, routine_id: str) -> Optional[s
                     durations.append(int(dur.total_seconds()))
         
         if durations:
-            # Calculate average
             avg_seconds = sum(durations) // len(durations)
-            mins = avg_seconds // 60
-            secs = avg_seconds % 60
-            return f"{mins}m {secs}s"
+            return avg_seconds // 60
     
     except Exception:
         pass
@@ -168,15 +245,32 @@ def display_next_workout(client: HevyAPIClient, routine: Dict[str, Any]) -> None
     routine_id = routine.get('id')
     full_routine = client.get_routine(routine_id)
     routine_data = full_routine.get('routine', {})
+    day_number = extract_day_number(routine_data.get('title', ''))
+    additional_info = _build_additional_training_summary(day_number)
     
     print(f"\n📅 Routine: {routine_data.get('title')}")
     print(f"💪 Total Exercises: {len(routine_data.get('exercises', []))}")
     
-    # Get estimated duration if available (from same routine_id)
-    estimated_duration = get_estimated_duration(client, routine_id)
-    if estimated_duration:
-        print(f"⏱️  Estimated Duration: {estimated_duration}")
-    
+    estimated_main_minutes = get_estimated_duration(client, routine_id)
+    if estimated_main_minutes is not None:
+        print(f"⏱️  Main workout duration: {_format_duration_minutes(estimated_main_minutes)}")
+    else:
+        print("⏱️  Main workout duration: unavailable")
+
+    if additional_info:
+        print("\n🧩 Additional training:")
+        if additional_info['targeted']:
+            targeted_text = ', '.join([f"{muscle} (15m)" for muscle in additional_info['targeted']])
+            print(f"  • Targeted: {targeted_text}")
+        if additional_info['core']:
+            print("  • Core: 15m")
+        if additional_info['cardio_minutes']:
+            print(f"  • Cardio: {_format_duration_minutes(additional_info['cardio_minutes'])}")
+        print(f"  • Additional training time: {_format_duration_minutes(additional_info['total_minutes'])}")
+
+    combined_minutes = (estimated_main_minutes or 0) + (additional_info['total_minutes'] if additional_info else 0)
+    print(f"\n🔗 Combined training time: {_format_duration_minutes(combined_minutes)}")
+
     print("\nExercises:")
     for idx, exercise in enumerate(routine_data.get('exercises', []), 1):
         title = exercise.get('title', 'Unknown')
@@ -207,20 +301,27 @@ def display_next_workout(client: HevyAPIClient, routine: Dict[str, Any]) -> None
                 print(f"     Notes: {filtered_notes}")
 
 
-def save_next_workout_info(next_routine: Dict[str, Any]) -> None:
+def save_next_workout_info(client: HevyAPIClient, next_routine: Dict[str, Any]) -> None:
     """Save next workout information for future reference."""
     output_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
     os.makedirs(output_dir, exist_ok=True)
     
-    output_file = os.path.join(output_dir, 'next_workout.json')
+    day_number = next_routine.get('day_number')
+    additional_info = _build_additional_training_summary(day_number)
+    estimated_main_minutes = get_estimated_duration(client, next_routine.get('id'))
+    combined_minutes = (estimated_main_minutes or 0) + (additional_info['total_minutes'] if additional_info else 0)
     
     next_workout_info = {
         'routine_id': next_routine.get('id'),
         'title': next_routine.get('title'),
-        'day_number': next_routine.get('day_number'),
-        'folder_id': next_routine.get('folder_id')
+        'day_number': day_number,
+        'folder_id': next_routine.get('folder_id'),
+        'estimated_main_minutes': estimated_main_minutes,
+        'additional_training': additional_info,
+        'combined_training_minutes': combined_minutes,
     }
     
+    output_file = os.path.join(output_dir, 'next_workout.json')
     with open(output_file, 'w') as f:
         json.dump(next_workout_info, f, indent=2)
 
@@ -259,7 +360,7 @@ def main():
         
         if next_routine:
             display_next_workout(client, next_routine)
-            save_next_workout_info(next_routine)
+            save_next_workout_info(client, next_routine)
         else:
             print("Could not find next routine in sequence")
             

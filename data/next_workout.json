@@ -1,6 +1,17 @@
 {
-  "routine_id": "c4bf0fc5-5c2e-4fb8-a71c-03c4bf1ce978",
-  "title": "Day 1 - Chest",
-  "day_number": 1,
-  "folder_id": 2760878
+  "routine_id": "185c065c-aa54-4e05-91ec-a799d0d86a97",
+  "title": "Day 2 - Back",
+  "day_number": 2,
+  "folder_id": 2760878,
+  "estimated_main_minutes": 68,
+  "additional_training": {
+    "targeted": [
+      "forearms"
+    ],
+    "core": true,
+    "cardio_minutes": 30,
+    "total_minutes": 60,
+    "notes": "forearms + 30 minutes cardio and core"
+  },
+  "combined_training_minutes": 128
 }
